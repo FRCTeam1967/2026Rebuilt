@@ -52,25 +52,27 @@ public class Climb extends SubsystemBase {
      motor.setPosition(0);
   }
 
-  public void moveTo(double pos, boolean holdingRobot) {
-    if (holdingRobot) {
-      motor.setControl(request.withPosition(pos).withSlot(1));
-    } else {
-      motor.setControl(request.withPosition(pos).withSlot(0));
-    }
+  public void moveTo(double inches) {  
+    rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
+    MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
+    motor.setPosition(0);
+
   }
 
-   public void moveAt(DoubleSupplier speed) {
-    if(speed.getAsDouble() < 0) {
-      motor.set(speed.getAsDouble() * Constants.Climb.WIND_FACTOR);
-    } else {
-      motor.set(speed.getAsDouble() * Constants.Climb.UNWIND_FACTOR);
-    }
+  public boolean atHeight(){
+    double currentPosition = motor.getRotorPosition().getValueAsDouble();
+    double targetPosition = rotations;
+    double error = Math.abs(targetPosition-currentPosition);
+    return(error<Constants.Climb.ERROR_THRESHOLD)
   }
 
-   public void lowerAt(double speed){
-    motor.set(speed * Constants.Climb.WIND_FACTOR);
+public void setSafe(){
+  if(!sensor.get()){
+    Motor.setPosition(0);
   }
+}
+
+public boolean getSensor
 
    public void stop() {
     motor.stopMotor();

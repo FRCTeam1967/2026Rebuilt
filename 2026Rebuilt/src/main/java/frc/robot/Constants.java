@@ -28,6 +28,8 @@ public class Constants {
     public static final int DOWN_kI = 2;
     public static final int DOWN_kD = 3;
     public static final int DOWN_kS = 4;
+
+    public static final double SPROCKET_PITCH_CIRCUMFERENCE = 100000;
   
 }
 }
