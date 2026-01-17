@@ -18,45 +18,45 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import frc.robot.Constants;
 
 
-public class Pivot extends SubsystemBase {
-  private TalonFX pivotMotor;
+public class Extension extends SubsystemBase {
+  private TalonFX motor;
   public double revsToMove;
 
   /** Creates a new Pivot. */
-  public Pivot() {
-    pivotMotor = new TalonFX (Constants.Pivot.PIVOT_MOTOR_ID);
+  public Extension() {
+    motor = new TalonFX (Constants.Extension.EXTENSION_MOTOR_ID);
     var talonFXconfigs = new TalonFXConfiguration();
 
     
     var slot0Configs = talonFXconfigs.Slot0;
-    slot0Configs.kS = Constants.Pivot.kS; 
-    slot0Configs.kV = Constants.Pivot.kV;
-    slot0Configs.kA = Constants.Pivot.kA;
-    slot0Configs.kP = Constants.Pivot.kP;
-    slot0Configs.kI = Constants.Pivot.kI;
-    slot0Configs.kD = Constants.Pivot.kD; 
+    slot0Configs.kS = Constants.Extension.kS; 
+    slot0Configs.kV = Constants.Extension.kV;
+    slot0Configs.kA = Constants.Extension.kA;
+    slot0Configs.kP = Constants.Extension.kP;
+    slot0Configs.kI = Constants.Extension.kI;
+    slot0Configs.kD = Constants.Extension.kD; 
 
 
     var motionMagicConfigs = talonFXconfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
-    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Extension.CRUISE_VELOCITY;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.Extension.ACCELERATION;
+    motionMagicConfigs.MotionMagicJerk = Constants.Extension.JERK;
 
-    pivotMotor.getConfigurator().apply(talonFXconfigs);
+    motor.getConfigurator().apply(talonFXconfigs);
 
       //resetEncoders(); 
-    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+    motor.setNeutralMode(NeutralModeValue.Brake);
       
   }
 
 public void resetEncoders(){
-  pivotMotor.setPosition(0);
+  motor.setPosition(0);
 
 }
 
 public boolean isReached(){
-  double rawPos = pivotMotor.getRotorPosition().getValueAsDouble();
-  double currentPos = (rawPos/Constants.Pivot.GEAR_RATIO)*360;
+  double rawPos = motor.getRotorPosition().getValueAsDouble();
+  double currentPos = (rawPos/Constants.Extension.GEAR_RATIO)*360;
   double diff = Math.abs(currentPos - revsToMove*360);
   return diff < 5.0;  
 }
@@ -64,12 +64,12 @@ public boolean isReached(){
   
 
 public void moveTo(double revolutions){
-  revsToMove = revolutions*(Constants.Pivot.GEAR_RATIO);
+  revsToMove = revolutions*(Constants.Extension.GEAR_RATIO);
   MotionMagicVoltage request = new MotionMagicVoltage(revsToMove);
 }  
 
 public void stopMotor(double speed){
-  pivotMotor.stopMotor();
+  motor.stopMotor();
 }
 
 
