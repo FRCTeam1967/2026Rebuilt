@@ -38,4 +38,14 @@ public class Constants {
     public static final double SPROCKET_PITCH_CIRCUMFERENCE = 100000;
   
 }
+public static class TelescopingArm {
+    public static final int RIGHT_MOTOR_ID = 1000;
+    public static final int DIGITAL_INPUT_ID = 10000;
+    public static final double CURRENT_LIMIT = 0;
+    public static final double DEADBAND = 0.05;
+    public static final double UNWIND_FACTOR = 1;
+    public static final double WIND_FACTOR = 0.5;
+    public static final double TOP_ROTATIONS = 0;
+    public static final double LOWER_SPEED = 0;
+}
 }
