@@ -33,5 +33,10 @@ public class Constants {
 
     }
 
+    public static class Pooper{
+        public static final int POOPER_TOP_MOTOR_ID = 9;
+        public static final int POOPER_BOTTOM_MOTOR_ID = 10;
+    }
+
 
 }
