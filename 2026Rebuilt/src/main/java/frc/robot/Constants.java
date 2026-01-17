@@ -10,6 +10,11 @@ public class Constants {
     }
 
  public static class Climb {
+
+    public static final double GEAR_RATIO = 64/8;
+    public static final double JERK = 600; //1000 //1600 <---how fast the acceleration is reached
+    public static final double FEED_FORWARD = 0;
+
     public static final int RIGHT_MOTOR_ID = 90;
     public static final int LEFT_MOTOR_ID = 99;
     public static final int WIND_FACTOR = 3;
@@ -17,6 +22,7 @@ public class Constants {
     public static final int CRUISE_VELOCITY = 10;
     public static final int ACCELERATION = 20;
     public static final int CURRENT_LIMIT = 40;
+    public static final int ERROR_THRESHOLD = 12;
 
     public static final int UP_kP = 1;
     public static final int UP_kI = 2;

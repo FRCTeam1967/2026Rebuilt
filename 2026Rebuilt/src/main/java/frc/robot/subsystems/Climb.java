@@ -23,6 +23,7 @@ public class Climb extends SubsystemBase {
   private MotionMagicVoltage request;
   private boolean isRight;
   private DigitalInput sensor;
+  private double rotations;
 
   public Climb(int motorID){
     motor = new TalonFX(motorID);
@@ -48,14 +49,14 @@ public class Climb extends SubsystemBase {
 
   }
 
-  public void setEncoderOffset() {
+  public void resetEncoders() {
      motor.setPosition(0);
   }
 
   public void moveTo(double inches) {  
     rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
     MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
-    motor.setPosition(0);
+    motor.setControl(request);
 
   }
 
@@ -63,24 +64,22 @@ public class Climb extends SubsystemBase {
     double currentPosition = motor.getRotorPosition().getValueAsDouble();
     double targetPosition = rotations;
     double error = Math.abs(targetPosition-currentPosition);
-    return(error<Constants.Climb.ERROR_THRESHOLD)
+    return(error<Constants.Climb.ERROR_THRESHOLD);
   }
 
 public void setSafe(){
   if(!sensor.get()){
-    Motor.setPosition(0);
+    motor.setPosition(0);
   }
 }
+public boolean getSensor(){
+  return !sensor.get();
+}
 
-public boolean getSensor
+public void stopMotor() {
+  motor.stopMotor();
+}
 
-   public void stop() {
-    motor.stopMotor();
-  }
-
-  public boolean getSensorValue() {
-    return sensor.get();
-  }
 
   
   @Override
