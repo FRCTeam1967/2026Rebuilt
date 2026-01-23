@@ -43,7 +43,7 @@ public final class Constants {
     public static final double HOOD = 0.0; //placeholder
   }
 
-  public static class FlywheelShooter{
+  public static class FlywheelShooter {
      public static final int FLYWHEELSHOOTER_MOTOR_ID = 16; //change number later
 
     public static final double kP = 0.0; //placeholder
@@ -53,7 +53,10 @@ public final class Constants {
     public static final double kV = 0.0; //placeholder
     public static final double kA = 0.0; //placeholder
 
-    public static final double CURRENT_LIMIT = 0.0; //placeholder
+    public static final double CRUISE_VELOCITY = 0.0; //placeholder
+    public static final double ACCELERATION = 0.0; //placeholder
+    public static final double JERK = 0.0; //placeholder
+    
     public static final double GEAR_RATIO = 0.0; //placeholder
 
     public static final double FLYWHEEL_SHOOTER = 0.0;

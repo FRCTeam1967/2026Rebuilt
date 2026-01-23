@@ -5,33 +5,11 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.FlywheelShooter;
-
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import edu.wpi.first.wpilibj.DigitalInput;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunFlywheelShooter extends Command {
-  private FlywheelShooter flywheelShooter;
-  private double flywheelAcceleration, flywheelVelocity;
-  
-  /** Creates a new RunShooter. */
-  public RunFlywheelShooter(FlywheelShooter flywheelShooter, double flywheelAcceleration, double flywheelVelocity) {
-    this.flywheelShooter = flywheelShooter;
-    this.flywheelAcceleration = flywheelAcceleration;
-    this.flywheelVelocity = flywheelVelocity;
-    //addRequirements(flywheelShooter, flywheelAcceleration, flywheelVelocity);
+  /** Creates a new RunFlywheelShooter. */
+  public RunFlywheelShooter() {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -41,16 +19,11 @@ public class RunFlywheelShooter extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    flywheelShooter.runMotor(flywheelAcceleration, flywheelVelocity);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted)
-   {
-    flywheelShooter.stop();
-   }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
