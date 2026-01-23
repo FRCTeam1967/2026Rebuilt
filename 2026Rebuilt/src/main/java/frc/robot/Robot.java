@@ -4,98 +4,157 @@
 
 package frc.robot;
 
+import choreo.Choreo;
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
-/**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
-
+  public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+  private Command m_autonomousCommand; //AutoRoutine
+  private final AutoFactory autoFactory;
   private final RobotContainer m_robotContainer;
-
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
+  private final GerryRig m_gerryRig; 
+  private final AutoChooser autoChooser;
+  //public ShuffleboardTab matchTab;
+  
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-  }
+    //matchTab = Shuffleboard.getTab("match");
+    var drive = m_robotContainer.drivetrain;
 
-  /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
+    autoFactory = new AutoFactory(
+            drive::getPose, // A function that returns the current robot pose
+            drive::resetPose, // A function that resets the current robot pose to the provided Pose2d
+            drive::followTrajectory, // The drive subsystem trajectory follower 
+            true, // If alliance flipping should be enabled 
+            drive // The drive subsystem
+    );
+    autoChooser = new AutoChooser();
+
+    // Add options to the chooser
+    autoChooser.addRoutine("centerToF4", this::centerToF4);
+    autoChooser.addRoutine("runMotor", this::runMotor);
+
+    // Put the auto chooser on the dashboard
+    //SmartDashboard.putData(autoChooser);
+    matchTab.add("auto chooser lol", autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+    
+
+    // Schedule the selected auto during the autonomous period
+    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
+    }
+
+   
+    //private Command exampleAutoCommand() {
+        // ...
+   // }
+
+  // AUTO FACTORY METHOD
+  private AutoRoutine centerToF4() {
+    AutoRoutine routine = autoFactory.newRoutine("F4");
+
+    // Load the routine's trajectories
+    AutoTrajectory driveToF4 = routine.trajectory("Center To F4");
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(
+        Commands.sequence(
+            driveToF4.resetOdometry(),
+            driveToF4.cmd()
+        )
+    );
+    
+
+    return routine;
+}
+
+private AutoRoutine runMotor() {
+  AutoRoutine routine = autoFactory.newRoutine("run");
+  // AutoTrajectory gerryMotor = routine.trajectory("run");
+  // autoFactory
+  //   .bind("runMotor",  new RunCommand(() -> m_gerryRig.runMotor(0.7), m_gerryRig));
+
+  // Load the routine's trajectories
+
+  // When the routine begins, reset odometry and start the first trajectory (1)
+  routine.active().onTrue(new RunCommand(() -> m_gerryRig.runMotor(0.7), m_gerryRig));
+
+  return routine;
+}
+
+// public void addToChooser(String title, AutoRoutine routine) {
+//   autoChooser.addRoutine(title, routine);
+// }
+
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    CommandScheduler.getInstance().run();
+    CommandScheduler.getInstance().run(); 
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {}
 
   @Override
   public void disabledPeriodic() {}
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  @Override
+  public void disabledExit() {}
+
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
-    }
+    // //m_autonomousCommand = pickupAndScoreAuto();
+    // // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    // m_autonomousCommand = autoChooser.selectedCommand();
+  
+    // if (m_autonomousCommand != null) {
+    //   //autoChooser.selectedCommandScheduler();
+    //   m_autonomousCommand.schedule();
+    // }
   }
 
-  /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {}
 
   @Override
+  public void autonomousExit() {}
+
+  @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
   }
 
-  /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {}
 
   @Override
+  public void teleopExit() {}
+
+  @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
 
-  /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
 
-  /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void testExit() {}
 
-  /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
 }
