@@ -63,4 +63,8 @@ public final class Constants {
 
     public static final double FLYWHEEL_SHOOTER = 0.0;
   }
+
+  public static class Xbox {
+     public static final int OPERATOR_CONTROLLER_PORT = 0; //change number later
+  }
 }
