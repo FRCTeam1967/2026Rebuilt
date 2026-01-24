@@ -10,12 +10,12 @@ import frc.robot.subsystems.Climb;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class MoveClimb extends Command {
   private Climb climb;
-  private double inches;
+  private double meters;
 
   /** Creates a new MoveClimb. */
-  public MoveClimb(Climb climb, double inches) {
+  public MoveClimb(Climb climb, double meters) {
     this.climb = climb;
-    this.inches = inches;
+    this.meters = meters;
     addRequirements(climb);
     
     // Use addRequirements() here to declare subsystem dependencies.
@@ -30,13 +30,13 @@ public class MoveClimb extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climb.moveTo(inches);
+    climb.moveTo(meters);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-      climb.stopMotor();
+      // climb.stopMotor();
   }
 
   // Returns true when the command should end.

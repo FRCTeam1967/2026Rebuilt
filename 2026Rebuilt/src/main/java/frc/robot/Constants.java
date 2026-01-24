@@ -12,9 +12,9 @@ public class Constants {
 
  public static class Climb {
 
-    public static final double GEAR_RATIO = 64/8;
-    public static final double JERK = 600; //1000 //1600 <---how fast the acceleration is reached
-    public static final double FEED_FORWARD = 0;
+    public static final double GEAR_RATIO = 64.0/8.0;
+    public static final double JERK = 600.0; //1000 //1600 <---how fast the acceleration is reached
+    public static final double FEED_FORWARD = 0.0;
 
     public static final int MOTOR_ID = 90;
     public static final int CRUISE_VELOCITY = 160;
@@ -29,13 +29,15 @@ public class Constants {
     public static final int kV = 0;
     public static final int kA = 0;
 
-    public static final double MIN_HEIGHT = 0;
-    public static final double MAX_HEIGHT = 30;
-    public static final double SAFE = 0.1;
+    public static final double MIN_HEIGHT_METERS = 0.0;
+    public static final double MAX_HEIGHT_METERS = 1000;
+    public static final double SAFE_METERS = 0.1;
 
-    public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.76*Math.PI;
+    public static final double METER_CONVERSION_FACTOR = 0.0254;
+
+    public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.76*METER_CONVERSION_FACTOR*Math.PI;
     public static final double CARRIAGE_MASS_KG = 3;
-    public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE * 0.0254) / (2.0 * Math.PI);
+    public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
     public static final int SENSOR_CHANNEL = 0;
 }
 public static class TelescopingArm {

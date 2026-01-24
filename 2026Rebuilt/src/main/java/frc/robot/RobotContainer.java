@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.simulation.JoystickSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,17 +26,19 @@ import edu.wpi.first.wpilibj.Joystick;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Climb climb = new Climb();
+  public final Climb climb = new Climb();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  public final CommandXboxController m_operatorController =
-  new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+  // public final CommandXboxController m_driverController =
+  //     new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  // public final CommandXboxController m_operatorController =
+  // new CommandXboxController(OperatorConstants.kOperatorControllerPort);
   
   //public final JoystickSim simJoystick = new JoystickSim(1);
-  public final Joystick joystick = new Joystick(1);
+  public final Joystick joystick = new Joystick(0);
+  public final JoystickSim joystickSim = new JoystickSim(joystick);
 
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -61,8 +64,9 @@ public class RobotContainer {
 
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    //m_operatorController.a().onTrue(new MoveClimb(climb, 20));
-    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb, 20));
+    // m_operatorController.a().onTrue(new MoveClimb(climb, 20));
+    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb, 100));
+    new JoystickButton(joystick, 2).onTrue(new MoveClimb(climb, 0));
   }
 
   /**
