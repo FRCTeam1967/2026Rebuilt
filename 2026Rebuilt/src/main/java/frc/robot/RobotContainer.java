@@ -31,6 +31,14 @@ public class RobotContainer {
  
   private void configureBindings() {
 
+    // Pick a target rotor speed (RPS). Start small.
+    final double kTargetRotorRps = 50.0; // 50 rps = 3000 rpm (rotor)
+
+    operatorController.leftTrigger()
+        .whileTrue(new RunCommand(() -> flywheelShooter.setVelocity(kTargetRotorRps), flywheelShooter))
+      .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+
+
     operatorController.rightTrigger(0.2)
         .whileTrue(new RunCommand(() -> flywheelShooter.setMotor(0.40), flywheelShooter))
         .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
@@ -45,6 +53,15 @@ public class RobotContainer {
 
     operatorController.x()
         .onTrue(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+
+    operatorController.rightTrigger(0.05)
+    .whileTrue(new RunCommand(() -> {
+      double rt = operatorController.getRightTriggerAxis(); // 0..1
+      double targetRotorRps = rt * 80.0; // full trigger = 80 rps
+      flywheelShooter.setVelocity(targetRotorRps);
+    }, flywheelShooter))
+    .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+
   }
 
   public Command getAutonomousCommand() {

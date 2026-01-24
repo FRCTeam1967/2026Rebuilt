@@ -13,7 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -33,7 +33,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   private TalonFX flywheelMotor1;
   private TalonFX flywheelMotor2;
-  private TalonFX flywheelMotor3;
+ 
 
   private static final double kSimDt = 0.02;
 
@@ -50,7 +50,7 @@ public class FlywheelShooter extends SubsystemBase {
   public FlywheelShooter() {
     flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID);
     flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID);
-    flywheelMotor3 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR3_ID);
+    
 
       var talonFXConfigs = new TalonFXConfiguration();
 
@@ -72,18 +72,18 @@ public class FlywheelShooter extends SubsystemBase {
 
       flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
       flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
-      flywheelMotor3.setNeutralMode(NeutralModeValue.Brake);
+      
       //talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
       flywheelMotor1.getConfigurator().apply(talonFXConfigs);
       flywheelMotor2.getConfigurator().apply(talonFXConfigs);
-      flywheelMotor3.getConfigurator().apply(talonFXConfigs);
+      
   }
 
   public void setMotor(double speed) {
       flywheelMotor1.set(speed);
       flywheelMotor2.set(speed);
-      flywheelMotor3.set(speed);
+      
   }
 
   //public void moveTo(double revolutions) {
@@ -97,7 +97,7 @@ public class FlywheelShooter extends SubsystemBase {
 
       flywheelMotor1.setControl(request);
       flywheelMotor2.setControl(request);
-      flywheelMotor3.setControl(request);
+      
   }
 
   //public void moveMotor(double speed) {
@@ -109,7 +109,7 @@ public class FlywheelShooter extends SubsystemBase {
    public void stopMotor() {
       flywheelMotor1.stopMotor();
       flywheelMotor2.stopMotor();
-      flywheelMotor3.stopMotor();
+      
    }
 
 
@@ -120,38 +120,68 @@ public class FlywheelShooter extends SubsystemBase {
 
     @Override
   public void simulationPeriodic() {
+  // If disabled, hard-reset sim outputs so GUI + SmartDashboard go to 0
+    if (RobotState.isDisabled()) {
+      // Stop commanding the motors (optional but nice)
+      flywheelMotor1.stopMotor();
+      flywheelMotor2.stopMotor();
+     
+
+    // Reset sim model + sensor readings
+    flywheelSim.setInputVoltage(0.0);
+    flywheelSim.update(kSimDt);
+
+    simRotorPosRot = 0.0;
+
     var sim1 = flywheelMotor1.getSimState();
     var sim2 = flywheelMotor2.getSimState();
-    var sim3 = flywheelMotor3.getSimState();
+    
 
     double batteryV = RobotController.getBatteryVoltage();
     sim1.setSupplyVoltage(batteryV);
     sim2.setSupplyVoltage(batteryV);
-    sim3.setSupplyVoltage(batteryV);
+    
 
-    double motorVolts =
-        sim1.getMotorVoltageMeasure().in(Volts);
+    sim1.setRotorVelocity(0.0);
+    sim2.setRotorVelocity(0.0);
+    
+
+    sim1.setRawRotorPosition(0.0);
+    sim2.setRawRotorPosition(0.0);
+    
+
+    SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
+    return;
+  }
+    var sim1 = flywheelMotor1.getSimState();
+    var sim2 = flywheelMotor2.getSimState();
+   
+
+    double batteryV = RobotController.getBatteryVoltage();
+    sim1.setSupplyVoltage(batteryV);
+    sim2.setSupplyVoltage(batteryV);
+   
+
+    double motorVolts = sim1.getMotorVoltageMeasure().in(Volts);
 
     flywheelSim.setInputVoltage(motorVolts);
     flywheelSim.update(kSimDt);
 
-    double mechRps =
-        flywheelSim.getAngularVelocityRadPerSec()
-        / (2.0 * Math.PI);
+    double mechRps = flywheelSim.getAngularVelocityRadPerSec() / (2.0 * Math.PI);
 
-    double rotorRps =
-        mechRps * Constants.FlywheelShooter.GEAR_RATIO;
+    double rotorRps = mechRps * Constants.FlywheelShooter.GEAR_RATIO;
 
     simRotorPosRot += rotorRps * kSimDt;
 
     sim1.setRotorVelocity(rotorRps);
     sim2.setRotorVelocity(rotorRps);
-    sim3.setRotorVelocity(rotorRps);
+   
 
     sim1.setRawRotorPosition(simRotorPosRot);
     sim2.setRawRotorPosition(simRotorPosRot);
-    sim3.setRawRotorPosition(simRotorPosRot);
+    
 
     SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
   }
+
 }
