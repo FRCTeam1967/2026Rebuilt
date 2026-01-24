@@ -36,7 +36,7 @@ public class RobotContainer {
 
     operatorController.leftTrigger()
         .whileTrue(new RunCommand(() -> flywheelShooter.setVelocity(kTargetRotorRps), flywheelShooter))
-      .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
 
 
     operatorController.rightTrigger(0.2)

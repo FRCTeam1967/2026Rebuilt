@@ -5,162 +5,162 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 
-import com.ctre.phoenix6.sim.TalonFXSimState;
+import frc.robot.Constants;
+
 import static edu.wpi.first.units.Units.Volts;
 
 public class FlywheelShooter extends SubsystemBase {
 
   private TalonFX flywheelMotor1;
   private TalonFX flywheelMotor2;
- 
 
+  // =============================
+  // SIMULATION STATE
+  // =============================
   private static final double kSimDt = 0.02;
-
   private double simRotorPosRot = 0.0;
 
+  // Keep this if you want; just make sure your GEAR_RATIO > 0
   private final DCMotorSim flywheelSim = new DCMotorSim(
-   LinearSystemId.createDCMotorSystem(
-      DCMotor.getKrakenX60Foc(1), 0.001, Constants.FlywheelShooter.GEAR_RATIO
-   ),
-   DCMotor.getKrakenX60Foc(1)
-);
+      LinearSystemId.createDCMotorSystem(
+          DCMotor.getKrakenX60Foc(1),
+          0.001,
+          Constants.FlywheelShooter.GEAR_RATIO
+      ),
+      DCMotor.getKrakenX60Foc(1)
+  );
+
+  // =============================
+  // MECHANISM2D (Glass visual)
+  // =============================
+  private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
+  private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
+
+  // A "spoke" that rotates to show the flywheel spinning
+  private final MechanismLigament2d flywheelShooter =
+      shooterRoot.append(new MechanismLigament2d(
+          "flywheelShooter",
+          0.8,  // length
+          0.0,  // initial angle (deg)
+          6,    // line thickness
+          new Color8Bit(Color.kOrange)
+      ));
+
+  private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
     flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID);
     flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID);
-    
 
-      var talonFXConfigs = new TalonFXConfiguration();
+    var talonFXConfigs = new TalonFXConfiguration();
 
-      var slot0Configs = talonFXConfigs.Slot0;
-      slot0Configs.kS = Constants.FlywheelShooter.kS; 
-      slot0Configs.kV = Constants.FlywheelShooter.kV; 
-      slot0Configs.kA = Constants.FlywheelShooter.kA; 
-      slot0Configs.kP = Constants.FlywheelShooter.kP; 
-      slot0Configs.kI = Constants.FlywheelShooter.kI;
-      slot0Configs.kD = Constants.FlywheelShooter.kD; 
-  
-      // set Motion Magic settings
-      var motionMagicConfigs = talonFXConfigs.MotionMagic;
-      motionMagicConfigs.MotionMagicCruiseVelocity = Constants.FlywheelShooter.CRUISE_VELOCITY;
-      motionMagicConfigs.MotionMagicAcceleration = Constants.FlywheelShooter.ACCELERATION;
-      motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
+    var slot0Configs = talonFXConfigs.Slot0;
+    slot0Configs.kS = Constants.FlywheelShooter.kS;
+    slot0Configs.kV = Constants.FlywheelShooter.kV;
+    slot0Configs.kA = Constants.FlywheelShooter.kA;
+    slot0Configs.kP = Constants.FlywheelShooter.kP;
+    slot0Configs.kI = Constants.FlywheelShooter.kI;
+    slot0Configs.kD = Constants.FlywheelShooter.kD;
 
-      talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    var motionMagicConfigs = talonFXConfigs.MotionMagic;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.FlywheelShooter.CRUISE_VELOCITY;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.FlywheelShooter.ACCELERATION;
+    motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
 
-      flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
-      flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
-      
-      //talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
-      flywheelMotor1.getConfigurator().apply(talonFXConfigs);
-      flywheelMotor2.getConfigurator().apply(talonFXConfigs);
-      
+    flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
+    flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
+
+    flywheelMotor1.getConfigurator().apply(talonFXConfigs);
+    flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+
+    // Publish Mechanism2d so Glass can display it
+    SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
   public void setMotor(double speed) {
-      flywheelMotor1.set(speed);
-      flywheelMotor2.set(speed);
-      
+    flywheelMotor1.set(speed);
+    flywheelMotor2.set(speed);
   }
-
-  //public void moveTo(double revolutions) {
-      //MotionMagicVoltage request = (new MotionMagicVoltage(revolutions)).withFeedForward(0.0);
-      //flywheelMotor.setControl(request);
-  //}
 
   public void setVelocity(double velocity) {
-      //MotionMagicVelocityDutyCycle request = new MotionMagicVelocityDutyCycle(velocity);
-      MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(velocity);
-
-      flywheelMotor1.setControl(request);
-      flywheelMotor2.setControl(request);
-      
+    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(velocity);
+    flywheelMotor1.setControl(request);
+    flywheelMotor2.setControl(request);
   }
 
-  //public void moveMotor(double speed) {
-      //VelocityVoltage request = new VelocityVoltage(speed);
-      //intakeMotor.setControl(request);
-   //}
-  
-   /** Stops both the left motor and right motor */
-   public void stopMotor() {
-      flywheelMotor1.stopMotor();
-      flywheelMotor2.stopMotor();
-      
-   }
-
+  public void stopMotor() {
+    flywheelMotor1.stopMotor();
+    flywheelMotor2.stopMotor();
+  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // If you want the Mechanism2d to move on real robot too,
+    // you would update flywheelSpoke here using real sensor velocity.
   }
 
-    @Override
+  @Override
   public void simulationPeriodic() {
-  // If disabled, hard-reset sim outputs so GUI + SmartDashboard go to 0
+
+    // If disabled, hard-reset sim outputs so GUI + SmartDashboard + Mechanism2d go to 0
     if (RobotState.isDisabled()) {
-      // Stop commanding the motors (optional but nice)
-      flywheelMotor1.stopMotor();
-      flywheelMotor2.stopMotor();
-     
+      stopMotor();
 
-    // Reset sim model + sensor readings
-    flywheelSim.setInputVoltage(0.0);
-    flywheelSim.update(kSimDt);
+      // Reset sim model
+      flywheelSim.setInputVoltage(0.0);
+      flywheelSim.update(kSimDt);
 
-    simRotorPosRot = 0.0;
+      simRotorPosRot = 0.0;
+
+      var sim1 = flywheelMotor1.getSimState();
+      var sim2 = flywheelMotor2.getSimState();
+
+      double batteryV = RobotController.getBatteryVoltage();
+      sim1.setSupplyVoltage(batteryV);
+      sim2.setSupplyVoltage(batteryV);
+
+      sim1.setRotorVelocity(0.0);
+      sim2.setRotorVelocity(0.0);
+
+      sim1.setRawRotorPosition(0.0);
+      sim2.setRawRotorPosition(0.0);
+
+      // Reset Mechanism2d visual
+      spokeAngleDeg = 0.0;
+      flywheelSpoke.setAngle(0.0);
+
+      SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
+      return;
+    }
 
     var sim1 = flywheelMotor1.getSimState();
     var sim2 = flywheelMotor2.getSimState();
-    
 
     double batteryV = RobotController.getBatteryVoltage();
     sim1.setSupplyVoltage(batteryV);
     sim2.setSupplyVoltage(batteryV);
-    
-
-    sim1.setRotorVelocity(0.0);
-    sim2.setRotorVelocity(0.0);
-    
-
-    sim1.setRawRotorPosition(0.0);
-    sim2.setRawRotorPosition(0.0);
-    
-
-    SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
-    return;
-  }
-    var sim1 = flywheelMotor1.getSimState();
-    var sim2 = flywheelMotor2.getSimState();
-   
-
-    double batteryV = RobotController.getBatteryVoltage();
-    sim1.setSupplyVoltage(batteryV);
-    sim2.setSupplyVoltage(batteryV);
-   
 
     double motorVolts = sim1.getMotorVoltageMeasure().in(Volts);
 
@@ -168,20 +168,22 @@ public class FlywheelShooter extends SubsystemBase {
     flywheelSim.update(kSimDt);
 
     double mechRps = flywheelSim.getAngularVelocityRadPerSec() / (2.0 * Math.PI);
-
     double rotorRps = mechRps * Constants.FlywheelShooter.GEAR_RATIO;
 
     simRotorPosRot += rotorRps * kSimDt;
 
     sim1.setRotorVelocity(rotorRps);
     sim2.setRotorVelocity(rotorRps);
-   
 
     sim1.setRawRotorPosition(simRotorPosRot);
     sim2.setRawRotorPosition(simRotorPosRot);
-    
+
+    // Mechanism2d: rotate the spoke based on rotor speed
+    spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
+    flywheelSpoke.setAngle(spokeAngleDeg);
 
     SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
+    SmartDashboard.putNumber("Flywheel/MotorVolts", motorVolts);
+    SmartDashboard.putNumber("Flywheel/SpokeAngleDeg", spokeAngleDeg);
   }
-
 }

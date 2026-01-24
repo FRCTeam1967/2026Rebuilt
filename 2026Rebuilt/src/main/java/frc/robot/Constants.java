@@ -46,7 +46,6 @@ public final class Constants {
   public static class FlywheelShooter {
      public static final int FLYWHEELSHOOTER_MOTOR1_ID = 16; //change number later
      public static final int FLYWHEELSHOOTER_MOTOR2_ID = 17; //change number later
-     public static final int FLYWHEELSHOOTER_MOTOR3_ID = 18; //change number later
 
     public static final double kP = 0.5; //placeholder
     public static final double kI = 0.0; //placeholder
