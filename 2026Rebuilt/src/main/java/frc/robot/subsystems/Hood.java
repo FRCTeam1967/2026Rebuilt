@@ -125,6 +125,10 @@ public class Hood extends SubsystemBase {
   public void periodic() {
     checkLimit();
   }
+
+  public void simulationPeriodic() {
+    double output = hoodMotor.get();
+  }
   
    /**Adds values to shuffleboard 
     *  we don't know if we need shuffle board values for right now on hood but this will be here just in case

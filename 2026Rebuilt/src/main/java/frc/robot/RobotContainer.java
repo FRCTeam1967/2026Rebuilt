@@ -20,10 +20,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-
-    // Right bumper → run shooter while held
-    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-        .whileTrue(new RunFlywheelShooter(shooter, 0.6)); // CHANGE speed if needed
+//
   }
 }
 

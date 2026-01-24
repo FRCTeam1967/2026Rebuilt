@@ -26,11 +26,11 @@ public final class Constants {
   public static class Hood {
      public static final int HOOD_MOTOR_ID = 17; //change number later
 
-     public static final double CRUISE_VELOCITY = 0.0; //placeholder
-     public static final double ACCELERATION = 0.0; //placeholder
-     public static final double JERK = 0.0; //placeholder
+     public static final double CRUISE_VELOCITY = 50.0; //placeholder
+     public static final double ACCELERATION = 80.0; //placeholder
+     public static final double JERK = 110.0; //placeholder
 
-    public static final double kP = 0.0; //placeholder
+    public static final double kP = 0.5; //placeholder
     public static final double kI = 0.0; //placeholder
     public static final double kD = 0.0; //placeholder
     public static final double kS = 0.0; //placeholder
@@ -44,9 +44,11 @@ public final class Constants {
   }
 
   public static class FlywheelShooter {
-     public static final int FLYWHEELSHOOTER_MOTOR_ID = 16; //change number later
+     public static final int FLYWHEELSHOOTER_MOTOR1_ID = 16; //change number later
+     public static final int FLYWHEELSHOOTER_MOTOR2_ID = 17; //change number later
+     public static final int FLYWHEELSHOOTER_MOTOR3_ID = 18; //change number later
 
-    public static final double kP = 0.0; //placeholder
+    public static final double kP = 0.5; //placeholder
     public static final double kI = 0.0; //placeholder
     public static final double kD = 0.0; //placeholder
     public static final double kS = 0.0; //placeholder
@@ -57,7 +59,7 @@ public final class Constants {
     public static final double ACCELERATION = 0.0; //placeholder
     public static final double JERK = 0.0; //placeholder
     
-    public static final double GEAR_RATIO = 0.0; //placeholder
+    public static final double GEAR_RATIO = 5.0; 
 
     public static final double FLYWHEEL_SHOOTER = 0.0;
   }

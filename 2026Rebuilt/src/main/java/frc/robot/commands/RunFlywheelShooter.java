@@ -11,14 +11,20 @@ import java.util.function.DoubleSupplier;
 public class RunFlywheelShooter extends Command {
   /** Creates a new RunFlywheelShooter. */
 
-  private final FlywheelShooter shooter;
+  private final FlywheelShooter shooter1;
+  private final FlywheelShooter shooter2;
+  private final FlywheelShooter shooter3;
   private final double speed;
     
-  public RunFlywheelShooter(FlywheelShooter shooter, double speed) {
-    this.shooter = shooter;
+  public RunFlywheelShooter(FlywheelShooter shooter1, FlywheelShooter shooter2, FlywheelShooter shooter3, double speed) {
+    this.shooter1 = shooter1;
+    this.shooter2 = shooter2;
+    this.shooter3 = shooter3;
     this.speed = speed;
 
-    addRequirements(shooter);
+    addRequirements(shooter1);
+    addRequirements(shooter2);
+    addRequirements(shooter3);
   }
 
   // Called when the command is initially scheduled.
@@ -30,12 +36,16 @@ public class RunFlywheelShooter extends Command {
    // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.setMotor(speed);
+    shooter1.setMotor(speed);
+    shooter2.setMotor(speed);
+    shooter3.setMotor(speed);
   }
   
    @Override
   public void end(boolean interrupted) {
-    shooter.stopMotor();
+    shooter1.stopMotor();
+    shooter2.stopMotor();
+    shooter3.stopMotor();
   }
 
  // Returns true when the command should end.

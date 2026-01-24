@@ -17,17 +17,40 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import static edu.wpi.first.units.Units.Volts;
 
 public class FlywheelShooter extends SubsystemBase {
 
-  private TalonFX flywheelMotor;
+  private TalonFX flywheelMotor1;
+  private TalonFX flywheelMotor2;
+  private TalonFX flywheelMotor3;
+
+  private static final double kSimDt = 0.02;
+
+  private double simRotorPosRot = 0.0;
+
+  private final DCMotorSim flywheelSim = new DCMotorSim(
+   LinearSystemId.createDCMotorSystem(
+      DCMotor.getKrakenX60Foc(1), 0.001, Constants.FlywheelShooter.GEAR_RATIO
+   ),
+   DCMotor.getKrakenX60Foc(1)
+);
 
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
-    flywheelMotor = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR_ID);
+    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID);
+    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID);
+    flywheelMotor3 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR3_ID);
 
       var talonFXConfigs = new TalonFXConfiguration();
 
@@ -47,14 +70,20 @@ public class FlywheelShooter extends SubsystemBase {
 
       talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
-      flywheelMotor.setNeutralMode(NeutralModeValue.Brake);
+      flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
+      flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
+      flywheelMotor3.setNeutralMode(NeutralModeValue.Brake);
       //talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-      flywheelMotor.getConfigurator().apply(talonFXConfigs);
+      flywheelMotor1.getConfigurator().apply(talonFXConfigs);
+      flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+      flywheelMotor3.getConfigurator().apply(talonFXConfigs);
   }
 
   public void setMotor(double speed) {
-      flywheelMotor.set(speed);
+      flywheelMotor1.set(speed);
+      flywheelMotor2.set(speed);
+      flywheelMotor3.set(speed);
   }
 
   //public void moveTo(double revolutions) {
@@ -66,7 +95,9 @@ public class FlywheelShooter extends SubsystemBase {
       //MotionMagicVelocityDutyCycle request = new MotionMagicVelocityDutyCycle(velocity);
       MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(velocity);
 
-      flywheelMotor.setControl(request);
+      flywheelMotor1.setControl(request);
+      flywheelMotor2.setControl(request);
+      flywheelMotor3.setControl(request);
   }
 
   //public void moveMotor(double speed) {
@@ -76,13 +107,51 @@ public class FlywheelShooter extends SubsystemBase {
   
    /** Stops both the left motor and right motor */
    public void stopMotor() {
-      flywheelMotor.stopMotor();
+      flywheelMotor1.stopMotor();
+      flywheelMotor2.stopMotor();
+      flywheelMotor3.stopMotor();
    }
-
 
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+    @Override
+  public void simulationPeriodic() {
+    var sim1 = flywheelMotor1.getSimState();
+    var sim2 = flywheelMotor2.getSimState();
+    var sim3 = flywheelMotor3.getSimState();
+
+    double batteryV = RobotController.getBatteryVoltage();
+    sim1.setSupplyVoltage(batteryV);
+    sim2.setSupplyVoltage(batteryV);
+    sim3.setSupplyVoltage(batteryV);
+
+    double motorVolts =
+        sim1.getMotorVoltageMeasure().in(Volts);
+
+    flywheelSim.setInputVoltage(motorVolts);
+    flywheelSim.update(kSimDt);
+
+    double mechRps =
+        flywheelSim.getAngularVelocityRadPerSec()
+        / (2.0 * Math.PI);
+
+    double rotorRps =
+        mechRps * Constants.FlywheelShooter.GEAR_RATIO;
+
+    simRotorPosRot += rotorRps * kSimDt;
+
+    sim1.setRotorVelocity(rotorRps);
+    sim2.setRotorVelocity(rotorRps);
+    sim3.setRotorVelocity(rotorRps);
+
+    sim1.setRawRotorPosition(simRotorPosRot);
+    sim2.setRawRotorPosition(simRotorPosRot);
+    sim3.setRawRotorPosition(simRotorPosRot);
+
+    SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
   }
 }
