@@ -65,7 +65,7 @@ public class RobotContainer {
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
     // m_operatorController.a().onTrue(new MoveClimb(climb, 20));
-    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb, 100));
+    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb, 3));
     new JoystickButton(joystick, 2).onTrue(new MoveClimb(climb, 0));
   }
 

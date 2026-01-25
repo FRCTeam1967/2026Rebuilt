@@ -95,7 +95,7 @@ public class Climb extends SubsystemBase {
               true,
               Constants.Climb.SAFE_METERS
           );
-
+      /*
       sensorSim = new DIOSim(sensor);
       mechanism = new Mechanism2d(50,50);
       root = mechanism.getRoot("elevatorRoot", 25, 0);
@@ -104,6 +104,43 @@ public class Climb extends SubsystemBase {
           tower.append(
               new MechanismLigament2d(
                   "carriage", 5, 0, 6, new Color8Bit(Color.kBlue)));
+    */
+         
+      sensorSim = new DIOSim(sensor);
+
+      // Bigger canvas 
+      mechanism = new Mechanism2d(120, 90);
+
+      // Put the root near the bottom center
+      root = mechanism.getRoot("climbRoot", 60, 8);
+
+      // Two rails (left + right)
+      MechanismLigament2d leftRail =
+          root.append(new MechanismLigament2d("leftRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
+      MechanismLigament2d rightRail =
+          root.append(new MechanismLigament2d("rightRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
+
+      // Offset right rail by adding a short horizontal ligament first
+      MechanismRoot2d rightRoot = mechanism.getRoot("rightRoot", 72, 8);
+      rightRail =
+          rightRoot.append(new MechanismLigament2d("rightRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
+
+      // Top crossbar
+      MechanismRoot2d topRoot = mechanism.getRoot("topRoot", 60, 78);
+      MechanismLigament2d topBar =
+          topRoot.append(new MechanismLigament2d("topBar", 28, 0, 6, new Color8Bit(Color.kGray)));
+
+      // Carriage “plate” that moves up/down
+      carriage =
+          root.append(new MechanismLigament2d("carriageLift", 0, 90, 10, new Color8Bit(Color.kBlue)));
+
+      // Add a plate across the rails (so it looks like a carriage, not a stick)
+      MechanismLigament2d plate =
+          carriage.append(new MechanismLigament2d("plate", 30, 0, 10, new Color8Bit(Color.kBlue)));
+
+      // a little hook/bumper detail
+      plate.append(new MechanismLigament2d("hook", 10, -90, 6, new Color8Bit(Color.kLightBlue)));
+
     }
   }
 

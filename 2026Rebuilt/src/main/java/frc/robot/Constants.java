@@ -23,14 +23,14 @@ public class Constants {
     public static final int ERROR_THRESHOLD = 2;
 
     public static final double kP = 0.5;
-    public static final int kI = 0;
-    public static final int kD = 0;
-    public static final int kS = 0;
+    public static final int kI = 0; 
+    public static final int kD = 0; 
+    public static final int kS = 0;  
     public static final int kV = 0;
     public static final int kA = 0;
 
     public static final double MIN_HEIGHT_METERS = 0.0;
-    public static final double MAX_HEIGHT_METERS = 1000;
+    public static final double MAX_HEIGHT_METERS = 1000.0;
     public static final double SAFE_METERS = 0.1;
 
     public static final double METER_CONVERSION_FACTOR = 0.0254;
