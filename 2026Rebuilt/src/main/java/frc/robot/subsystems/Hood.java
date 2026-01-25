@@ -34,7 +34,7 @@ public class Hood extends SubsystemBase {
   private TalonFX hoodMotor;
   private DigitalInput limitSwitch;
   
-  //private CANcode absEncode;
+
   private double revsToMove;
   private TalonFXConfiguration config;
 
@@ -80,7 +80,7 @@ public class Hood extends SubsystemBase {
     // Zero if switch is already pressed at boot
     checkLimit();
   }
-    //CHANGE AND REMOVE THESE METHODS FOR HOOD
+
   public void stop() {
       hoodMotor.stopMotor();
   }

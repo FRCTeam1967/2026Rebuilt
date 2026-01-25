@@ -27,13 +27,11 @@ public class RunFlywheelShooter extends Command {
     addRequirements(shooter3);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
   
   }
 
-   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     shooter1.setMotor(speed);
@@ -51,7 +49,6 @@ public class RunFlywheelShooter extends Command {
  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    //return intake.intakeBroken(); 
     return false;
   }
 }

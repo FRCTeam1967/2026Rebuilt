@@ -33,13 +33,10 @@ public class FlywheelShooter extends SubsystemBase {
   private TalonFX flywheelMotor1;
   private TalonFX flywheelMotor2;
 
-  // =============================
-  // SIMULATION STATE
-  // =============================
+
   private static final double kSimDt = 0.02;
   private double simRotorPosRot = 0.0;
 
-  // Keep this if you want; just make sure your GEAR_RATIO > 0
   private final DCMotorSim flywheelSim = new DCMotorSim(
       LinearSystemId.createDCMotorSystem(
           DCMotor.getKrakenX60Foc(1),
@@ -49,14 +46,12 @@ public class FlywheelShooter extends SubsystemBase {
       DCMotor.getKrakenX60Foc(1)
   );
 
-  // =============================
-  // MECHANISM2D (Glass visual)
-  // =============================
+
   private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
   private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
 
   // A "spoke" that rotates to show the flywheel spinning
-  private final MechanismLigament2d flywheelShooter =
+  private final MechanismLigament2d flywheelSpoke =
       shooterRoot.append(new MechanismLigament2d(
           "flywheelShooter",
           0.8,  // length
@@ -95,7 +90,6 @@ public class FlywheelShooter extends SubsystemBase {
     flywheelMotor1.getConfigurator().apply(talonFXConfigs);
     flywheelMotor2.getConfigurator().apply(talonFXConfigs);
 
-    // Publish Mechanism2d so Glass can display it
     SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
@@ -117,8 +111,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // If you want the Mechanism2d to move on real robot too,
-    // you would update flywheelSpoke here using real sensor velocity.
+    
   }
 
   @Override
@@ -147,7 +140,7 @@ public class FlywheelShooter extends SubsystemBase {
       sim1.setRawRotorPosition(0.0);
       sim2.setRawRotorPosition(0.0);
 
-      // Reset Mechanism2d visual
+      // Reset Mechanism2d
       spokeAngleDeg = 0.0;
       flywheelSpoke.setAngle(0.0);
 
