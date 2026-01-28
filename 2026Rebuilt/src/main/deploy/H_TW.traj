@@ -1,5 +1,5 @@
 {
- "name":"NewPath",
+ "name":"H_TW",
  "version":3,
  "snapshot":{
   "waypoints":[],
@@ -7,7 +7,9 @@
   "targetDt":0.05
  },
  "params":{
-  "waypoints":[],
+  "waypoints":[
+    {"x":{"exp":"3.6257991790771484 m", "val":3.625799179077149}, "y":{"exp":"4.051816463470459 m", "val":4.051816463470459}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":13, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"1.081 m", "val":1.081}, "y":{"exp":"4.551 m", "val":4.551}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
