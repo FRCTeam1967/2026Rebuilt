@@ -37,6 +37,7 @@ public class FlywheelShooter extends SubsystemBase {
   private static final double kSimDt = 0.02;
   private double simRotorPosRot = 0.0;
 
+  // Keep this if you want; just make sure your GEAR_RATIO > 0
   private final DCMotorSim flywheelSim = new DCMotorSim(
       LinearSystemId.createDCMotorSystem(
           DCMotor.getKrakenX60Foc(1),
@@ -46,17 +47,19 @@ public class FlywheelShooter extends SubsystemBase {
       DCMotor.getKrakenX60Foc(1)
   );
 
-
+  // =============================
+  // MECHANISM2D (Glass visual)
+  // =============================
   private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
   private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
 
   // A "spoke" that rotates to show the flywheel spinning
-  private final MechanismLigament2d flywheelSpoke =
+  private final MechanismLigament2d flywheelShooter =
       shooterRoot.append(new MechanismLigament2d(
-          "flywheelShooter",
+          "flywheelSpoke",
           0.8,  // length
           0.0,  // initial angle (deg)
-          6,    // line thickness
+          6,    
           new Color8Bit(Color.kOrange)
       ));
 
@@ -111,17 +114,18 @@ public class FlywheelShooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
+    // If you want the Mechanism2d to move on real robot too,
+    // you would update flywheelSpoke here using real sensor velocity.
   }
 
   @Override
   public void simulationPeriodic() {
 
-    // If disabled, hard-reset sim outputs so GUI + SmartDashboard + Mechanism2d go to 0
+    
     if (RobotState.isDisabled()) {
       stopMotor();
 
-      // Reset sim model
+
       flywheelSim.setInputVoltage(0.0);
       flywheelSim.update(kSimDt);
 
@@ -140,7 +144,7 @@ public class FlywheelShooter extends SubsystemBase {
       sim1.setRawRotorPosition(0.0);
       sim2.setRawRotorPosition(0.0);
 
-      // Reset Mechanism2d
+      // Reset Mechanism2d visual
       spokeAngleDeg = 0.0;
       flywheelSpoke.setAngle(0.0);
 
@@ -171,7 +175,7 @@ public class FlywheelShooter extends SubsystemBase {
     sim1.setRawRotorPosition(simRotorPosRot);
     sim2.setRawRotorPosition(simRotorPosRot);
 
-    // Mechanism2d: rotate the spoke based on rotor speed
+
     spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
     flywheelSpoke.setAngle(spokeAngleDeg);
 
