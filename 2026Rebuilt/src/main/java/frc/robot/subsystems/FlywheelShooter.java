@@ -37,7 +37,10 @@ public class FlywheelShooter extends SubsystemBase {
   private static final double kSimDt = 0.02;
   private double simRotorPosRot = 0.0;
 
-  // Keep this if you want; just make sure your GEAR_RATIO > 0
+<<<<<<< HEAD
+
+=======
+>>>>>>> 15da386faf87caecb3e6b4ef5046f0d3ec79d06c
   private final DCMotorSim flywheelSim = new DCMotorSim(
       LinearSystemId.createDCMotorSystem(
           DCMotor.getKrakenX60Foc(1),
@@ -46,15 +49,19 @@ public class FlywheelShooter extends SubsystemBase {
       ),
       DCMotor.getKrakenX60Foc(1)
   );
+<<<<<<< HEAD
+  private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
+  private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
 
-  // =============================
-  // MECHANISM2D (Glass visual)
-  // =============================
+=======
+
+
   private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
   private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
 
   // A "spoke" that rotates to show the flywheel spinning
-  private final MechanismLigament2d flywheelShooter =
+>>>>>>> 15da386faf87caecb3e6b4ef5046f0d3ec79d06c
+  private final MechanismLigament2d flywheelSpoke =
       shooterRoot.append(new MechanismLigament2d(
           "flywheelSpoke",
           0.8,  // length
@@ -114,8 +121,10 @@ public class FlywheelShooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // If you want the Mechanism2d to move on real robot too,
-    // you would update flywheelSpoke here using real sensor velocity.
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 15da386faf87caecb3e6b4ef5046f0d3ec79d06c
   }
 
   @Override
@@ -144,7 +153,11 @@ public class FlywheelShooter extends SubsystemBase {
       sim1.setRawRotorPosition(0.0);
       sim2.setRawRotorPosition(0.0);
 
-      // Reset Mechanism2d visual
+<<<<<<< HEAD
+
+=======
+      // Reset Mechanism2d
+>>>>>>> 15da386faf87caecb3e6b4ef5046f0d3ec79d06c
       spokeAngleDeg = 0.0;
       flywheelSpoke.setAngle(0.0);
 
