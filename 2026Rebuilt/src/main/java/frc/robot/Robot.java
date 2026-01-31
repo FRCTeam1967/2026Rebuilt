@@ -72,11 +72,13 @@ public class Robot extends TimedRobot {
   private AutoRoutine test() {
     AutoRoutine routine = autoFactory.newRoutine("Test");
     // Load the routine's trajectories
-    // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+    // Optional<Trajectory<SwerveSample>> trajectory = 
+    //Choreo.loadTrajectory("test");
     AutoTrajectory testPath = routine.trajectory("test");
-    testPath.atPose("wait 5s", 0.2, 0.5).onTrue(new WaitCommand(2.0));
     // When the routine begins, reset odometry and start the first trajectory (1)f
-
+    //testPath.atPose("wait 5s", 0.0, 0.0);
+    // testPath.atTime("wait 5s").onTrue(new WaitCommand(2.0));
+    
     routine.active().onTrue(
         Commands.sequence(
             testPath.resetOdometry(),
@@ -86,10 +88,11 @@ public class Robot extends TimedRobot {
             //testPath.cmd()
             
         )
+        
     ); 
-    // testPath.atPose("wait 5s", 0.2, 0.5).onTrue(new WaitCommand(2.0));
+    testPath.atTime(1.0).onTrue(new WaitCommand(2.0));
     //routine.active().onTrue(Commands.print("Started the routine!"));
-
+    // testPath.atPose("wait 5s", 0.0, 0.0);
     return routine;
   }
 
