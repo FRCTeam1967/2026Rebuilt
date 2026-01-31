@@ -8,8 +8,9 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.FlywheelShooter;
 
 public class Simulation extends SubsystemBase {
   // Size in "meters" for the mechanism canvas (just a drawing coordinate system)
@@ -57,6 +58,8 @@ public class Simulation extends SubsystemBase {
     // Spin the flywheel ligament visually
     double flywheelAngleDeg = (t * 360.0) % 360.0;
     flywheelLigament.setAngle(flywheelAngleDeg);
+
+    SmartDashboard.putNumber("Hood", hoodAngleDeg);
   }
 }
 
