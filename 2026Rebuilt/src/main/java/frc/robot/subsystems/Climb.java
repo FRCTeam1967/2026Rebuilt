@@ -10,13 +10,18 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -25,6 +30,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -39,6 +46,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
+
+
 public class Climb extends SubsystemBase {
   /** Creates a new Climb. */
   
@@ -48,6 +57,7 @@ public class Climb extends SubsystemBase {
   private DigitalInput sensor;
   private double rotations;
   private double appliedVoltage;
+  private DifferentialDrivetrainSim swerve;
 
   // private ProfiledPIDController m_controller;
   // private EncoderSim encoderSim;
@@ -62,13 +72,21 @@ public class Climb extends SubsystemBase {
   private MechanismLigament2d tower;
   private MechanismLigament2d carriage;
   private TalonFXSimState motorSim;
+  private Field2d field;
+  
+  private Pose3d poses;
+  private Rotation3d rotation;
 
   public Climb() {
     motor = new TalonFX(Constants.Climb.MOTOR_ID);
     config = new TalonFXConfiguration();
     sensor = new DigitalInput(Constants.Climb.SENSOR_CHANNEL);
     motorSim = motor.getSimState();
-
+    field = new Field2d();
+    swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+    rotation = new Rotation3d();
+    poses = new Pose3d(0.0,0.0,0.0,rotation);
+    
 
     config.Slot0.kP = Constants.Climb.kP;
     config.Slot0.kI = Constants.Climb.kI;
@@ -108,41 +126,47 @@ public class Climb extends SubsystemBase {
          
       sensorSim = new DIOSim(sensor);
 
-      // Bigger canvas 
-      mechanism = new Mechanism2d(120, 90);
+      mechanism = new Mechanism2d(2, 2);
 
-      // Put the root near the bottom center
-      root = mechanism.getRoot("climbRoot", 60, 8);
+      // bottom center
+      root = mechanism.getRoot("climbRoot", 1.0, 0.2);
 
-      // Two rails (left + right)
+      // uniform thickness for everything
+      double t = 1;  // thicker than before
+
+      // rails
       MechanismLigament2d leftRail =
-          root.append(new MechanismLigament2d("leftRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
+          root.append(new MechanismLigament2d(
+              "leftRail", 1.0, 90, t, new Color8Bit(Color.kDarkGray)));
+
+      MechanismRoot2d rightRoot = mechanism.getRoot("rightRoot", 1.3, 0.2);
       MechanismLigament2d rightRail =
-          root.append(new MechanismLigament2d("rightRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
+          rightRoot.append(new MechanismLigament2d(
+              "rightRail", 1.0, 90, t, new Color8Bit(Color.kDarkGray)));
 
-      // Offset right rail by adding a short horizontal ligament first
-      MechanismRoot2d rightRoot = mechanism.getRoot("rightRoot", 72, 8);
-      rightRail =
-          rightRoot.append(new MechanismLigament2d("rightRail", 70, 90, 6, new Color8Bit(Color.kDarkGray)));
-
-      // Top crossbar
-      MechanismRoot2d topRoot = mechanism.getRoot("topRoot", 60, 78);
-      MechanismLigament2d topBar =
-          topRoot.append(new MechanismLigament2d("topBar", 28, 0, 6, new Color8Bit(Color.kGray)));
-
-      // Carriage “plate” that moves up/down
+      // carriage
       carriage =
-          root.append(new MechanismLigament2d("carriageLift", 0, 90, 10, new Color8Bit(Color.kBlue)));
+          root.append(new MechanismLigament2d(
+              "carriageLift", 0.0, 90, t, new Color8Bit(Color.kBlue)));
 
-      // Add a plate across the rails (so it looks like a carriage, not a stick)
+      // plate
       MechanismLigament2d plate =
-          carriage.append(new MechanismLigament2d("plate", 30, 0, 10, new Color8Bit(Color.kBlue)));
+          carriage.append(new MechanismLigament2d(
+              "plate", 0.6, 0, t, new Color8Bit(Color.kBlue)));
 
-      // a little hook/bumper detail
-      plate.append(new MechanismLigament2d("hook", 10, -90, 6, new Color8Bit(Color.kLightBlue)));
+      // hook
+      plate.append(new MechanismLigament2d(
+          "hook", 0.25, -90, t, new Color8Bit(Color.kLightBlue)));
+    
+    Pose3d poseA = new Pose3d();
+    Pose3d poseB = new Pose3d();
 
-    }
+    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
+      .getStructTopic("MyPose", Pose3d.struct).publish();
+    StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
   }
+}
 
   public void simulationInit(){
     motorSim = motor.getSimState();
@@ -211,11 +235,31 @@ public class Climb extends SubsystemBase {
 
     boolean atBottom = climbSim.getPositionMeters() <= Constants.Climb.MIN_HEIGHT_METERS + 0.002;
     sensorSim.setValue(!atBottom);
+    field.setRobotPose(swerve.getPose());
 
     SmartDashboard.putData("climb mechanism", mechanism);
+    // SmartDashboard.putData("climb mechanism", mechanism.generate3dMechanism());
     SmartDashboard.putBoolean("sensor val", getSensor());
     SmartDashboard.putNumber("position", currentHeight);
     SmartDashboard.putNumber("voltage", voltage);
+    /*
+    SmartDashboard.putNumber("pose3d x", poses.getX());
+    SmartDashboard.putNumber("pose3d y", poses.getY());
+    SmartDashboard.putNumber("pose3d z", poses.getZ());
+    SmartDashboard.putNumber("pose3d rotx", poses.getRotation().getX());
+    SmartDashboard.putNumber("pose3d roty", poses.getRotation().getY());
+    SmartDashboard.putNumber("pose3d rotz", poses.getRotation().getZ());
+    */
+    SmartDashboard.putNumberArray("robotPose", new double[] {
+      poses.getX(),
+      poses.getY(),
+      poses.getZ(),
+      poses.getRotation().getX(),
+      poses.getRotation().getY(),
+      poses.getRotation().getZ()
+    });
+    SmartDashboard.putData("field", field);
+    
 
   }
   
