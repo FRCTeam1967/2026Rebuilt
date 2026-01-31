@@ -7,11 +7,11 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.subsystems.FlywheelShooter;
-import frc.robot.subsystems.Simulation;
+import frc.robot.subsystems.Simulation3D;
 
 public class RobotContainer {
   private final FlywheelShooter flywheelShooter = new FlywheelShooter();
-  private final Simulation simulation = new Simulation(); // ✅ ensures logging code exists
+  private final Simulation3D simulation = new Simulation3D(); // ✅ ensures logging code exists
 
   public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 

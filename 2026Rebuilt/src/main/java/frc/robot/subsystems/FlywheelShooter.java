@@ -109,8 +109,7 @@ public class FlywheelShooter extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    
+  public void periodic() {    
   }
 
   @Override
@@ -139,7 +138,6 @@ public class FlywheelShooter extends SubsystemBase {
       sim1.setRawRotorPosition(0.0);
       sim2.setRawRotorPosition(0.0);
 
-
       flywheelSpoke.setAngle(0.0);
       SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
       return;
@@ -163,7 +161,7 @@ public class FlywheelShooter extends SubsystemBase {
     simRotorPosRot += rotorRps * kSimDt;
 
     sim1.setRotorVelocity(rotorRps);
-    sim2.setRotorVelocity(rotorRps);
+    sim2.setRotorVelocity(rotorRps*3);
 
     sim1.setRawRotorPosition(simRotorPosRot);
     sim2.setRawRotorPosition(simRotorPosRot);

@@ -29,7 +29,7 @@ public final class Constants {
     public static final double kA = 0.0; //placeholder
 
     public static final double CURRENT_LIMIT = 0.0; //placeholder
-    public static final double GEAR_RATIO = 0.0; //placeholder
+    public static final double GEAR_RATIO = 11.4; //placeholder
 
     public static final double HOOD = 0.0; //placeholder
   }
@@ -49,7 +49,7 @@ public final class Constants {
     public static final double ACCELERATION = 0.0; //placeholder
     public static final double JERK = 0.0; //placeholder
     
-    public static final double GEAR_RATIO = 5.0; 
+    public static final double GEAR_RATIO = 1.3333; 
 
     public static final double FLYWHEEL_SHOOTER = 0.0;
   }
