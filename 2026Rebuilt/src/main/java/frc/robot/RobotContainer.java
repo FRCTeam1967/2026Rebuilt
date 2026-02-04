@@ -5,8 +5,6 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Climb;
 import frc.robot.commands.*;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -16,6 +14,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.simulation.JoystickSim;
+
+
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;  
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,15 +61,26 @@ public class RobotContainer {
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
+        final XboxController driverController = new XboxController(0);
+
+
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
 
     // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
     // m_operatorController.a().onTrue(new MoveClimb(climb, 20));
-    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb, 3));
+    new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb,3));
     new JoystickButton(joystick, 2).onTrue(new MoveClimb(climb, 0));
+
+    new JoystickButton(driverController, XboxController.Button.kY.value)
+      .onTrue(new MoveClimb(climb, 0.35));
+
+    // Move climb DOWN
+    new JoystickButton(driverController, XboxController.Button.kA.value)
+        .onTrue(new MoveClimb(climb, 0.0));
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

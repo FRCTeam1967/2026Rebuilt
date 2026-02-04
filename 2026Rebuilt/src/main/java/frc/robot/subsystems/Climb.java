@@ -152,11 +152,11 @@ public class Climb extends SubsystemBase {
       // plate
       MechanismLigament2d plate =
           carriage.append(new MechanismLigament2d(
-              "plate", 0.6, 0, t, new Color8Bit(Color.kBlue)));
+              "plate", 0.6, 0, t, new Color8Bit(Color.kBlue))); //length:0.6
 
       // hook
       plate.append(new MechanismLigament2d(
-          "hook", 0.25, -90, t, new Color8Bit(Color.kLightBlue)));
+          "hook", 0.30, -90, t, new Color8Bit(Color.kLightBlue)));//length: 0.25
     
     Pose3d poseA = new Pose3d();
     Pose3d poseB = new Pose3d();
