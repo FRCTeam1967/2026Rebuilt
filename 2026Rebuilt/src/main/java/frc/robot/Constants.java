@@ -9,17 +9,18 @@ public class Constants {
     public static class Extension{
         public static final int EXTENSION_MOTOR_ID = 100000;
 
-        public static final int kS = 0;
-        public static final int kV = 0;
-        public static final int kA = 0;
-        public static final int kP = 0;
+        public static final double kS = 0.25;
+        public static final double kV = 0.12;
+        public static final double kA = 0.01;
+        public static final int kP = 3;
         public static final int kI = 0;
         public static final int kD = 0;
         
-        public static final int CRUISE_VELOCITY = 0;
-        public static final int ACCELERATION = 0;
-        public static final int JERK = 0;
-        public static final int GEAR_RATIO = 1;
+        public static final int CRUISE_VELOCITY = 40;
+        public static final int ACCELERATION = 100;
+        public static final int JERK = 1000;
+        public static final double GEAR_RATIO = 21/1.0;
+        public static final double FEED_FORWARD = 0;
 
     }
 
