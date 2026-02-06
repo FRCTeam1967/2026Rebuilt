@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import com.revrobotics.Rev2mDistanceSensor;
+import com.revrobotics.Rev2mDistanceSensor.Port;
 
 public class Robot extends TimedRobot {
   public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
@@ -32,12 +34,16 @@ public class Robot extends TimedRobot {
   private final AutoFactory autoFactory;
   private final RobotContainer m_robotContainer;
   private final AutoChooser autoChooser;
+  private Rev2mDistanceSensor distOnboard; 
+  private Rev2mDistanceSensor distMXP;
   //public ShuffleboardTab matchTab;
   
   public Robot() {
     m_robotContainer = new RobotContainer();
     //matchTab = Shuffleboard.getTab("match");
     var drive = m_robotContainer.drivetrain;
+    distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
+    distMXP = new Rev2mDistanceSensor(Port.kMXP);
     
 
     autoFactory = new AutoFactory(
@@ -91,6 +97,11 @@ public class Robot extends TimedRobot {
         
     ); 
     testPath.atTime(1.0).onTrue(new WaitCommand(2.0));
+     
+     while (distMXP.getRange() >= 27) {
+      ///intake
+      //pid to pose forward to the gamepiece pose 
+     }
     //routine.active().onTrue(Commands.print("Started the routine!"));
     // testPath.atPose("wait 5s", 0.0, 0.0);
     return routine;
