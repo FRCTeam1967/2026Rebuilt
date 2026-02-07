@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
@@ -35,10 +36,12 @@ public class Extension extends SubsystemBase {
   private TalonFXSimState motorSim;
   private double simRotorPosition = 0.0;
   private double simAppliedVoltage = 0.0;
+  private PIDController controller;
   /** Creates a new Pivot. */
   public Extension() {
     motor = new TalonFX (Constants.Extension.EXTENSION_MOTOR_ID);
     motorSim = motor.getSimState();
+    controller = new PIDController(20, 6, 6);
     var talonFXconfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXconfigs.Slot0;
@@ -83,14 +86,14 @@ public class Extension extends SubsystemBase {
   }
 
   public boolean isReached(){
-    double rawPos = motor.getRotorPosition().getValueAsDouble();
-    double currentPos = rawPos*360;
-    double diff = Math.abs(currentPos - revsToMove*360);
-    return diff < 5.0;  
+    double currentPos = motor.getPosition().getValueAsDouble();
+    double diff = Math.abs(currentPos - revsToMove);
+    return diff < 0.02; 
+
   }
 
   public void moveTo(double rotations){
-  revsToMove = rotations * Constants.Extension.GEAR_RATIO;
+  revsToMove = rotations;
 
   // Optional gravity feedforward later
   simAppliedVoltage = 0.0;
@@ -107,8 +110,9 @@ public class Extension extends SubsystemBase {
   public void simulationPeriodic() {
     double error = revsToMove - simRotorPosition;
 
-    double kSimP = 2.0;  
-    double voltage = kSimP * error + simAppliedVoltage;
+    // double voltage = kSimP * error + simAppliedVoltage;
+    double voltage = controller.calculate(simRotorPosition, revsToMove);
+
 
     voltage = Math.max(Math.min(voltage, 12.0), -12.0);
 

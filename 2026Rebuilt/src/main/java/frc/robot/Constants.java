@@ -20,7 +20,7 @@ public class Constants {
         public static final int ACCELERATION = 100;
         public static final int JERK = 1000;
         public static final double GEAR_RATIO = 21/1.0;
-        public static final double FEED_FORWARD = 0;
+        public static final double FEED_FORWARD = 1;
 
     }
 
