@@ -44,8 +44,8 @@ public class Robot extends TimedRobot {
   private final AutoFactory autoFactory;
   private final RobotContainer m_robotContainer;
   private final AutoChooser autoChooser;
-  // private Rev2mDistanceSensor distOnboard; 
-  // private Rev2mDistanceSensor distMXP;
+  private Rev2mDistanceSensor distOnboard; 
+  private Rev2mDistanceSensor distMXP;
   private final GerryRig m_gerryRig; 
   LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
   LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
@@ -60,8 +60,8 @@ public class Robot extends TimedRobot {
     m_gerryRig = new GerryRig();
 
     
-    // distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
-    // distMXP = new Rev2mDistanceSensor(Port.kMXP);
+    distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
+    distMXP = new Rev2mDistanceSensor(Port.kMXP);
     
     autoFactory = new AutoFactory(
             drive::getPose, // A function that returns the current robot pose
@@ -96,40 +96,23 @@ public class Robot extends TimedRobot {
   private AutoRoutine test() {
     AutoRoutine routine = autoFactory.newRoutine("Test");
     // Load the routine's trajectories
-    // Optional<Trajectory<SwerveSample>> trajectory = 
-    //Choreo.loadTrajectory("test");
-    //AutoTrajectory testPath = routine.trajectory("test");
+    
+    AutoTrajectory testPath = routine.trajectory("test");
     // When the routine begins, reset odometry and start the first trajectory (1)f
     //testPath.atPose("wait 5s", 0.0, 0.0);
     // testPath.atTime("wait 5s").onTrue(new WaitCommand(2.0));
     routine.active().onTrue(
       Commands.sequence(
-        new RunCommand(() -> m_gerryRig.runMotor(0.3), m_gerryRig).withTimeout(3.0), 
-        new RunCommand(() -> m_gerryRig.runMotor(0.7), m_gerryRig).withTimeout(3.0),
-        new RunCommand(() -> m_gerryRig.stopMotor(), m_gerryRig)
-      )
-    );
+          testPath.resetOdometry(),
+          testPath.cmd() 
+    ));
     
-    // routine.active().onTrue(
-    //     Commands.sequence(
-    //         testPath.resetOdometry(),
-    //         testPath.cmd()
-            //testPath.atPose("wait 5s", 0.2, 0.5).onTrue(new WaitCommand(2.0)),
- 
-            //testPath.cmd()
-            
-    //     ) 
-
-    // );
-    // testPath.atPose("wait 5s", 0.1, 0.5).onTrue(blinkCommand.withTimeout(2.0));
+    testPath.atPose("wait 5s", 0.1, 0.5).onTrue(blinkCommand.withTimeout(2.0));
 
     // while (m_gerryRig.getGerryVel() > 0.6) {
     //   ledSubsystem.runPattern(blinking);
     //   //intake
     //   //pid to pose forward to the gamepiece pose
-    //   //routine.active().onTrue(Commands.print("Started the routine!"));
-    //   // testPath.atPose("wait 5s", 0.0, 0.0);
-    //   //testPath.atPose("wait 5s", 2.0, 3.0).onTrue(new WaitCommand(5.0));
     //   }
     return routine;
   }
@@ -149,6 +132,7 @@ public class Robot extends TimedRobot {
     return conditional;
   }
 
+  
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
@@ -168,31 +152,13 @@ public class Robot extends TimedRobot {
     return routine;
   }
 
-  private AutoRoutine ijfsldj() {
-    AutoRoutine routine = autoFactory.newRoutine("HTW");
-    // Load the routine's trajectories
-    // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
-     AutoTrajectory hubtowershoot = routine.trajectory("H_TW");
 
-    // When the routine begins, reset odometry and start the first trajectory (1)
-    routine.active().onTrue(
-        Commands.sequence(
-            hubtowershoot.resetOdometry(),
-            hubtowershoot.cmd()
-            
-        )
-    );    
-    
-
-    return routine;
-  }
-/*
 private AutoRoutine otctw() {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
     // Load the routine's trajectories
     // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
     AutoTrajectory goToFuel = routine.trajectory("OT_N_TW1");
-    AutoTrajectory fuel  = routine.trajectory("OT_fuelBranch);
+    AutoTrajectory fuel  = routine.trajectory("OT_N_fuelBranch2");
     AutoTrajectory shootClimb = routine.trajectory("OT_N_TW3");
 
     // When the routine begins, reset odometry and start the first trajectory (1)
@@ -203,9 +169,19 @@ private AutoRoutine otctw() {
             
         )
     );    
-    
+    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
+    //the hopper is full, so we should continue with the rest of the auto and go shoot
+    Trigger doneGo = goToFuel.done();
+    doneGo.and(()-> distMXP.getRange()>=27).onTrue(fuel.cmd());//if true then intake 
+     //write intake for fuel traj if true 
+    doneGo.and(()-> distMXP.getRange()< 27).onTrue(shootClimb.cmd());
+   
+    //write shoot for shootClimb
+    fuel.done().onTrue(shootClimb.cmd());
+    shootClimb.atPose("Marker", 0.0,0.0);//keep shooting after you reach event marker name Marker
+    //create an event marker with offset in choreo interface that says stop motor and then start climb in code
     return routine;
-} */
+}
 
 // private AutoRoutine gRig() {
 //     AutoRoutine routine = autoFactory.newRoutine("GerryRig");
