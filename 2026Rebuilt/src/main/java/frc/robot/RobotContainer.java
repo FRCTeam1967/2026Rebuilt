@@ -56,7 +56,7 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    new JoystickButton(joystick, 1).onTrue(new Extend(extension, 5));
+    new JoystickButton(joystick, 1).onTrue(new Extend(extension, 8));
     new JoystickButton(joystick, 2).onTrue(new Extend(extension, 0));
     }
 

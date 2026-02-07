@@ -13,17 +13,24 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 
 
 public class Extension extends SubsystemBase {
@@ -37,10 +44,20 @@ public class Extension extends SubsystemBase {
   private double simRotorPosition = 0.0;
   private double simAppliedVoltage = 0.0;
   private PIDController controller;
+  private Field2d field;
+  private DifferentialDrivetrainSim swerve;
+    private double rotations;
+  private double appliedVoltage;
+  private Pose3d poses;
+  private Rotation3d rotation;
   /** Creates a new Pivot. */
   public Extension() {
     motor = new TalonFX (Constants.Extension.EXTENSION_MOTOR_ID);
     motorSim = motor.getSimState();
+    field = new Field2d();
+    swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+    rotation = new Rotation3d();
+    poses = new Pose3d(0.0,0.0,0.0,rotation);
     controller = new PIDController(20, 6, 6);
     var talonFXconfigs = new TalonFXConfiguration();
 
@@ -73,6 +90,13 @@ public class Extension extends SubsystemBase {
     true, // Simulate gravity
     0.0 // Initial angle (rad)
     );  
+    Pose3d poseA = new Pose3d();
+    Pose3d poseB = new Pose3d();
+
+    StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
+      .getStructTopic("MyPose", Pose3d.struct).publish();
+    StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
   }
 
   public void simulationInit(){
@@ -89,7 +113,6 @@ public class Extension extends SubsystemBase {
     double currentPos = motor.getPosition().getValueAsDouble();
     double diff = Math.abs(currentPos - revsToMove);
     return diff < 0.02; 
-
   }
 
   public void moveTo(double rotations){
@@ -113,7 +136,6 @@ public class Extension extends SubsystemBase {
     // double voltage = kSimP * error + simAppliedVoltage;
     double voltage = controller.calculate(simRotorPosition, revsToMove);
 
-
     voltage = Math.max(Math.min(voltage, 12.0), -12.0);
 
     armSim.setInputVoltage(voltage);
@@ -133,10 +155,21 @@ public class Extension extends SubsystemBase {
     motorSim.setSupplyVoltage(voltage);
 
     arm.setAngle(Units.radiansToDegrees(armAngleRad));
+    field.setRobotPose(swerve.getPose());
 
     SmartDashboard.putData("pivot mechanism", mech2d);
     SmartDashboard.putNumber("Motor Voltage", voltage);
     SmartDashboard.putNumber("Rotor Pos", simRotorPosition);
+
+    SmartDashboard.putNumberArray("robotPose", new double[] {
+      poses.getX(),
+      poses.getY(),
+      poses.getZ(),
+      poses.getRotation().getX(),
+      poses.getRotation().getY(),
+      poses.getRotation().getZ()
+    });
+    SmartDashboard.putData("field", field);
 }
 
   public void periodic() {
