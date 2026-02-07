@@ -1,5 +1,5 @@
 {
- "name":"OT_N_TW3",
+ "name":"N_ScoreClimb",
  "version":3,
  "snapshot":{
   "waypoints":[
@@ -26,8 +26,7 @@
     {"x":{"exp":"3.7304770946502686 m", "val":3.730477094650269}, "y":{"exp":"0.7068336009979248 m", "val":0.7068336009979248}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"2.519259214401245 m", "val":2.519259214401245}, "y":{"exp":"1.3320544958114624 m", "val":1.3320544958114624}, "heading":{"exp":"0.876057925264639 rad", "val":0.876057925264639}, "intervals":19, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"1.7521132230758667 m", "val":1.7521132230758667}, "y":{"exp":"2.3050200939178467 m", "val":2.3050200939178467}, "heading":{"exp":"0.5070982284003652 rad", "val":0.5070982284003652}, "intervals":17, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"1.4587684869766235 m", "val":1.4587684869766235}, "y":{"exp":"3.273966073989868 m", "val":3.273966073989868}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"-1.0545185804367065 m", "val":-1.0545185804367063}, "y":{"exp":"3.221853256225586 m", "val":3.221853256225586}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"1.4587684869766235 m", "val":1.4587684869766235}, "y":{"exp":"3.273966073989868 m", "val":3.273966073989868}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
@@ -186,5 +185,7 @@
     {"t":2.7266, "x":1.45877, "y":3.27397, "heading":0.0, "vx":0.0, "vy":0.0, "omega":0.0, "ax":0.0, "ay":0.0, "alpha":0.0, "fx":[0.0,0.0,0.0,0.0], "fy":[0.0,0.0,0.0,0.0]}],
   "splits":[0]
  },
- "events":[]
+ "events":[
+   {"name":"Start Score", "from":{"target":4, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":null},
+   {"name":"Stop Score", "from":{"target":6, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
 }
