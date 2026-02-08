@@ -12,8 +12,14 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -21,11 +27,14 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.LimelightHelpers;
 //import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import dev.doglog.DogLog;
 
 public class Robot extends TimedRobot {
   public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
@@ -37,6 +46,8 @@ public class Robot extends TimedRobot {
   
   private final AutoFactory autoFactory;
   private final AutoChooser autoChooser;
+
+  private final StructPublisher<Pose2d> choreoPublisher;
 
 
   public Robot() {
@@ -52,15 +63,57 @@ public class Robot extends TimedRobot {
     autoChooser = new AutoChooser();
 
     autoChooser.addRoutine("Test", this::Test);
+    autoChooser.addRoutine("TestTrench2", this::TestTrench2);
+    autoChooser.addRoutine("AngleRedTrench", this::AngleRedTrench);
 
     matchTab.add("auto chooser lol", autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
-
-    //RobotModeTriggers.disabled().whileTrue(autoChooser.selectedCommandScheduler());   
+    
+    RobotModeTriggers.autonomous().whileTrue(autoChooser.selectedCommandScheduler());
+    //RobotModeTriggers.disabled().whileTrue(autoChooser.selectedCommandScheduler()); 
+    
+    choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
   }
 
   //CHOREO AUTO
   private AutoRoutine Test() {
-        AutoRoutine routine = autoFactory.newRoutine("Test");
+        AutoRoutine routine = autoFactory.newRoutine("test");
+        // Load the routine's trajectories
+        // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+        AutoTrajectory test_path = routine.trajectory("Test");
+
+        // When the routine begins, reset odometry and start the first trajectory (1)
+        routine.active().onTrue(
+            Commands.sequence(
+                //logging
+                new InstantCommand(() -> DogLog.log("initial pose from choreo", test_path.getInitialPose().get())),
+                new InstantCommand(() -> DogLog.log("final pose from choreo", test_path.getFinalPose().get())),
+
+                new InstantCommand(() -> DogLog.log("gyro BEFORE conditional", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees())),
+                new InstantCommand(() -> DogLog.log("limelight yaw BEFORE resetOdometry", Units.radiansToDegrees(LimelightHelpers.getBotPose3d("limelight-front").getRotation().getZ()))),
+                new InstantCommand(() -> DogLog.log("should flip?", ChoreoAllianceFlipUtil.shouldFlip())),
+
+                //step one: set gyro to starting heading (flips for alliance)
+                new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+
+                //step two: reset odometry to starting pose
+                test_path.resetOdometry(),
+
+                //step three: set LL heading to gyro (aka starting) heading
+                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+                new InstantCommand(() -> DogLog.log("gyro position after 'setting' it", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees())),
+
+                new InstantCommand(() -> DogLog.log("limelight yaw AFTER resetOdometry", Units.radiansToDegrees(LimelightHelpers.getBotPose3d("limelight-front").getRotation().getZ()))),
+                 
+                //step four: run the path!
+                test_path.cmd()          
+            )
+        );
+
+        return routine;
+    }
+
+    private AutoRoutine TestTrench2() {
+        AutoRoutine routine = autoFactory.newRoutine("test");
         // Load the routine's trajectories
         // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
         AutoTrajectory test_path = routine.trajectory("Test");
@@ -69,12 +122,43 @@ public class Robot extends TimedRobot {
         routine.active().onTrue(
             Commands.sequence(
                 test_path.resetOdometry(),
+                new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", test_path.getInitialPose().get().getRotation().getDegrees(), 0, 0, 0, 0, 0)),    
+
                 test_path.cmd()          
             )
         );
 
-        LimelightHelpers.SetRobotOrientation("limelight-front", test_path.getInitialPose().get().getRotation().getDegrees(), 0, 0, 0, 0, 0);    
-        m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
+        //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
+
+
+        return routine;
+    }
+
+    private AutoRoutine AngleRedTrench() {
+        AutoRoutine routine = autoFactory.newRoutine("AngleRedTrench");
+        // Load the routine's trajectories
+        // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+        AutoTrajectory test_path = routine.trajectory("AngleRedTrench");
+
+        // When the routine begins, reset odometry and start the first trajectory (1)
+        routine.active().onTrue(
+            Commands.sequence(
+                // robot yaw to path starting yaw
+                new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+                
+                // set robot orientation to ^
+                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", test_path.getInitialPose().get().getRotation().getDegrees(), 0, 0, 0, 0, 0)),    
+
+                // resets the current robot pose to the provided Pose2d
+                test_path.resetOdometry(),
+
+                // follow trajectory
+                test_path.cmd()          
+            )
+        );
+
+        //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
 
         return routine;
     }
@@ -93,6 +177,17 @@ public class Robot extends TimedRobot {
     } */
   }
 
+
+  /*
+   * Limelight IMU Modes:
+   * 0: No internal IMU processing. MT2 uses interpolated yaw from robot's gyro sent via SetRobotOrientation().
+   * 1: Internal IMU offset is calibrated to match external yaw each frame (seeding). MT2 still uses external yaw for botpose.
+   * 2: Uses internal IMU's fused yaw only. No external input required.
+   * 3: Complementary filter fuses internal IMU with MT1 vision yaw. When MT1 gets a valid pose, it slowly corrects internal IMU drift.
+   * 4: Complementary filter fuses internal IMU with external yaw from SetRobotOrientation(). This is the recommended mode, as the internal IMU's 
+   * 1khz update rate is utilized for frame-by-frame motion while the robot's IMU corrects for any drift over time.
+   */
+
   @Override
   public void disabledInit() {
     SignalLogger.stop();
@@ -101,7 +196,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    LimelightHelpers.SetIMUMode("limelight-front", 1);
+    LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
   }
 
@@ -110,12 +205,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
     LimelightHelpers.SetThrottle("limelight-front", 0);
   }
 
   @Override
   public void autonomousPeriodic() {
-    LimelightHelpers.SetIMUMode("limelight-front", 2);
+    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
   }
 
   @Override
@@ -129,7 +225,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    LimelightHelpers.SetIMUMode("limelight-front", 2); //1
+    LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
   }
 
   @Override

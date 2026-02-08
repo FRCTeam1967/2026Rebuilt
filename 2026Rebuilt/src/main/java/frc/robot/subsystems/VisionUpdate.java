@@ -71,7 +71,7 @@ public class VisionUpdate extends SubsystemBase {
   @Override
   public void periodic() {
     boolean doRejectUpdate = false;
-    LimelightHelpers.SetRobotOrientation("limelight-front", (Units.degreesToRadians(drivetrain.getPigeon2().getYaw().getValueAsDouble())), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-front", (drivetrain.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
 
     LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
 

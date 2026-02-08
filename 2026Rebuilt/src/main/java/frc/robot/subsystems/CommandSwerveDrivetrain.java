@@ -10,8 +10,10 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 import choreo.trajectory.SwerveSample;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -139,6 +141,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -163,6 +167,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -195,6 +201,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
+
     }
 
     /**
@@ -238,11 +247,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Get the current pose of the robot
         Pose2d pose = getPose();
 
+        DogLog.log("samples of trajectory", sample.getPose());
+
+        double velocityX = sample.vx + xController.calculate(pose.getX(), sample.x);
+        DogLog.log("PID controller X follow trajectory", velocityX);
+
         // Generate and apply the next speeds for the robot
         setControl(new SwerveRequest.FieldCentric()
-            .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
+            .withVelocityX(velocityX)
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)));
+            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
+
 
        //ChassisSpeeds speeds = new ChassisSpeeds(
             //,sample.vx + xController.calculate(pose.getX(), sample.x)
