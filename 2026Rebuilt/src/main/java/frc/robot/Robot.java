@@ -44,8 +44,8 @@ public class Robot extends TimedRobot {
   private final AutoFactory autoFactory;
   private final RobotContainer m_robotContainer;
   private final AutoChooser autoChooser;
-  private Rev2mDistanceSensor distOnboard; 
-  private Rev2mDistanceSensor distMXP;
+  // private Rev2mDistanceSensor distOnboard; 
+  // private Rev2mDistanceSensor distMXP;
   private final GerryRig m_gerryRig; 
   LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
   LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
@@ -60,8 +60,8 @@ public class Robot extends TimedRobot {
     m_gerryRig = new GerryRig();
 
     
-    distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
-    distMXP = new Rev2mDistanceSensor(Port.kMXP);
+    // distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
+    // distMXP = new Rev2mDistanceSensor(Port.kMXP);
     
     autoFactory = new AutoFactory(
             drive::getPose, // A function that returns the current robot pose
@@ -171,10 +171,10 @@ private AutoRoutine otctw() {
     );    
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
-    Trigger doneGo = goToFuel.done();
-    doneGo.and(()-> distMXP.getRange()>=27).onTrue(fuel.cmd());//if true then intake 
-     //write intake for fuel traj if true 
-    doneGo.and(()-> distMXP.getRange()< 27).onTrue(shootClimb.cmd());
+    // Trigger doneGo = goToFuel.done();
+    // doneGo.and(()-> distMXP.getRange()>=27).onTrue(fuel.cmd());//if true then intake 
+    //  //write intake for fuel traj if true 
+    // doneGo.and(()-> distMXP.getRange()< 27).onTrue(shootClimb.cmd());
    
     //write shoot for shootClimb
     fuel.done().onTrue(shootClimb.cmd());

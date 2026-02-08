@@ -10,6 +10,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
@@ -50,6 +51,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
+    private double headingMin = -Math.PI;
+    private double headingMax = Math.PI;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -135,7 +138,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         super(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
+            headingController.enableContinuousInput(headingMin, headingMax);
         }
+        headingController.enableContinuousInput(headingMin, headingMax);
+        
     }
 
     /**
@@ -159,7 +165,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
+            headingController.enableContinuousInput(headingMin, headingMax);
         }
+        headingController.enableContinuousInput(headingMin, headingMax); 
     }
 
     /**
@@ -191,7 +199,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         if (Utils.isSimulation()) {
             startSimThread();
+            headingController.enableContinuousInput(headingMin, headingMax);
         }
+        headingController.enableContinuousInput(headingMin, headingMax);
     }
 
     /**
@@ -232,12 +242,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getPose();
-
         // Generate and apply the next speeds for the robot
         setControl(new SwerveRequest.FieldCentric()
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)));
+            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
+
 
        //ChassisSpeeds speeds = new ChassisSpeeds(
             //,sample.vx + xController.calculate(pose.getX(), sample.x)
