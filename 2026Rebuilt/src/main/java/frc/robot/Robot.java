@@ -113,19 +113,25 @@ public class Robot extends TimedRobot {
     }
 
     private AutoRoutine TestTrench2() {
-        AutoRoutine routine = autoFactory.newRoutine("test");
+        AutoRoutine routine = autoFactory.newRoutine("TestTrench2");
         // Load the routine's trajectories
         // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
-        AutoTrajectory test_path = routine.trajectory("Test");
+        AutoTrajectory test_path = routine.trajectory("TestTrench2");
 
         // When the routine begins, reset odometry and start the first trajectory (1)
         routine.active().onTrue(
             Commands.sequence(
-                test_path.resetOdometry(),
+                //step one: set gyro to starting heading (flips for alliance)
                 new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
-                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", test_path.getInitialPose().get().getRotation().getDegrees(), 0, 0, 0, 0, 0)),    
 
-                test_path.cmd()          
+                //step two: reset odometry to starting pose
+                test_path.resetOdometry(),
+
+                //step three: set LL heading to gyro (aka starting) heading
+                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+                 
+                //step four: run the path!
+                test_path.cmd()                  
             )
         );
 
@@ -144,17 +150,17 @@ public class Robot extends TimedRobot {
         // When the routine begins, reset odometry and start the first trajectory (1)
         routine.active().onTrue(
             Commands.sequence(
-                // robot yaw to path starting yaw
+                //step one: set gyro to starting heading (flips for alliance)
                 new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
-                
-                // set robot orientation to ^
-                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", test_path.getInitialPose().get().getRotation().getDegrees(), 0, 0, 0, 0, 0)),    
 
-                // resets the current robot pose to the provided Pose2d
+                //step two: reset odometry to starting pose
                 test_path.resetOdometry(),
 
-                // follow trajectory
-                test_path.cmd()          
+                //step three: set LL heading to gyro (aka starting) heading
+                new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+                 
+                //step four: run the path!
+                test_path.cmd()      
             )
         );
 
