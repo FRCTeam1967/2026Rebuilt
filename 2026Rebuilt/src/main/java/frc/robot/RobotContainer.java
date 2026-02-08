@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.VisionUpdate;
+import frc.robot.subsystems.*;
+import frc.robot.commands.*;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -50,21 +52,13 @@ public class RobotContainer {
         configLLTab(limelightTab, fieldTab);        
     }
 
-    private double limelight_aim_proportional() {
-        // kP (constant of proportionality)
-        // this is a hand-tuned number that determines the aggressiveness of our proportional control loop
-        // if it is too high, the robot will oscillate around.
-        // if it is too low, the robot will never reach its target
-        // if the robot never turns in the correct direction, kP should be inverted.
-        // int[] validIDs = {10, 25, 26};
-        // LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
-        
+    private double limelight_aim_proportional() {        
         double kP = 0.02; //0.035
         double targetingAngularVelocity = 0.0; 
         // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
         // your limelight 3 feed, tx should return roughly 31 degrees.
 
-        if (LimelightHelpers.getFiducialID("limelight-front") == 10) {
+        if (LimelightHelpers.getFiducialID("limelight-front") == 10 || LimelightHelpers.getFiducialID("limelight-front") == 26) {
             targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
         }
 
@@ -154,14 +148,21 @@ public class RobotContainer {
                     .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
             )
         );
-        // ranging
-        joystick.rightTrigger().whileTrue(
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(limelight_range_proportional()) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
+        // // ranging
+        // joystick.rightTrigger().whileTrue(
+        //     drivetrain.applyRequest(() ->
+        //         drive.withVelocityX(limelight_range_proportional()) // Drive forward with negative Y (forward)
+        //             .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        //             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        //     )
+        // );
+
+        // tower alignment using TX
+        joystick.leftTrigger().whileTrue(new AlignTowerTX(drivetrain, vision, false, true));
+
+        // tower alignment using pose
+        joystick.leftTrigger().whileTrue(new AlignTowerPose(drivetrain, vision));
+
 
         //do both
         joystick.y().whileTrue(

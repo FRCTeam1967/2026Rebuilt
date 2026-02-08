@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -13,6 +15,8 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
@@ -67,6 +71,47 @@ public class VisionUpdate extends SubsystemBase {
       mt2.pose,
       Utils.fpgaToCurrentTime(mt2.timestampSeconds));
   }
+
+  private boolean disableVision = false;
+  // private SwerveRequest.ApplyRobotSpeeds request = new SwerveRequest.ApplyRobotSpeeds();
+
+  public NetworkTable limelightTable, limelightOdometryTable;
+  public LimelightTarget_Fiducial limelightTargetFiducial = new LimelightTarget_Fiducial();
+
+  public Pose3d targetPose = new Pose3d();
+  public LimelightResults results = new LimelightResults();
+
+  //Limelight Updating Values
+  private double xAlignmentOffset, yAlignmentOffset, zAlignmentOffset, vAlignmentCheck;
+  private double xOdometryOffset, yOdometryOffset, zOdometryOffset;
+  private ChassisSpeeds alignSpeed;
+
+  private boolean isInRange = false;
+
+  public boolean isVisionDisabled(){
+    return disableVision;
+  }
+
+  public boolean getInRange() {
+    return isInRange;
+  }
+
+  public void setInRangeTrue() {
+    isInRange = true;
+  }
+
+  public void setInRangeFalse() {
+    isInRange = false;
+  }
+
+  public double getTXAlignmentOffset() {
+    return xAlignmentOffset;
+  }
+
+  public double getAlignmentCheck() {
+    return vAlignmentCheck;
+  }
+
 
   @Override
   public void periodic() {
