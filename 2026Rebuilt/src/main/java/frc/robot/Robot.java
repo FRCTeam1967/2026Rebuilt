@@ -7,8 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.Extend;
-import frc.robot.subsystems.Extension;
+import frc.robot.commands.MovePivot;
+import frc.robot.subsystems.Pivot;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -96,12 +96,12 @@ public class Robot extends TimedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    m_robotContainer.extension.simulationInit();
+    m_robotContainer.pivot.simulationInit();
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    m_robotContainer.extension.simulationPeriodic();
+    m_robotContainer.pivot.simulationPeriodic();
   }
 }
