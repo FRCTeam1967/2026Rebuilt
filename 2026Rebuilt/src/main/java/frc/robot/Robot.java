@@ -157,9 +157,9 @@ private AutoRoutine otctw() {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
     // Load the routine's trajectories
     // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
-    AutoTrajectory goToFuel = routine.trajectory("OT_N_TW1");
-    AutoTrajectory fuel  = routine.trajectory("OT_N_fuelBranch2");
-    AutoTrajectory shootClimb = routine.trajectory("OT_N_TW3");
+    AutoTrajectory goToFuel = routine.trajectory("OT_N");
+    AutoTrajectory fuel  = routine.trajectory("OT_N_fuelBranch");
+    AutoTrajectory shootClimb = routine.trajectory("N_ScoreClimb");
 
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(
