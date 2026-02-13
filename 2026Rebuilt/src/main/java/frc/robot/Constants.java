@@ -30,7 +30,7 @@ public final class Constants {
     public static final double kV = 0.0;  // placeholder
     public static final double kA = 0.0;  // placeholder
 
-    public static final double GEAR_RATIO = 11.4;      // motor_rot / hood_rot
+    public static final double GEAR_RATIO = 0.0875;      // motor_rot / hood_rot
 
     public static final double MIN_DEG = 30.0;
     public static final double MAX_DEG = 86.0;
@@ -60,7 +60,7 @@ public final class Constants {
     public static final double FLYWHEEL_SHOOTER_SPEED2 = 50.0;
     public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
 
-    public static final double GEAR_RATIO = 1.3333; 
+    public static final double GEAR_RATIO = 1.5; 
   }
 
   public static class Xbox {

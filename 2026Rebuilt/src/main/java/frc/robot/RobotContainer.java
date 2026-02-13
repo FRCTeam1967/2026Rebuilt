@@ -43,10 +43,10 @@ public class RobotContainer {
     .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
     
     operatorController.y()
-    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)); //speed change
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)); //speed change to 50
 
     operatorController.b()
-    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED3)); //speed change
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED3)); //speed change to 60
 
   }
 

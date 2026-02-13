@@ -11,6 +11,8 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -30,6 +32,8 @@ public class FlywheelShooter extends SubsystemBase {
 
   private TalonFX flywheelMotor1;
   private TalonFX flywheelMotor2;
+
+  private final CANBus canbus = new CANBus("Canivore");
 
 
   // private static final double kSimDt = 0.02;
@@ -61,8 +65,8 @@ public class FlywheelShooter extends SubsystemBase {
 
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
-    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID);
-    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID);
+    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
+    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -92,13 +96,13 @@ public class FlywheelShooter extends SubsystemBase {
     //SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
-  public void setVelocity(double velocity) {
+  public void setVelocity(double velocity) { //set the velocity of the shooter
     MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(velocity);
     flywheelMotor1.setControl(request);
     flywheelMotor2.setControl(request);
   }
 
-  public void stopMotor() {
+  public void stopMotor() { //stops the hood motor (obviously : ))
     flywheelMotor1.stopMotor();
     flywheelMotor2.stopMotor();
   }
