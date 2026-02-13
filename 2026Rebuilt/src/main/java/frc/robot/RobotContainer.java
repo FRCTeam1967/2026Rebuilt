@@ -141,7 +141,7 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
         // hub alignment
-        joystick.leftTrigger().whileTrue(
+        joystick.rightTrigger().whileTrue(
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
@@ -158,10 +158,10 @@ public class RobotContainer {
         // );
 
         // tower alignment using TX
-        joystick.leftTrigger().whileTrue(new AlignTowerTX(drivetrain, vision, false, true));
+        //joystick.leftTrigger().whileTrue(new AlignTowerTX(drivetrain, vision, false, true));
 
         // tower alignment using pose
-        joystick.leftTrigger().whileTrue(new AlignTowerPose(drivetrain, vision));
+        joystick.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
 
 
         //do both

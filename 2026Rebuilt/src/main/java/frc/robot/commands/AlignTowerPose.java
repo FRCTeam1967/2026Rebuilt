@@ -4,105 +4,118 @@
 
 package frc.robot.commands;
 
-import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import choreo.auto.AutoChooser;
-import choreo.auto.AutoFactory;
-import choreo.auto.AutoRoutine;
-import choreo.auto.AutoTrajectory;
-import choreo.util.ChoreoAllianceFlipUtil;
-import edu.wpi.first.math.VecBuilder;
+import java.util.Optional;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.LimelightHelpers;
-import frc.robot.RobotContainer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.generated.TunerConstants;
 import dev.doglog.DogLog;
-//import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.*;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTowerPose extends Command {
   private final CommandSwerveDrivetrain drivetrain;
-  private final VisionUpdate vision;
+
   private SwerveRequest.ApplyRobotSpeeds request = new SwerveRequest.ApplyRobotSpeeds();
-  private final RobotContainer m_robotContainer = new RobotContainer();
+
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+      
+  Optional<Alliance> ally = DriverStation.getAlliance(); 
 
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private static final double kP_translational = 0.5;
+  private static final double kP_rotational = 0.5;
+  private Transform2d difference = new Transform2d();
+  private Pose2d towerPose;
 
-  private final AutoFactory autoFactory = new AutoFactory(
-      m_robotContainer.drivetrain::getPose, // A function that returns the current robot pose
-      m_robotContainer.drivetrain::resetPose, // A function that resets the current robot pose to the provided Pose2d
-      m_robotContainer.drivetrain::followTrajectory, // The drive subsystem trajectory follower 
-            true, // If alliance flipping should be enabled 
-      m_robotContainer.drivetrain // The drive subsystem
-  );
-
-  AutoRoutine routine = autoFactory.newRoutine("TowerDepot"); // TODO: change name depending on side?
-  AutoTrajectory tower_path = routine.trajectory("TowerDepot");
-  
-  public AlignTowerPose(CommandSwerveDrivetrain drivetrain, VisionUpdate vision) {
+  public AlignTowerPose(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
-    this.vision = vision;
+
+    addRequirements(drivetrain);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    if (ally.isPresent()) {
+        if (ally.get() == Alliance.Red) {
+            towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(0));
+            //DogLog.log("Tower Pose: ", towerPose);
+        }
+        if (ally.get() == Alliance.Blue) {
+            towerPose = new Pose2d(1.092, 4.61, new Rotation2d(Math.PI));
+            //DogLog.log("Tower Pose: ", towerPose);
+        }
+    }    
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d towerPose = tower_path.getFinalPose().get();
-    Pose2d drivetrainPose = m_robotContainer.drivetrain.getPose();
+    Pose2d drivetrainPose = drivetrain.getPose();
+    difference = towerPose.minus(drivetrainPose);
 
-    Transform2d difference = towerPose.minus(drivetrainPose);
+    if (ally.get() == Alliance.Red) {
+        DogLog.log("Pose difference: ", difference);
 
-    DogLog.log("Pose difference: ", difference);
+        double xVelocity = MathUtil.clamp(difference.getX() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("xVelocity: ", xVelocity);
 
-    drivetrain.applyRequest(() ->
-      drive.withVelocityX(difference.getX() * MaxSpeed) // Drive forward with negative Y (forward)
-         .withVelocityY(difference.getY() * MaxSpeed) // Drive left with negative X (left)
-         .withRotationalRate(difference.getRotation().getDegrees() * MaxAngularRate)
-    );
+        double yVelocity = MathUtil.clamp(difference.getY() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("yVelocity: ", yVelocity);
+
+        double rotationalVelocity = MathUtil.clamp(difference.getRotation().getRadians() * kP_rotational, -MaxAngularRate, MaxAngularRate);
+        DogLog.log("rotationalVelocity: ", rotationalVelocity);
+
+        ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
+        DogLog.log("alignmentSpeed: ", alignmentSpeed);
+
+        drivetrain.setControl(request.withSpeeds(alignmentSpeed));
+    }
+    else {
+        DogLog.log("Pose difference: ", difference);
+
+        double xVelocity = MathUtil.clamp(-difference.getX() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("xVelocity: ", xVelocity);
+
+        double yVelocity = MathUtil.clamp(-difference.getY() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("yVelocity: ", yVelocity);
+
+        double rotationalVelocity = MathUtil.clamp(-difference.getRotation().getRadians() * kP_rotational, -MaxAngularRate, MaxAngularRate);
+        DogLog.log("rotationalVelocity: ", rotationalVelocity);
+
+        ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
+        DogLog.log("alignmentSpeed: ", alignmentSpeed);
+
+        drivetrain.setControl(request.withSpeeds(alignmentSpeed));
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+      drivetrain.setControl(request.withSpeeds(new ChassisSpeeds()));
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+      return Math.abs(difference.getX()) < 0.05 &&
+             Math.abs(difference.getY()) < 0.05 &&
+             Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2);
   }
 }

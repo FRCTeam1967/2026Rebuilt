@@ -70,6 +70,8 @@ public class Robot extends TimedRobot {
     autoChooser.addRoutine("TowerDepot", this::TowerDepot);
     autoChooser.addRoutine("TowerOutpost", this::TowerOutpost);
     autoChooser.addRoutine("TowerWrong", this::TowerWrong);
+    autoChooser.addRoutine("TowerWronger", this::TowerWronger);
+
 
     matchTab.add("auto chooser lol", autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
     
@@ -251,12 +253,40 @@ public class Robot extends TimedRobot {
               //step four: run the path!
               test_path.cmd(),
               new WaitCommand(2.0),
-              new AlignTowerPose(m_robotContainer.drivetrain, m_robotContainer.vision)
+              new AlignTowerPose(m_robotContainer.drivetrain)
           )
       );
 
       //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
 
+      return routine;
+  }
+
+    private AutoRoutine TowerWronger() {
+      AutoRoutine routine = autoFactory.newRoutine("TowerWronger");
+      // Load the routine's trajectories
+      // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+      AutoTrajectory test_path = routine.trajectory("TowerWronger");
+
+      // When the routine begins, reset odometry and start the first trajectory (1)
+      routine.active().onTrue(
+          Commands.sequence(
+              //step one: set gyro to starting heading (flips for alliance)
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+
+              //step two: reset odometry to starting pose
+              test_path.resetOdometry(),
+
+              //step three: set LL heading to gyro (aka starting) heading
+              new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+                
+              //step four: run the path!
+              test_path.cmd(),
+              new AlignTowerPose(m_robotContainer.drivetrain)
+          )
+      );
+
+      //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
       return routine;
   }
 
