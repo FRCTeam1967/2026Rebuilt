@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.RobotController;
@@ -21,9 +22,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-
 import frc.robot.Constants;
 
 import static edu.wpi.first.units.Units.Volts;
@@ -34,32 +32,32 @@ public class FlywheelShooter extends SubsystemBase {
   private TalonFX flywheelMotor2;
 
 
-  private static final double kSimDt = 0.02;
-  private double simRotorPosRot = 0.0;
+  // private static final double kSimDt = 0.02;
+  // private double simRotorPosRot = 0.0;
 
 
-  private final DCMotorSim flywheelSim = new DCMotorSim(
-      LinearSystemId.createDCMotorSystem(
-          DCMotor.getKrakenX60Foc(1),
-          0.001,
-          Constants.FlywheelShooter.GEAR_RATIO
-      ),
-      DCMotor.getKrakenX60Foc(1)
-  );
-  private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
-  private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
+  // private final DCMotorSim flywheelSim = new DCMotorSim(
+  //     LinearSystemId.createDCMotorSystem(
+  //         DCMotor.getKrakenX60Foc(1),
+  //         0.001,
+  //         Constants.FlywheelShooter.GEAR_RATIO
+  //     ),
+  //     DCMotor.getKrakenX60Foc(1)
+  // );
+  // private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
+  // private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
 
-  // A "spoke" that rotates to show the flywheel spinning
-  private final MechanismLigament2d flywheelSpoke =
-      shooterRoot.append(new MechanismLigament2d(
-          "flywheelSpoke",
-          0.8,  // length
-          0.0,  // initial angle (deg)
-          6,    
-          new Color8Bit(Color.kOrange)
-      ));
+  // // A "spoke" that rotates to show the flywheel spinning
+  // private final MechanismLigament2d flywheelSpoke =
+  //     shooterRoot.append(new MechanismLigament2d(
+  //         "flywheelSpoke",
+  //         0.8,  // length
+  //         0.0,  // initial angle (deg)
+  //         6,    
+  //         new Color8Bit(Color.kOrange)
+  //     ));
 
-  private double spokeAngleDeg = 0.0;
+  // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
@@ -89,12 +87,9 @@ public class FlywheelShooter extends SubsystemBase {
     flywheelMotor1.getConfigurator().apply(talonFXConfigs);
     flywheelMotor2.getConfigurator().apply(talonFXConfigs);
 
-    SmartDashboard.putData("ShooterMech2d", shooterMech);
-  }
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-  public void setMotor(double speed) {
-    flywheelMotor1.set(speed);
-    flywheelMotor2.set(speed);
+    //SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
   public void setVelocity(double velocity) {
@@ -116,62 +111,62 @@ public class FlywheelShooter extends SubsystemBase {
   public void simulationPeriodic() {
 
     
-    if (RobotState.isDisabled()) {
-      stopMotor();
+    // if (RobotState.isDisabled()) {
+    //   stopMotor();
 
 
-      flywheelSim.setInputVoltage(0.0);
-      flywheelSim.update(kSimDt);
+    //   flywheelSim.setInputVoltage(0.0);
+    //   flywheelSim.update(kSimDt);
 
-      simRotorPosRot = 0.0;
+    //   simRotorPosRot = 0.0;
 
-      var sim1 = flywheelMotor1.getSimState();
-      var sim2 = flywheelMotor2.getSimState();
+    //   var sim1 = flywheelMotor1.getSimState();
+    //   var sim2 = flywheelMotor2.getSimState();
 
-      double batteryV = RobotController.getBatteryVoltage();
-      sim1.setSupplyVoltage(batteryV);
-      sim2.setSupplyVoltage(batteryV);
+    //   double batteryV = RobotController.getBatteryVoltage();
+    //   sim1.setSupplyVoltage(batteryV);
+    //   sim2.setSupplyVoltage(batteryV);
 
-      sim1.setRotorVelocity(0.0);
-      sim2.setRotorVelocity(0.0);
+    //   sim1.setRotorVelocity(0.0);
+    //   sim2.setRotorVelocity(0.0);
 
-      sim1.setRawRotorPosition(0.0);
-      sim2.setRawRotorPosition(0.0);
+    //   sim1.setRawRotorPosition(0.0);
+    //   sim2.setRawRotorPosition(0.0);
 
-      flywheelSpoke.setAngle(0.0);
-      SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
-      return;
-    }
+    //   flywheelSpoke.setAngle(0.0);
+    //   SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
+    //   return;
+    // }
 
-    var sim1 = flywheelMotor1.getSimState();
-    var sim2 = flywheelMotor2.getSimState();
+    // var sim1 = flywheelMotor1.getSimState();
+    // var sim2 = flywheelMotor2.getSimState();
 
-    double batteryV = RobotController.getBatteryVoltage();
-    sim1.setSupplyVoltage(batteryV);
-    sim2.setSupplyVoltage(batteryV);
+    // double batteryV = RobotController.getBatteryVoltage();
+    // sim1.setSupplyVoltage(batteryV);
+    // sim2.setSupplyVoltage(batteryV);
 
-    double motorVolts = sim1.getMotorVoltageMeasure().in(Volts);
+    // double motorVolts = sim1.getMotorVoltageMeasure().in(Volts);
 
-    flywheelSim.setInputVoltage(motorVolts);
-    flywheelSim.update(kSimDt);
+    // flywheelSim.setInputVoltage(motorVolts);
+    // flywheelSim.update(kSimDt);
 
-    double mechRps = flywheelSim.getAngularVelocityRadPerSec() / (2.0 * Math.PI);
-    double rotorRps = mechRps * Constants.FlywheelShooter.GEAR_RATIO;
+    // double mechRps = flywheelSim.getAngularVelocityRadPerSec() / (2.0 * Math.PI);
+    // double rotorRps = mechRps * Constants.FlywheelShooter.GEAR_RATIO;
 
-    simRotorPosRot += rotorRps * kSimDt;
+    // simRotorPosRot += rotorRps * kSimDt;
 
-    sim1.setRotorVelocity(rotorRps);
-    sim2.setRotorVelocity(rotorRps*3);
+    // sim1.setRotorVelocity(rotorRps);
+    // sim2.setRotorVelocity(rotorRps*3);
 
-    sim1.setRawRotorPosition(simRotorPosRot);
-    sim2.setRawRotorPosition(simRotorPosRot);
+    // sim1.setRawRotorPosition(simRotorPosRot);
+    // sim2.setRawRotorPosition(simRotorPosRot);
 
 
-    spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
-    flywheelSpoke.setAngle(spokeAngleDeg);
+    // spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
+    // flywheelSpoke.setAngle(spokeAngleDeg);
 
-    SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
-    SmartDashboard.putNumber("Flywheel/MotorVolts", motorVolts);
-    SmartDashboard.putNumber("Flywheel/SpokeAngleDeg", spokeAngleDeg);
+    // SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
+    // SmartDashboard.putNumber("Flywheel/MotorVolts", motorVolts);
+    // SmartDashboard.putNumber("Flywheel/SpokeAngleDeg", spokeAngleDeg);
   }
 }

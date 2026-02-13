@@ -3,15 +3,20 @@ package frc.robot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import frc.robot.commands.RunFlywheelShooter;
+import frc.robot.commands.RunHood;
+
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
 import frc.robot.subsystems.FlywheelShooter;
-import frc.robot.subsystems.Simulation3D;
+import frc.robot.subsystems.Hood;
+//import frc.robot.subsystems.Simulation3D;
 
 public class RobotContainer {
   private final FlywheelShooter flywheelShooter = new FlywheelShooter();
-  private final Simulation3D simulation = new Simulation3D(); // ✅ ensures logging code exists
+  private final Hood hood = new Hood();
 
   public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
@@ -24,37 +29,25 @@ public class RobotContainer {
     flywheelShooter.setDefaultCommand(
         new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
     );
+
+    hood.configDashboard(matchTab);
   }
 
   private void configureBindings() {
-    final double kTargetRotorRps = 50.0;
-
-    operatorController.leftTrigger()
-        .whileTrue(new RunCommand(() -> flywheelShooter.setVelocity(kTargetRotorRps), flywheelShooter))
-        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-
-    operatorController.rightTrigger(0.2)
-        .whileTrue(new RunCommand(() -> flywheelShooter.setMotor(0.40), flywheelShooter))
-        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-
+    //final double kTargetRotorRps = 50.0;
+    
     operatorController.a()
-        .whileTrue(new RunCommand(() -> flywheelShooter.setMotor(0.70), flywheelShooter))
-        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-
-    operatorController.b()
-        .whileTrue(new RunCommand(() -> flywheelShooter.setMotor(0.20), flywheelShooter))
-        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1)); //create new speed
 
     operatorController.x()
-        .onTrue(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+    .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
+    
+    operatorController.y()
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)); //speed change
 
-    operatorController.rightTrigger(0.05)
-        .whileTrue(new RunCommand(() -> {
-          double rt = operatorController.getRightTriggerAxis();
-          double targetRotorRps = rt * 80.0;
-          flywheelShooter.setVelocity(targetRotorRps);
-        }, flywheelShooter))
-        .onFalse(new InstantCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+    operatorController.b()
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED3)); //speed change
+
   }
 
   public Command getAutonomousCommand() {
