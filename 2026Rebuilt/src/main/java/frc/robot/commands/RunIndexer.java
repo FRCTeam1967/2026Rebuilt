@@ -8,12 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Indexer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class MovePivot extends Command {
+public class RunIndexer extends Command {
   public Indexer indexer;
   private double speed;
   
   /** Creates a new RunIndexer. */
-  public MovePivot(Indexer indexer, double speed) {
+  public RunIndexer(Indexer indexer, double speed) {
     this.indexer = indexer;
     this.speed = speed;
     addRequirements(indexer);

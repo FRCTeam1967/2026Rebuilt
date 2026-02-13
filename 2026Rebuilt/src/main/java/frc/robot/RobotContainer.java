@@ -5,16 +5,17 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.MovePivot;
+import frc.robot.commands.*;
 import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.Pivot;
+import frc.robot.subsystems.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,7 +26,9 @@ import frc.robot.subsystems.Pivot;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  final Pivot pivot = new Pivot();
+  Pivot pivot = new Pivot();
+  Intake intake = new Intake();
+  Indexer indexer = new Indexer();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -34,6 +37,8 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
   public final Joystick joystick = new Joystick(0);
+
+  public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -57,14 +62,17 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
+    //m_driverController.b().onTrue(m_exampleSubsystem.exampleMethodCommand());
+    m_operatorController.x().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+    m_operatorController.rightTrigger().whileTrue(new ParallelCommandGroup(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), new RunIndexer(indexer, 10.0)));
     m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
     m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
     //SIMULATION BUTTON BINDINGS
-    new JoystickButton(joystick, 1).onTrue(new MovePivot(pivot, 8));
-    new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
+    //new JoystickButton(joystick, 1).onTrue(new MovePivot(pivot, 8));
+    //new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
+
+    pivot.configDashboard(fieldTab);
     }
 
   /**

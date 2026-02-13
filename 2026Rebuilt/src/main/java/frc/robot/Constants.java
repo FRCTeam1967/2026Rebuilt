@@ -8,7 +8,7 @@ public class Constants {
     }
     public static class Pivot{
         public static final int MOTOR_ID = 10;
-        public static final int ENCODER_ID = 1000000000;
+        public static final int ENCODER_ID = 27;
 
         public static final double kS = 0.25;
         public static final double kV = 0.12;
