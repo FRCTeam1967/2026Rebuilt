@@ -34,6 +34,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LED;
 
 public class RobotContainer {
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -49,17 +50,27 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public LED ledSubsystem = Robot.ledSubsystem;
+    
+     public final AutoChooser autoChooserLOL = new AutoChooser();
+
+
+    public LED ledSubsystem = new LED();
     LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
     LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
     Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
-    //public static SendableChooser<Command> autoChooser; 
-    //public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+    public Autoes autoes;
+
+    public static ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+
+
     
-    public RobotContainer() {
+    public RobotContainer() {  
+        //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);   
+        autoes = new Autoes();
         configureBindings();
-        //matchTab.add(autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+        // Schedule the selected auto during the autonomous period
+        matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     }
     
     

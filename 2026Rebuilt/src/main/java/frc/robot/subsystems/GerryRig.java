@@ -14,7 +14,6 @@ public class GerryRig extends SubsystemBase {
   public GerryRig() {
     motor = new TalonFX(31);
 
-
   }
   public void runMotor(double speed){
     motor.set(speed);

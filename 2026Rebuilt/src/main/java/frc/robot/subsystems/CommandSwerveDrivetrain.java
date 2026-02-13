@@ -12,6 +12,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
+import choreo.Choreo.TrajectoryLogger;
+import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -259,6 +261,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Apply the generated speeds
         // driveFieldRelative(speeds);
     }
+
     @Override
     public void periodic() {
         /*
