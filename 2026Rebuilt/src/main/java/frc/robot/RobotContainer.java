@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.*;
+import frc.robot.subsystems.Pivot;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,6 +25,11 @@ import frc.robot.subsystems.*;
  */
 import frc.robot.subsystems.FlywheelShooter;
 import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Indexer;
+
+
 //import frc.robot.subsystems.Simulation3D;
 
 public class RobotContainer {
@@ -67,10 +72,13 @@ public class RobotContainer {
     
     //SHOOTER AND HOOD BUTTON BINDINGS
     m_operatorController.x()
-    .whileTrue(new ParallelCommandGroup(
-      new RunFlywheelShooter(flywheelShooter, feeder, indexer, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)
-      // new RunIndexer(indexer, 10.0).withTimeout(10)
-      )); //create new speed
+    .whileTrue(
+      new ParallelCommandGroup(
+        new RunFlywheelShooter(flywheelShooter, feeder, indexer, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2),
+        // new RunIndexer(indexer, 10.0).withTimeout(10)
+        new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)));
+        //create new speed
+      
 
     m_operatorController.y()
     .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));

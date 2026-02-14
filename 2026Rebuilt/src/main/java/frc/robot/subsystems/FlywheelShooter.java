@@ -115,7 +115,6 @@ public class FlywheelShooter extends SubsystemBase {
     double currentVelocity1 = flywheelMotor1.getRotorVelocity().getValueAsDouble();
     double currentVelocity2 = Math.abs(flywheelMotor2.getRotorVelocity().getValueAsDouble());
     double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
-
     return(averageVelocity);
 
   }

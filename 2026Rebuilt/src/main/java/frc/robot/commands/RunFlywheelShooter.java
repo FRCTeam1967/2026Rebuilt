@@ -41,8 +41,9 @@ public class RunFlywheelShooter extends Command {
 
   @Override
   public void execute() {
-    if (shooter.reachedShooterSpeed()) {
-      shooter.setVelocity(speed2, speed1);
+    shooter.setVelocity(speed2, speed1);
+    if (reachedShooterSpeed || shooter.reachedShooterSpeed()) {
+      reachedShooterSpeed = true;
       feeder.setMotor(Constants.Feeder.FEEDER_SPEED);
       indexer.setMotor(Constants.Indexer.INDEXER_SPEED);
     }
@@ -51,6 +52,8 @@ public class RunFlywheelShooter extends Command {
    @Override
   public void end(boolean interrupted) {
     shooter.stopMotor();
+    feeder.stopMotor();
+    indexer.stopMotor();
   }
 
  // Returns true when the command should end.
