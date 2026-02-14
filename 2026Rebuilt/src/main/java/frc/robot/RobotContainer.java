@@ -1,9 +1,14 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import frc.robot.commands.RunFlywheelShooter;
+import frc.robot.commands.RunHood;
+
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -23,6 +28,10 @@ import frc.robot.subsystems.*;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
+import frc.robot.subsystems.FlywheelShooter;
+import frc.robot.subsystems.Hood;
+//import frc.robot.subsystems.Simulation3D;
+
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -41,21 +50,41 @@ public class RobotContainer {
   public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  private final FlywheelShooter flywheelShooter = new FlywheelShooter();
+  private final Hood hood = new Hood();
+
+  public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+
+  private final CommandXboxController operatorController =
+      new CommandXboxController(Constants.Xbox.OPERATOR_CONTROLLER_PORT);
+
   public RobotContainer() {
-    // Configure the trigger bindings
     configureBindings();
+
+    flywheelShooter.setDefaultCommand(
+        new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
+    );
+
+    hood.configDashboard(matchTab);
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
+    //final double kTargetRotorRps = 50.0;
+    
+    operatorController.a()
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1)); //create new speed
+
+    operatorController.x()
+    .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
+    
+    operatorController.y()
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)); //speed change to 50
+
+    operatorController.b()
+    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED3)); //speed change to 60
+
+  }
+
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
@@ -81,7 +110,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return null;
   }
 }
+
+
+
+
