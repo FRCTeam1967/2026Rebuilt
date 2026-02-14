@@ -23,7 +23,7 @@ public class Hood extends SubsystemBase {
   private final TalonFX hoodMotor;
   private final CANcoder absEncoder;
 
-  private final CANBus canbus = new CANBus("Canivore");
+  private final CANBus canbus = new CANBus("CANivore");
 
   private double targetMotorRot = 0.0;
 

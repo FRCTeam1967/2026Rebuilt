@@ -53,11 +53,14 @@ public final class Constants {
     public static final double ACCELERATION = 200.0;   // placeholder
     public static final double JERK = 800.0;           // placeholder
 
-    public static final double FLYWHEEL_SHOOTER_SPEED1 = 40.0; //rotations per second
-    public static final double FLYWHEEL_SHOOTER_SPEED2 = 50.0;
+    public static final double FLYWHEEL_SHOOTER_SPEED1 = 1000.0; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_SPEED2 = -1000.0;
     public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
 
-    public static final double GEAR_RATIO = 1.5; 
+    public static final double SHOOTER_THRESHOLD_SPEED1 = 1000.0;
+    public static final double SHOOTER_THRESHOLD_SPEED2 = -1000.0;
+
+    public static final double GEAR_RATIO = 1.333; 
   }
 
     public static class Pivot{
@@ -92,11 +95,12 @@ public final class Constants {
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
+        public static final int INDEXER_SPEED = 10;
 
     }
 
     public static class Feeder{
-        public static final int FEEDER_MOTOR_ID = 13; //TODO: change this to actual ID
+        public static final int FEEDER_MOTOR_ID = 36; //TODO: change this to actual ID
         public static final double FEEDER_SPEED = -15.0;
     }
 

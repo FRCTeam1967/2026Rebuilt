@@ -5,18 +5,31 @@
 package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants;
 import frc.robot.subsystems.FlywheelShooter;
+import frc.robot.commands.RunIndexer;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Feeder;
 import java.util.function.DoubleSupplier;
+
 
 public class RunFlywheelShooter extends Command {
   /** Creates a new RunFlywheelShooter. */
 
   private final FlywheelShooter shooter;
-  private final double speed;
+  private final Feeder feeder;
+  private final Indexer indexer;
+  private final double speed1;
+  private final double speed2;
+
+  private boolean reachedShooterSpeed = false;
     
-  public RunFlywheelShooter(FlywheelShooter shooter, double speed) {
+  public RunFlywheelShooter(FlywheelShooter shooter, Feeder feeder, Indexer indexer, double speed1, double speed2) {
     this.shooter = shooter;
-    this.speed = speed;
+    this.feeder = feeder;
+    this.indexer = indexer;
+    this.speed1 = speed1;
+    this.speed2 = speed2;
 
     addRequirements(shooter);
   }
@@ -28,7 +41,11 @@ public class RunFlywheelShooter extends Command {
 
   @Override
   public void execute() {
-    shooter.setVelocity(speed);
+    if (shooter.reachedShooterSpeed()) {
+      shooter.setVelocity(speed2, speed1);
+      feeder.setMotor(Constants.Feeder.FEEDER_SPEED);
+      indexer.setMotor(Constants.Indexer.INDEXER_SPEED);
+    }
   }
   
    @Override

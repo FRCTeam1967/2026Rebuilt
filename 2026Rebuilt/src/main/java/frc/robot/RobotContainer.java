@@ -4,10 +4,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import frc.robot.commands.RunFlywheelShooter;
-import frc.robot.commands.RunHood;
-
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
@@ -71,7 +67,10 @@ public class RobotContainer {
     
     //SHOOTER AND HOOD BUTTON BINDINGS
     m_operatorController.x()
-    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1)); //create new speed
+    .whileTrue(new ParallelCommandGroup(
+      new RunFlywheelShooter(flywheelShooter, feeder, indexer, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)
+      // new RunIndexer(indexer, 10.0).withTimeout(10)
+      )); //create new speed
 
     m_operatorController.y()
     .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
@@ -83,7 +82,7 @@ public class RobotContainer {
       new ParallelCommandGroup(
         new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
         new RunIndexer(indexer, 10.0),
-        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)));
+        new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
 
     m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
 

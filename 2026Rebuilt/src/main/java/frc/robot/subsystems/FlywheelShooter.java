@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -33,7 +34,9 @@ public class FlywheelShooter extends SubsystemBase {
   private TalonFX flywheelMotor1;
   private TalonFX flywheelMotor2;
 
-  private final CANBus canbus = new CANBus("Canivore");
+  private final CANBus canbus = new CANBus("CANivore");
+
+  private boolean reachedShooterSpeed = false;
 
 
   // private static final double kSimDt = 0.02;
@@ -96,10 +99,25 @@ public class FlywheelShooter extends SubsystemBase {
     //SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
-  public void setVelocity(double velocity) { //set the velocity of the shooter
-    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(velocity);
-    flywheelMotor1.setControl(request);
-    flywheelMotor2.setControl(request);
+  public void setVelocity(double velocity1, double velocity2) { //set the velocity of the shooter
+    MotionMagicVelocityVoltage request1 = new MotionMagicVelocityVoltage(velocity1);
+    MotionMagicVelocityVoltage request2 = new MotionMagicVelocityVoltage(velocity2);
+    flywheelMotor1.setControl(request1);
+    flywheelMotor2.setControl(request2);
+  }
+
+  public boolean reachedShooterSpeed() { //checks if the shooter has reached the target speed
+    return (getAverageVelocity() >= Constants.FlywheelShooter.SHOOTER_THRESHOLD_SPEED1);
+  }
+
+  public double getAverageVelocity() { //checks if the shooter has reached the target speed
+  
+    double currentVelocity1 = flywheelMotor1.getRotorVelocity().getValueAsDouble();
+    double currentVelocity2 = Math.abs(flywheelMotor2.getRotorVelocity().getValueAsDouble());
+    double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
+
+    return(averageVelocity);
+
   }
 
   public void stopMotor() { //stops the hood motor (obviously : ))
