@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Optional;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
@@ -65,7 +67,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    SignalLogger.stop();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -83,6 +87,7 @@ public class Robot extends TimedRobot {
     //   //autoChooser.selectedCommandScheduler();
     //   m_autonomousCommand.schedule();
     // }
+    SignalLogger.start();
   }
 
   @Override
@@ -96,6 +101,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    SignalLogger.start();
   }
 
   @Override
