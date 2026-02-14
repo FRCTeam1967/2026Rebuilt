@@ -11,7 +11,6 @@ import frc.robot.commands.RunHood;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
-import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -34,10 +33,11 @@ import frc.robot.subsystems.Hood;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  Pivot pivot = new Pivot();
-  Intake intake = new Intake();
-  Indexer indexer = new Indexer();
+  public final Pivot pivot = new Pivot();
+  public final Intake intake = new Intake();
+  public final Indexer indexer = new Indexer();
+  public final Feeder feeder = new Feeder();
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -45,7 +45,7 @@ public class RobotContainer {
   private final CommandXboxController m_operatorController =
       new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
-  public final Joystick joystick = new Joystick(0);
+  //public final Joystick joystick = new Joystick(0);
 
   public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
 
@@ -55,9 +55,6 @@ public class RobotContainer {
 
   public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
-  private final CommandXboxController operatorController =
-      new CommandXboxController(Constants.Xbox.OPERATOR_CONTROLLER_PORT);
-
   public RobotContainer() {
     configureBindings();
 
@@ -66,43 +63,37 @@ public class RobotContainer {
     );
 
     hood.configDashboard(matchTab);
+    pivot.configDashboard(fieldTab);
   }
 
   private void configureBindings() {
     //final double kTargetRotorRps = 50.0;
     
-    operatorController.a()
+    //SHOOTER AND HOOD BUTTON BINDINGS
+    m_operatorController.x()
     .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1)); //create new speed
 
-    operatorController.x()
+    m_operatorController.y()
     .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
     
-    operatorController.y()
-    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2)); //speed change to 50
+    //INTAKE AND INDEXER BUTTON BINDINGS
+    m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
 
-    operatorController.b()
-    .whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED3)); //speed change to 60
+    m_operatorController.rightTrigger().whileTrue(
+      new ParallelCommandGroup(
+        new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(indexer, 10.0),
+        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)));
 
-  }
-
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_driverController.b().onTrue(m_exampleSubsystem.exampleMethodCommand());
-    m_operatorController.x().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
-    m_operatorController.rightTrigger().whileTrue(new ParallelCommandGroup(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), new RunIndexer(indexer, 10.0)));
     m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+
     m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
     //SIMULATION BUTTON BINDINGS
     //new JoystickButton(joystick, 1).onTrue(new MovePivot(pivot, 8));
     //new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
 
-    pivot.configDashboard(fieldTab);
-    }
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

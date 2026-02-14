@@ -7,9 +7,10 @@ import edu.wpi.first.math.util.Units;
 
 public final class Constants {
 
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
-  }
+    public static class OperatorConstants{
+        public static final int kDriverControllerPort = 0;
+        public static final int kOperatorControllerPort = 1;
+    }
 
   public static class Hood {
     public static final int HOOD_MOTOR_ID = 19;        
@@ -59,15 +60,6 @@ public final class Constants {
     public static final double GEAR_RATIO = 1.5; 
   }
 
-  public static class Xbox {
-    public static final int OPERATOR_CONTROLLER_PORT = 0; // change later
-  }
-public class Constants {
-
-    public static class OperatorConstants{
-        public static final int kDriverControllerPort = 0;
-        public static final int kOperatorControllerPort = 1;
-    }
     public static class Pivot{
         public static final int MOTOR_ID = 10;
         public static final int ENCODER_ID = 27;
@@ -101,6 +93,11 @@ public class Constants {
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
 
+    }
+
+    public static class Feeder{
+        public static final int FEEDER_MOTOR_ID = 13; //TODO: change this to actual ID
+        public static final double FEEDER_SPEED = -15.0;
     }
 
 
