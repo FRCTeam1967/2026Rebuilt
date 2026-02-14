@@ -10,8 +10,6 @@ import frc.robot.commands.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -81,7 +79,10 @@ public class RobotContainer {
       
 
     m_operatorController.y()
-    .onTrue(new RunHood(hood, Constants.Hood.HOOD_TEST_SHOT, Constants.Hood.HOOD_TOLERANCE_DEG));
+    .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));
+    
+    m_operatorController.rightBumper()
+    .onTrue(new RunHood(hood, 0, Constants.Hood.HOOD_TOLERANCE_DEG));
     
     //INTAKE AND INDEXER BUTTON BINDINGS
     m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
@@ -101,6 +102,10 @@ public class RobotContainer {
     //new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
 
   }
+
+  //  public void maintainHood() { 
+  //    hood.setRelToAbs();
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

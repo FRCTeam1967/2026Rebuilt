@@ -16,14 +16,14 @@ public final class Constants {
     public static final int HOOD_MOTOR_ID = 19;        
     public static final int HOOD_CANCODER_ID = 21;     
 
-    public static final double CRUISE_VELOCITY = 1.0;  // placeholder
-    public static final double ACCELERATION = 2.0;     // placeholder
-    public static final double JERK = 10.0;            // placeholder
+    public static final double CRUISE_VELOCITY = 500;  // placeholder
+    public static final double ACCELERATION = 300;     // placeholder
+    public static final double JERK = 300;            // placeholder
 
-    public static final double kP = 0.5;  // placeholder
+    public static final double kP = 5;  // placeholder
     public static final double kI = 0.0;  // placeholder
     public static final double kD = 0.0;  // placeholder
-    public static final double kS = 0.0;  // placeholder
+    public static final double kS = 15;  // placeholder
     public static final double kV = 0.0;  // placeholder
     public static final double kA = 0.0;  // placeholder
 
@@ -33,8 +33,11 @@ public final class Constants {
     public static final double MAX_DEG = 86.0;
 
     public static final double HOOD_HOLD_DEG = 30.0;
-    public static final double HOOD_TEST_SHOT = 35.0; //use this for testing
-    public static final double HOOD_TOLERANCE_DEG = 2.0;
+    public static final double HOOD_MAX = 0.70; //use this for testing
+    public static final double HOOD_TOLERANCE_DEG = 0.01;
+
+    public static final double OFFSET = -108.45703125;
+    public static final double PERCENT_UP = 50/100;
 
   }
 

@@ -30,6 +30,7 @@ public class Hood extends SubsystemBase {
   public Hood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
     absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
+    CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -44,6 +45,8 @@ public class Hood extends SubsystemBase {
     talonFXConfigs.MotionMagic.MotionMagicAcceleration = Constants.Hood.ACCELERATION;
     talonFXConfigs.MotionMagic.MotionMagicJerk = Constants.Hood.JERK;
 
+    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Hood.OFFSET;
+
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
@@ -51,17 +54,18 @@ public class Hood extends SubsystemBase {
     hoodMotor.getConfigurator().apply(talonFXConfigs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    var ccdConfigs = new CANcoderConfiguration();
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0.337646484375;
     absEncoder.getConfigurator().apply(ccdConfigs);
 
-    moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
+    // moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
+    setZero();
+    //stop();
   }
 
-  private static double clampDeg(double deg) { //putting mech limits for max and min degrees 
-    return Math.max(Constants.Hood.MIN_DEG, Math.min(Constants.Hood.MAX_DEG, deg));
-  }
+  // private static double clampDeg(double deg) { //putting mech limits for max and min degrees 
+  //   return Math.max(Constants.Hood.MIN_DEG, Math.min(Constants.Hood.MAX_DEG, deg));
+  // }
 
   public static double motorRotToDeg(double motorRot) { //converts motor rotations to degrees
     return (motorRot / Constants.Hood.GEAR_RATIO) * 360.0;
@@ -74,16 +78,14 @@ public class Hood extends SubsystemBase {
   public void stop() { //stop motor (obviously :) )
     hoodMotor.stopMotor();
   }
-
-  public void moveToDeg(double degrees) { //goes to target degrees
-    double clamped = clampDeg(degrees);
-    targetMotorRot = degToMotorRot(clamped);
-    hoodMotor.setControl(new MotionMagicVoltage(targetMotorRot).withFeedForward(0.0));
+  public void setZero() {
+    hoodMotor.setPosition(0);
   }
 
-  // public void maintainPosition() { //safety angle holding position
-  //   moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
-  // }
+  public void moveToDeg(double rotations) { //goes to target degrees
+    // double clamped = clampDeg(degrees);;
+    hoodMotor.setControl(new MotionMagicVoltage(rotations).withFeedForward(10));
+  }
 
   public double getHoodDeg() { //gets hood's angle in degrees 
     double motorRot = hoodMotor.getRotorPosition().getValueAsDouble();
@@ -103,9 +105,13 @@ public class Hood extends SubsystemBase {
     return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
   }
 
+  public void setRelToAbs(){
+    hoodMotor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
+  }
+
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addDouble("Hood Position (deg)", () -> getHoodDeg());
-    tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
+    tab.addDouble("Hood Position (deg)", () -> hoodMotor.getRotorPosition().getValueAsDouble());
+    // tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
     tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
     tab.addBoolean("Hood at Target?", () -> isReached());
     tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
