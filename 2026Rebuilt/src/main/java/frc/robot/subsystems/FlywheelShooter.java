@@ -96,6 +96,7 @@ public class FlywheelShooter extends SubsystemBase {
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
+    reachedShooterSpeed = false;
     //SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
