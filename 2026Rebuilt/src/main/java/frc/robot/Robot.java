@@ -54,7 +54,11 @@ public class Robot extends TimedRobot {
     //private Command exampleAutoCommand() {
         // ...
    // }
-
+  @Override
+  public void robotInit() {
+    m_robotContainer = new RobotContainer();
+  }
+  
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 

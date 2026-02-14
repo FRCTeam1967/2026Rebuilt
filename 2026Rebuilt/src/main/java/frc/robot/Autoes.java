@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
+import com.ctre.phoenix6.signals.UpdateModeValue;
 
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
@@ -27,7 +28,7 @@ import frc.robot.subsystems.GerryRig;
 
 /** Add your docs here. */
 public class Autoes {
-    //private final AutoChooser autoChooserLOL = new AutoChooser();
+    private final AutoChooser autoChooserLOL = new AutoChooser();
     private Command m_autonomousCommand; //AutoRoutine
     private final AutoFactory autoFactory;
     private final int disSensorID = 0;
@@ -37,12 +38,18 @@ public class Autoes {
     // Write these configs to the CANrange
 
 
-    public Autoes(){
-    m_robotContainer = Robot.m_robotContainer;
+    public Autoes(RobotContainer container){
+    m_robotContainer = container;
     var drive = m_robotContainer.drivetrain;
 
-    CANrangeConfiguration configs = new CANrangeConfiguration(); 
-    disSensor.getConfigurator().apply(configs);
+    CANrangeConfiguration config = new CANrangeConfiguration();
+
+    config.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // If CANrange has a signal strength of at least 2000, it is a valid measurement.
+    config.ProximityParams.ProximityThreshold = 0.1; // If CANrange detects an object within 0.1 meters, it will trigger the "isDetected" signal.
+
+    config.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz; // Make the CANrange update as fast as possible at 100 Hz. This requires short-range mode.
+
+    disSensor.getConfigurator().apply(config);
 
     autoFactory = new AutoFactory(
             drive::getPose, // A function that returns the current robot pose
@@ -55,15 +62,16 @@ public class Autoes {
     // Add options to the chooser
     
     //m_robotContainer.autoChooserLOL.addRoutine("Test Path", this::test);
-    //autoChooser.addRoutine("Test Conditional", this::testConditional);
-    //m_robotContainer.autoChooserLOL.addRoutine("HTW", this::htw);
+    //autoChooserLOL.addRoutine("Test Conditional", this::testConditional);
+    autoChooserLOL.addRoutine("HTW", this::htw);
     //m_robotContainer.autoChooserLOL.addRoutine("OTN", this::otn);
-    //m_robotContainer.autoChooserLOL.addRoutine("disSensorTest", this::disSensorTest);
-    RobotModeTriggers.autonomous().whileTrue(m_robotContainer.autoChooserLOL.selectedCommandScheduler());
+    //autoChooserLOL.addRoutine("disSensorTest", this::disSensorTest);
+    RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
     }
 
     public void configDashboard(ShuffleboardTab tab) {
-        tab.add("auto chooser lol", m_robotContainer.autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+        tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+        tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
     }
 
     private AutoRoutine test() {
@@ -105,6 +113,17 @@ public class Autoes {
     return routine;
   }
 
+  /**
+   * @return true if the motor is running
+   */
+  public double getDisSensor() {
+    return disSensor.getDistance().refresh().getValueAsDouble();
+  }
+
+  public GerryRig getGerryRig() {
+    return m_gerryRig;
+  }
+
 
   private AutoRoutine otctw() {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
@@ -132,11 +151,30 @@ public class Autoes {
     shootClimb.atPose("Marker", 0.0,0.0);//keep shooting after you reach event marker name Marker
     return routine;
   }
-  private AutoRoutine disSensorTest(){
-    AutoRoutine disSensorTest = autoFactory.newRoutine("Distance Sensor Test");
-    if (disSensor.getDistance().getValueAsDouble() <= 6){
-       m_gerryRig.runMotor(0.5);
-    }
-    return disSensorTest;
-  }
+  private AutoRoutine otc2x(){
+    AutoRoutine routine = autoFactory.newRoutine("OTC 2 Cycle");
+    AutoTrajectory otc2x = routine.trajectory("OT_C_2");
+    routine.active().onTrue(
+      Commands.sequence(
+        otc2x.resetOdometry(),
+        otc2x.cmd()
+      )
+    );
+    return routine;
+    
+    } 
+  // private AutoRoutine disSensorTest(){
+  //   AutoRoutine disSensorTest = autoFactory.newRoutine("Distance Sensor Test");
+
+  //   while (getDisSensor() >= 0.15) {
+  //     Commands.sequence(
+  //       new RunCommand(()-> m_gerryRig.runMotor(0.3)).withTimeout(5.0)
+  //     );
+  //   }
+
+  //   Commands.sequence(
+  //       new RunCommand(()-> m_gerryRig.stopMotor())
+  //   );
+  //   return disSensorTest;
+  // }
 }

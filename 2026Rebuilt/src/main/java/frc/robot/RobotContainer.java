@@ -26,11 +26,14 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.GerryRig;
 import frc.robot.subsystems.LED;
 
 public class RobotContainer {
@@ -50,9 +53,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final GerryRig gerryRig;
     
-     public final AutoChooser autoChooserLOL = new AutoChooser();
-
 
     public LED ledSubsystem = new LED();
     LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
@@ -61,16 +63,17 @@ public class RobotContainer {
 
     public Autoes autoes;
 
-    public static ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+    public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
-
-    
     public RobotContainer() {  
         //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);   
-        autoes = new Autoes();
+        autoes = new Autoes(this);
+        gerryRig = autoes.getGerryRig();
         configureBindings();
+        autoes.configDashboard(matchTab);
+        
         // Schedule the selected auto during the autonomous period
-        matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+        // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     }
     
     
@@ -101,14 +104,18 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
-        joystick.x().whileTrue(ledSubsystem.runPattern(blinking));
+        joystick.x().whileTrue(
+            new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
+                new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
+                () -> autoes.getDisSensor() <= 0.15)
+        );
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        joystick.povDown().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        joystick.povDown().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        joystick.povUp().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        joystick.povUp().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
