@@ -17,19 +17,13 @@ public class RunFlywheelShooter extends Command {
   /** Creates a new RunFlywheelShooter. */
 
   private final FlywheelShooter shooter;
-  private final Feeder feeder;
-  private final Indexer indexer;
-  private final double speed1;
-  private final double speed2;
-
-  private boolean reachedShooterSpeed = false;
+  private final double speed;
+  private final double acceleration;
     
-  public RunFlywheelShooter(FlywheelShooter shooter, Feeder feeder, Indexer indexer, double speed1, double speed2) {
+  public RunFlywheelShooter(FlywheelShooter shooter, double speed, double acceleration) {
     this.shooter = shooter;
-    this.feeder = feeder;
-    this.indexer = indexer;
-    this.speed1 = speed1;
-    this.speed2 = speed2;
+    this.speed = speed;
+    this.acceleration = acceleration;
 
     addRequirements(shooter);
   }
@@ -41,19 +35,12 @@ public class RunFlywheelShooter extends Command {
 
   @Override
   public void execute() {
-    shooter.setVelocity(speed2, speed1);
-    if (reachedShooterSpeed || shooter.reachedShooterSpeed()) {
-      reachedShooterSpeed = true;
-      feeder.setMotor(Constants.Feeder.FEEDER_SPEED);
-      indexer.setMotor(Constants.Indexer.INDEXER_SPEED);
-    }
+    shooter.setVelocity(speed, acceleration);
   }
   
    @Override
   public void end(boolean interrupted) {
     shooter.stopMotor();
-    feeder.stopMotor();
-    indexer.stopMotor();
   }
 
  // Returns true when the command should end.

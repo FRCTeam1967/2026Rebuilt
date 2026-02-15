@@ -52,15 +52,17 @@ public final class Constants {
     public static final double kV = 0.0; // placeholder
     public static final double kA = 0.0; // placeholder
 
-    public static final double CRUISE_VELOCITY = 50.0; // placeholder
-    public static final double ACCELERATION = 200.0;   // placeholder
+    public static final double CRUISE_VELOCITY = 100.0; // placeholder
+    public static final double ACCELERATION = 300.0;   // placeholder
     public static final double JERK = 800.0;           // placeholder
 
-    public static final double FLYWHEEL_SHOOTER_SPEED1 = -1000.0; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_SPEED = 100.0; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 100.0;
+
     public static final double FLYWHEEL_SHOOTER_SPEED2 = 1000.0;
     public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
 
-    public static final double SHOOTER_THRESHOLD_SPEED1 = 95.0;
+    public static final double SHOOTER_THRESHOLD_SPEED1 = 0.7 * Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
     public static final double SHOOTER_THRESHOLD_SPEED2 = -70.0;
 
     public static final double GEAR_RATIO = 1.333; 
@@ -104,7 +106,7 @@ public final class Constants {
 
     public static class Feeder{
         public static final int FEEDER_MOTOR_ID = 36; //TODO: change this to actual ID
-        public static final double FEEDER_SPEED = -15.0;
+        public static final double FEEDER_SPEED = -10.0;
     }
 
 

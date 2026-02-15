@@ -72,11 +72,21 @@ public class RobotContainer {
     m_operatorController.x()
     .whileTrue(
       new ParallelCommandGroup(
-        new RunFlywheelShooter(flywheelShooter, feeder, indexer, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED1, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED2),
-        // new RunIndexer(indexer, 10.0).withTimeout(10)
-        new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)));
-        //create new speed
-      
+        // new ParallelCommandGroup(
+        //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+        // ),
+
+        new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        
+        new SequentialCommandGroup(
+          new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+          new ParallelCommandGroup(
+            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)) 
+        )
+      )
+    );      
 
     m_operatorController.y()
     .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));

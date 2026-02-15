@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -16,6 +17,7 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -100,11 +102,17 @@ public class FlywheelShooter extends SubsystemBase {
     //SmartDashboard.putData("ShooterMech2d", shooterMech);
   }
 
-  public void setVelocity(double velocity1, double velocity2) { //set the velocity of the shooter
-    MotionMagicVelocityVoltage request1 = new MotionMagicVelocityVoltage(velocity1);
-    MotionMagicVelocityVoltage request2 = new MotionMagicVelocityVoltage(velocity2);
-    flywheelMotor1.setControl(request1);
-    flywheelMotor2.setControl(request2);
+  public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
+    MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(velocity)
+      .withAcceleration(acceleration);
+      //.withFeedForward(5.0);
+
+    MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
+      .withAcceleration(acceleration);
+      //.withFeedForward(5.0);
+
+    flywheelMotor1.setControl(requestOne);
+    flywheelMotor2.setControl(requestTwo);
   }
 
   public boolean reachedShooterSpeed() { //checks if the shooter has reached the target speed
@@ -113,8 +121,8 @@ public class FlywheelShooter extends SubsystemBase {
 
   public double getAverageVelocity() { //checks if the shooter has reached the target speed
   
-    double currentVelocity1 = flywheelMotor1.getRotorVelocity().getValueAsDouble();
-    double currentVelocity2 = Math.abs(flywheelMotor2.getRotorVelocity().getValueAsDouble());
+    double currentVelocity1 = flywheelMotor1.getVelocity().getValueAsDouble();
+    double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
     double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
     return(averageVelocity);
 
@@ -123,6 +131,15 @@ public class FlywheelShooter extends SubsystemBase {
   public void stopMotor() { //stops the hood motor (obviously : ))
     flywheelMotor1.stopMotor();
     flywheelMotor2.stopMotor();
+  }
+
+  public double getMotorVelocity(TalonFX motor) { //stops the hood motor (obviously : ))
+    return (motor.getVelocity().getValueAsDouble());
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addDouble("Flywheel Left Speed", () -> getMotorVelocity(flywheelMotor1));
+    tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
   }
 
   @Override
