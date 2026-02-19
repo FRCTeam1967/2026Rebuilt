@@ -20,21 +20,22 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.RunFeeder;
+import frc.robot.commands.RunFlywheelShooter;
+import frc.robot.commands.RunIndexer;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.GerryRig;
-
 
 /** Add your docs here. */
 public class Autoes {
     private final AutoChooser autoChooserLOL = new AutoChooser();
     private Command m_autonomousCommand; //AutoRoutine
     private final AutoFactory autoFactory;
-    private final int disSensorID = 0;
-    private final GerryRig m_gerryRig = new GerryRig(); 
+    //private final int disSensorID = 0;
     private final RobotContainer m_robotContainer; 
-    private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
+    //private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
     // Write these configs to the CANrange
 
 
@@ -49,7 +50,7 @@ public class Autoes {
 
     config.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz; // Make the CANrange update as fast as possible at 100 Hz. This requires short-range mode.
 
-    disSensor.getConfigurator().apply(config);
+    //disSensor.getConfigurator().apply(config);
 
     autoFactory = new AutoFactory(
             drive::getPose, // A function that returns the current robot pose
@@ -71,7 +72,7 @@ public class Autoes {
 
     public void configDashboard(ShuffleboardTab tab) {
         tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-        tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
+        // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
     }
 
     private AutoRoutine test() {
@@ -85,7 +86,7 @@ public class Autoes {
     ));
     return routine;
   }
-
+  
   private AutoRoutine otn() {
     AutoRoutine routine = autoFactory.newRoutine("OT_N");
     
@@ -105,10 +106,19 @@ public class Autoes {
     routine.active().onTrue(
         Commands.sequence(
             hubtowershoot.resetOdometry(),
+            Commands.parallel(
+              new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+              Commands.sequence(
+                new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+                Commands.parallel(
+                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                  new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+                )
+              )
+            ),
             hubtowershoot.cmd()
-            
         )
-    );    
+    );
 
     return routine;
   }
@@ -116,13 +126,9 @@ public class Autoes {
   /**
    * @return true if the motor is running
    */
-  public double getDisSensor() {
-    return disSensor.getDistance().refresh().getValueAsDouble();
-  }
-
-  public GerryRig getGerryRig() {
-    return m_gerryRig;
-  }
+  // public double getDisSensor() {
+  //   return disSensor.getDistance().refresh().getValueAsDouble();
+  // }
 
 
   private AutoRoutine otctw() {
@@ -141,10 +147,10 @@ public class Autoes {
       );    
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
-    Trigger doneGo = goToFuel.done();
-    doneGo.and(()-> disSensor.getDistance().getValueAsDouble() >=27).onTrue(fuel.cmd());//if true then intake 
-    //  //write intake for fuel traj if true 
-    doneGo.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
+    // Trigger doneGo = goToFuel.done();
+    // doneGo.and(()-> disSensor.getDistance().getValueAsDouble() >=27).onTrue(fuel.cmd());//if true then intake 
+    // //  //write intake for fuel traj if true 
+    // doneGo.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
     
         //write shoot for shootClimb
     fuel.done().onTrue(shootClimb.cmd());
