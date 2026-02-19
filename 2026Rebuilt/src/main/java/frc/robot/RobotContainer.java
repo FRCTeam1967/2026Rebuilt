@@ -1,132 +1,196 @@
 package frc.robot;
 
+
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.GerryRig;
+import frc.robot.subsystems.LED;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Pivot;
-
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
 import frc.robot.subsystems.FlywheelShooter;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Indexer;
 
-
-//import frc.robot.subsystems.Simulation3D;
-
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  public final Pivot pivot = new Pivot();
-  public final Intake intake = new Intake();
-  public final Indexer indexer = new Indexer();
-  public final Feeder feeder = new Feeder();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-  private final CommandXboxController m_operatorController =
-      new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+    /* Setting up bindings for necessary control of the swerve drive platform */
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-  //public final Joystick joystick = new Joystick(0);
+    private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
+    private final CommandXboxController joystick = new CommandXboxController(0);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  private final FlywheelShooter flywheelShooter = new FlywheelShooter();
-  private final Hood hood = new Hood();
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final GerryRig gerryRig;
+    
 
-  public ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+    public LED ledSubsystem = new LED();
+    LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
+    LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
+    Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
-  public RobotContainer() {
-    configureBindings();
+    public Autoes autoes;
+    public final Pivot pivot = new Pivot();
+    public final Intake intake = new Intake();
+    public final Indexer indexer = new Indexer();
+    public final Feeder feeder = new Feeder();
 
-    flywheelShooter.setDefaultCommand(
+
+    public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
+    private final FlywheelShooter flywheelShooter = new FlywheelShooter();
+    private final Hood hood = new Hood();  
+    public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+
+    public RobotContainer() {  
+        //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);   
+        autoes = new Autoes(this);
+        gerryRig = autoes.getGerryRig();
+        configureBindings();
+        autoes.configDashboard(matchTab);
+        hood.configDashboard(matchTab);
+        pivot.configDashboard(fieldTab);
+      
+      flywheelShooter.setDefaultCommand(
         new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
-    );
+      );
 
-    hood.configDashboard(matchTab);
-    pivot.configDashboard(fieldTab);
-  }
-
-  private void configureBindings() {
-    //final double kTargetRotorRps = 50.0;
-    
-    //SHOOTER AND HOOD BUTTON BINDINGS
-    m_operatorController.x()
-    .whileTrue(
-      new ParallelCommandGroup(
-        // new ParallelCommandGroup(
-        //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-        //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-        // ),
-
-        new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+   
         
-        new SequentialCommandGroup(
-          new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
-          new ParallelCommandGroup(
-            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)) 
+        // Schedule the selected auto during the autonomous period
+        // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+    }
+    
+    
+    private void configureBindings() {
+        // Note that X is defined as forward according to WPILib convention,
+        // and Y is defined as to the left according to WPILib convention.
+        drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() ->
+                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
+
+        // Idle while the robot is disabled. This ensures the configured
+        // neutral mode is applied to the drive motors while disabled.
+        final var idle = new SwerveRequest.Idle();
+        RobotModeTriggers.disabled().whileTrue(
+            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
+        );
+        //reset gyro
+        joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        drivetrain.registerTelemetry(logger::telemeterize);
+
+        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        joystick.b().whileTrue(drivetrain.applyRequest(() ->
+            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        ));
+
+        joystick.x().whileTrue(
+            new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
+                new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
+                () -> autoes.getDisSensor() <= 0.15)
+        );
+
+        // Run SysId routines when holding back/start and X/Y.
+        // Note that each routine should be run exactly once in a single log.
+        joystick.povDown().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        joystick.povDown().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        joystick.povUp().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        joystick.povUp().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+        // reset the field-centric heading on left bumper press
+        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        drivetrain.registerTelemetry(logger::telemeterize);
+      //SHOOTER AND HOOD BUTTON BINDINGS
+      m_operatorController.x()
+      .whileTrue(
+        new ParallelCommandGroup(
+          // new ParallelCommandGroup(
+          //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+          //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+          // ),
+
+          new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+
+          new SequentialCommandGroup(
+            new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+            new ParallelCommandGroup(
+              new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)) 
+          )
         )
-      )
-    );      
+      );
+       m_operatorController.y()
+      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));
 
-    m_operatorController.y()
-    .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));
-    
-    m_operatorController.rightBumper()
-    .onTrue(new RunHood(hood, 0, Constants.Hood.HOOD_TOLERANCE_DEG));
-    
-    //INTAKE AND INDEXER BUTTON BINDINGS
-    m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+      m_operatorController.rightBumper()
+      .onTrue(new RunHood(hood, 0, Constants.Hood.HOOD_TOLERANCE_DEG));
 
-    m_operatorController.rightTrigger().whileTrue(
-      new ParallelCommandGroup(
-        new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(indexer, 10.0),
-        new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
+      //INTAKE AND INDEXER BUTTON BINDINGS
+      m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
 
-    m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+      m_operatorController.rightTrigger().whileTrue(
+        new ParallelCommandGroup(
+          new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+          new RunIndexer(indexer, 10.0),
+          new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
 
-    m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+      m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
 
-    //SIMULATION BUTTON BINDINGS
-    //new JoystickButton(joystick, 1).onTrue(new MovePivot(pivot, 8));
-    //new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
+      m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
-  }
+    }
 
-  //  public void maintainHood() { 
-  //    hood.setRelToAbs();
-  // }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return null;
-  }
+    public Command getAutonomousCommand() {
+        return Commands.print("No autonomous command configured");
+    }
 }
-
-
-
-
