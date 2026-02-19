@@ -1,19 +1,113 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
-/**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
- *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
- */
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+
+    public static class OperatorConstants{
+        public static final int kDriverControllerPort = 0;
+        public static final int kOperatorControllerPort = 1;
+    }
+
+  public static class Hood {
+    public static final int HOOD_MOTOR_ID = 19;        
+    public static final int HOOD_CANCODER_ID = 21;     
+
+    public static final double CRUISE_VELOCITY = 500;  // placeholder
+    public static final double ACCELERATION = 300;     // placeholder
+    public static final double JERK = 300;            // placeholder
+
+    public static final double kP = 5;  // placeholder
+    public static final double kI = 0.0;  // placeholder
+    public static final double kD = 0.0;  // placeholder
+    public static final double kS = 15;  // placeholder
+    public static final double kV = 0.0;  // placeholder
+    public static final double kA = 0.0;  // placeholder
+
+    public static final double GEAR_RATIO = 0.0875;      // motor_rot / hood_rot
+
+    public static final double MIN_DEG = 30.0;
+    public static final double MAX_DEG = 86.0;
+
+    public static final double HOOD_HOLD_DEG = 30.0;
+    public static final double HOOD_MAX = 0.70; //use this for testing
+    public static final double HOOD_TOLERANCE_DEG = 0.01;
+
+    public static final double OFFSET = -108.45703125;
+    public static final double PERCENT_UP = 50/100;
+
   }
+
+  public static class FlywheelShooter {
+    public static final int FLYWHEELSHOOTER_MOTOR1_ID = 37; 
+    public static final int FLYWHEELSHOOTER_MOTOR2_ID = 18; 
+
+    public static final double kP = 0.5; // placeholder
+    public static final double kI = 0.0; // placeholder
+    public static final double kD = 0.0; // placeholder
+    public static final double kS = 0.0; // placeholder
+    public static final double kV = 0.0; // placeholder
+    public static final double kA = 0.0; // placeholder
+
+    public static final double CRUISE_VELOCITY = 100.0; // placeholder
+    public static final double ACCELERATION = 300.0;   // placeholder
+    public static final double JERK = 800.0;           // placeholder
+
+    public static final double FLYWHEEL_SHOOTER_SPEED = 100.0; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 100.0;
+
+    public static final double FLYWHEEL_SHOOTER_SPEED2 = 1000.0;
+    public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
+
+    public static final double SHOOTER_THRESHOLD_SPEED1 = 0.7 * Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
+    public static final double SHOOTER_THRESHOLD_SPEED2 = -70.0;
+
+    public static final double GEAR_RATIO = 1.333; 
+  }
+
+    public static class Pivot{
+        public static final int MOTOR_ID = 10;
+        public static final int ENCODER_ID = 27;
+
+        public static final double kS = 0.25;
+        public static final double kV = 0.12;
+        public static final double kA = 0.01;
+        public static final int kP = 3;
+        public static final int kI = 0;
+        public static final int kD = 0;
+        
+        public static final int CRUISE_VELOCITY = 40;
+        public static final int ACCELERATION = 100;
+        public static final int JERK = 1000;
+        public static final double GEAR_RATIO = 16/1.0;
+        public static final double FEED_FORWARD = 1;
+        public static final int SAFE = 10;
+
+        public static final double THRESHOLD = 1;
+        public static final double DEGREES_TO_REVS = 1/360;
+
+        public static final double DOWN_POSITION = 40 * DEGREES_TO_REVS;
+
+    }
+
+    public static class Intake{
+        public static final int INTAKE_MOTOR_ID = 11;
+        public static final int INTAKE_MOTOR_SPEED = 10;
+    }
+
+    public static class Indexer{
+        public static final int INDEXER_MOTOR_ID = 12;
+        public static final int INDEXER_SPEED = 10;
+
+    }
+
+    public static class Feeder{
+        public static final int FEEDER_MOTOR_ID = 36; //TODO: change this to actual ID
+        public static final double FEEDER_SPEED = -10.0;
+    }
+
+
 }

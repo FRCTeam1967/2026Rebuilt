@@ -36,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.GerryRig;
+import frc.robot.commands.MovePivot;
+import frc.robot.subsystems.Pivot;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand; //AutoRoutine
@@ -120,7 +122,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {}
+  public void simulationInit() {
+    m_robotContainer.pivot.simulationInit();
+  }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    m_robotContainer.pivot.simulationPeriodic();
+  }
 }

@@ -1,8 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
+
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -36,8 +33,24 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.GerryRig;
 import frc.robot.subsystems.LED;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.*;
+import edu.wpi.first.wpilibj.Joystick;
+
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.Pivot;
+import frc.robot.subsystems.FlywheelShooter;
+import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Indexer;
+
 public class RobotContainer {
 
+    
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -62,7 +75,15 @@ public class RobotContainer {
     Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
     public Autoes autoes;
+    public final Pivot pivot = new Pivot();
+    public final Intake intake = new Intake();
+    public final Indexer indexer = new Indexer();
+    public final Feeder feeder = new Feeder();
 
+
+    public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
+    private final FlywheelShooter flywheelShooter = new FlywheelShooter();
+    private final Hood hood = new Hood();  
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
     public RobotContainer() {  
@@ -71,6 +92,14 @@ public class RobotContainer {
         gerryRig = autoes.getGerryRig();
         configureBindings();
         autoes.configDashboard(matchTab);
+        hood.configDashboard(matchTab);
+        pivot.configDashboard(fieldTab);
+      
+      flywheelShooter.setDefaultCommand(
+        new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
+      );
+
+   
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
@@ -121,6 +150,44 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+      //SHOOTER AND HOOD BUTTON BINDINGS
+      m_operatorController.x()
+      .whileTrue(
+        new ParallelCommandGroup(
+          // new ParallelCommandGroup(
+          //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+          //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+          // ),
+
+          new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+
+          new SequentialCommandGroup(
+            new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+            new ParallelCommandGroup(
+              new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)) 
+          )
+        )
+      );
+       m_operatorController.y()
+      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));
+
+      m_operatorController.rightBumper()
+      .onTrue(new RunHood(hood, 0, Constants.Hood.HOOD_TOLERANCE_DEG));
+
+      //INTAKE AND INDEXER BUTTON BINDINGS
+      m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+
+      m_operatorController.rightTrigger().whileTrue(
+        new ParallelCommandGroup(
+          new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+          new RunIndexer(indexer, 10.0),
+          new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
+
+      m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+
+      m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+
     }
 
     public Command getAutonomousCommand() {
