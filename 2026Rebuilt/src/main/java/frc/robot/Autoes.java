@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunFlywheelShooter;
 import frc.robot.commands.RunIndexer;
+import frc.robot.commands.RunIntake;
 import frc.robot.generated.TunerConstants;
 
 /** Add your docs here. */
@@ -64,7 +65,9 @@ public class Autoes {
     
     //m_robotContainer.autoChooserLOL.addRoutine("Test Path", this::test);
     //autoChooserLOL.addRoutine("Test Conditional", this::testConditional);
-    autoChooserLOL.addRoutine("HTW", this::htw);
+    autoChooserLOL.addRoutine("Hub to Tower Preload", this::htw);
+    autoChooserLOL.addRoutine("Trench to Neutral Intake", this::otn);
+    
     //m_robotContainer.autoChooserLOL.addRoutine("OTN", this::otn);
     //autoChooserLOL.addRoutine("disSensorTest", this::disSensorTest);
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
@@ -90,22 +93,28 @@ public class Autoes {
   private AutoRoutine otn() {
     AutoRoutine routine = autoFactory.newRoutine("OT_N");
     
-    AutoTrajectory testPath = routine.trajectory("OT_N");
+    AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
     routine.active().onTrue(
       Commands.sequence(
-          testPath.resetOdometry(),
-          testPath.cmd() 
+          trenchNeutral.resetOdometry(),
+          trenchNeutral.cmd() 
     ));
+    trenchNeutral.atPose("Start Intake", 0.2,0.2).onTrue(
+      Commands.parallel(
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      )
+    );
 
     return routine;
   }
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory hubtowershoot = routine.trajectory("H_TW");
+    AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
     routine.active().onTrue(
         Commands.sequence(
-            hubtowershoot.resetOdometry(),
+            hubTowerShoot.resetOdometry(),
             Commands.parallel(
               new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
               Commands.sequence(
@@ -116,7 +125,7 @@ public class Autoes {
                 )
               )
             ),
-            hubtowershoot.cmd()
+            hubTowerShoot.cmd()
         )
     );
 
