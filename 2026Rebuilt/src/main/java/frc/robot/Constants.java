@@ -56,8 +56,9 @@ public final class Constants {
     public static final double ACCELERATION = 300.0;   // placeholder
     public static final double JERK = 800.0;           // placeholder
 
+    public static final double PRELOAD_SHOOTER_SPEED = 70.0; 
     public static final double FLYWHEEL_SHOOTER_SPEED = 100.0; //rotations per second
-    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 100.0;
+    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 200.0;
 
     public static final double FLYWHEEL_SHOOTER_SPEED2 = 1000.0;
     public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
