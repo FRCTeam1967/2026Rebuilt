@@ -8,12 +8,10 @@ public class RunHood extends Command {
 
   private final Hood hood;
   private final double targetDeg;
-  private final double toleranceDeg;
 
-  public RunHood(Hood hood, double targetDeg, double toleranceDeg) {
+  public RunHood(Hood hood, double targetDeg) {
     this.hood = hood;
     this.targetDeg = targetDeg;
-    this.toleranceDeg = toleranceDeg;
     addRequirements(hood);
   }
 
@@ -25,7 +23,7 @@ public class RunHood extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    hood.moveToDeg(targetDeg); //target degree
+    hood.moveTo(targetDeg); //target degree
   }
 
   // Called once the command ends or is interrupted.
@@ -37,6 +35,6 @@ public class RunHood extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return hood.isReachedDeg(toleranceDeg);
+    return hood.isReached();
   }
 }

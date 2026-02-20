@@ -167,10 +167,7 @@ public class RobotContainer {
         )
       );
        m_operatorController.y()
-      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX*Constants.Hood.PERCENT_UP, Constants.Hood.HOOD_TOLERANCE_DEG));
-
-      m_operatorController.rightBumper()
-      .onTrue(new RunHood(hood, 0, Constants.Hood.HOOD_TOLERANCE_DEG));
+      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //INTAKE AND INDEXER BUTTON BINDINGS
       m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));

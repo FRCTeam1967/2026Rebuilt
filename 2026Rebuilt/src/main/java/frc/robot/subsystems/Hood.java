@@ -23,9 +23,11 @@ public class Hood extends SubsystemBase {
   private final TalonFX hoodMotor;
   private final CANcoder absEncoder;
 
+  public double revsToMove;
+
   private final CANBus canbus = new CANBus("CANivore");
 
-  private double targetMotorRot = 0.0;
+  //private double targetMotorRot = 0.0;
 
   public Hood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
@@ -45,7 +47,7 @@ public class Hood extends SubsystemBase {
     talonFXConfigs.MotionMagic.MotionMagicAcceleration = Constants.Hood.ACCELERATION;
     talonFXConfigs.MotionMagic.MotionMagicJerk = Constants.Hood.JERK;
 
-    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Hood.OFFSET;
+    //ccdConfigs.MagnetSensor.MagnetOffset = Constants.Hood.OFFSET;
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
@@ -63,17 +65,19 @@ public class Hood extends SubsystemBase {
     //stop();
   }
 
+  public void moveTo(double revolutions) {
+    revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
+    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove)).withFeedForward(0.0);
+    hoodMotor.setControl(request);
+   }
+
   // private static double clampDeg(double deg) { //putting mech limits for max and min degrees 
   //   return Math.max(Constants.Hood.MIN_DEG, Math.min(Constants.Hood.MAX_DEG, deg));
   // }
 
-  public static double motorRotToDeg(double motorRot) { //converts motor rotations to degrees
-    return (motorRot / Constants.Hood.GEAR_RATIO) * 360.0;
-  }
-
-  public static double degToMotorRot(double deg) { //converts degrees to motor rotations
-    return (deg / 360.0) * Constants.Hood.GEAR_RATIO;
-  }
+  // public static double motorRotToDeg(double motorRot) { //converts motor rotations to degrees
+  //   return (motorRot / Constants.Hood.GEAR_RATIO) * 360.0;
+  // }
 
   public void stop() { //stop motor (obviously :) )
     hoodMotor.stopMotor();
@@ -82,40 +86,49 @@ public class Hood extends SubsystemBase {
     hoodMotor.setPosition(0);
   }
 
-  public void moveToDeg(double rotations) { //goes to target degrees
-    // double clamped = clampDeg(degrees);;
-    hoodMotor.setControl(new MotionMagicVoltage(rotations).withFeedForward(10));
-  }
+  // public void moveToDeg(double rotations) { //goes to target degrees
+  //   // double clamped = clampDeg(degrees);
+  //   hoodMotor.setControl(new MotionMagicVoltage(rotations).withFeedForward(10));
+  // }
 
-  public double getHoodDeg() { //gets hood's angle in degrees 
-    double motorRot = hoodMotor.getRotorPosition().getValueAsDouble();
-    return motorRotToDeg(motorRot);
-  }
+  // public double getHoodDeg() { //gets hood's angle in degrees 
+  //   double motorRot = hoodMotor.getRotorPosition().getValueAsDouble();
+  //   return motorRotToDeg(motorRot);
+  // }
 
   public double getAbsDeg() { //gets the absolute position from abs encoder
     return absEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
   }
 
-  public boolean isReachedDeg(double toleranceDeg) { //checks if the hood has met the error threshold
-    double targetDeg = motorRotToDeg(targetMotorRot);
-    return Math.abs(getHoodDeg() - targetDeg) <= toleranceDeg;
-  }
+  // public boolean isReachedDeg(double toleranceDeg) { //checks if the hood has met the error threshold
+  //   double targetDeg = motorRotToDeg(targetMotorRot);
+  //   return Math.abs(getHoodDeg() - targetDeg) <= toleranceDeg;
+  // }
 
-  public boolean isReached() { //uses tolerance deg to check if hood met error threshold :)
-    return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
-  }
+  // public boolean isReached() { //uses tolerance deg to check if hood met error threshold :)
+  //   return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
+  // }
+
+  /** checks if the position the motor is at is within error threshold of the end goal */
+   public boolean isReached() {
+      return Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+   }
 
   public void setRelToAbs(){
     hoodMotor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
   }
 
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addDouble("Hood Position (deg)", () -> hoodMotor.getRotorPosition().getValueAsDouble());
-    // tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
-    tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
+    tab.addDouble("Hood Position (deg)", () -> (hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360);
+    tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
+    //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
     tab.addBoolean("Hood at Target?", () -> isReached());
     tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
   }
+
+  public void maintainPosition() {
+      moveTo(Constants.Hood.HOOD_HOLD_DEG);
+   }
 
   @Override
   public void periodic() {}
