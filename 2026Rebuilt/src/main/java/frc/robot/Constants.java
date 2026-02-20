@@ -63,7 +63,7 @@ public final class Constants {
     public static final double FLYWHEEL_SHOOTER_SPEED2 = 1000.0;
     public static final double FLYWHEEL_SHOOTER_SPEED3 = 60.0;
 
-    public static final double SHOOTER_THRESHOLD_SPEED1 = 0.7 * Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
+    public static final double SHOOTER_THRESHOLD_SPEED1 = 0.4 * Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
     public static final double SHOOTER_THRESHOLD_SPEED2 = -70.0;
 
     public static final double GEAR_RATIO = 1.333; 

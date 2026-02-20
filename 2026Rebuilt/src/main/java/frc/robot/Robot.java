@@ -35,7 +35,6 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.GerryRig;
 import frc.robot.commands.MovePivot;
 import frc.robot.subsystems.Pivot;
 

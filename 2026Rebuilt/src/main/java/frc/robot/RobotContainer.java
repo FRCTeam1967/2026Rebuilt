@@ -30,7 +30,6 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.GerryRig;
 import frc.robot.subsystems.LED;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -66,9 +65,7 @@ public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final GerryRig gerryRig;
-    
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();    
 
     public LED ledSubsystem = new LED();
     LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
@@ -83,14 +80,13 @@ public class RobotContainer {
 
 
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
-    private final FlywheelShooter flywheelShooter = new FlywheelShooter();
+    public final FlywheelShooter flywheelShooter = new FlywheelShooter();
     private final Hood hood = new Hood();  
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
     public RobotContainer() {  
         //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);   
         autoes = new Autoes(this);
-        gerryRig = autoes.getGerryRig();
         configureBindings();
         autoes.configDashboard(matchTab);
         hood.configDashboard(matchTab);
@@ -134,11 +130,11 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
         ));
 
-        m_driverController.x().whileTrue(
-            new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
-                new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
-                () -> autoes.getDisSensor() <= 0.15)
-        );
+        // m_driverController.x().whileTrue(
+        //     new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
+        //         new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
+        //         () -> autoes.getDisSensor() <= 0.15)
+        // );
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.

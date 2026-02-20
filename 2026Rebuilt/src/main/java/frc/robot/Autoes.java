@@ -115,7 +115,13 @@ public class Autoes {
     routine.active().onTrue(
         Commands.sequence(
             hubTowerShoot.resetOdometry(),
-            Commands.parallel(
+            hubTowerShoot.cmd()
+        )
+    );
+
+    hubTowerShoot.atPose("Shoot Preload", 0, Math.PI/2)
+      .onTrue(
+        Commands.parallel(
               new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
               Commands.sequence(
                 new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
@@ -124,10 +130,8 @@ public class Autoes {
                   new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
                 )
               )
-            ),
-            hubTowerShoot.cmd()
-        )
-    );
+            ).withTimeout(7)
+      );
 
     return routine;
   }
