@@ -111,17 +111,15 @@ public class Autoes {
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
+
     AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
+    AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
+    
     routine.active().onTrue(
         Commands.sequence(
-            hubTowerShoot.resetOdometry(),
-            hubTowerShoot.cmd()
-        )
-    );
-
-    hubTowerShoot.atPose("Shoot Preload", 0, Math.PI/2)
-      .onTrue(
-        Commands.parallel(
+            shootFromABitBack.resetOdometry(),
+            shootFromABitBack.cmd(),
+            Commands.parallel(
               new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
               Commands.sequence(
                 new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
@@ -130,8 +128,12 @@ public class Autoes {
                   new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
                 )
               )
-            ).withTimeout(7)
-      );
+            ), // .withTimeout(7)
+            hubTowerShoot.resetOdometry(),
+            hubTowerShoot.cmd()
+            //climb
+        )
+    );
 
     return routine;
   }
