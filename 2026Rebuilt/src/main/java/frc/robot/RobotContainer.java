@@ -177,9 +177,10 @@ public class RobotContainer {
 
       m_operatorController.rightTrigger().whileTrue(
         new ParallelCommandGroup(
+          new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
           new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-          new RunIndexer(indexer, 10.0),
-          new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
+          new RunIndexer(indexer, 10.0)));
+          //new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
 
       m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
 
