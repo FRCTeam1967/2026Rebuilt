@@ -19,10 +19,13 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunFlywheelShooter;
 import frc.robot.commands.RunIndexer;
@@ -116,24 +119,30 @@ public class Autoes {
     AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
     
     routine.active().onTrue(
-        Commands.sequence(
-            shootFromABitBack.resetOdometry(),
-            shootFromABitBack.cmd(),
-            Commands.parallel(
-              new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-              Commands.sequence(
-                new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-                Commands.parallel(
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                  new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                )
-              )
-            ), // .withTimeout(7)
-            hubTowerShoot.resetOdometry(),
-            hubTowerShoot.cmd()
-            //climb
-        )
+      Commands.sequence(
+        shootFromABitBack.resetOdometry(),
+        shootFromABitBack.cmd()
+      )
+    ); 
+    shootFromABitBack.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
     );
+    shootFromABitBack.done().onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0)
+      .andThen(hubTowerShoot.cmd()));
 
     return routine;
   }

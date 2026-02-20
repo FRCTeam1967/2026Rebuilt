@@ -90,8 +90,7 @@ public final class Constants {
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 1/360;
 
-        public static final double DOWN_POSITION = 40 * DEGREES_TO_REVS;
-
+        public static final double DOWN_POSITION = 40; // * DEGREES_TO_REVS;
     }
 
     public static class Intake{
