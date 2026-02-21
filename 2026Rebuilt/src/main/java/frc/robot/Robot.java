@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix6.SignalLogger;
 
 import choreo.auto.AutoChooser;
@@ -14,16 +11,10 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import choreo.util.ChoreoAllianceFlipUtil;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableListener;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -31,20 +22,15 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
-import frc.robot.LimelightHelpers;
 //import frc.robot.LimelightHelpers.PoseEstimate;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import dev.doglog.DogLog;
 
 public class Robot extends TimedRobot {
   public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
-  private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
@@ -95,29 +81,20 @@ public class Robot extends TimedRobot {
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("Test");
 
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
+
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
-              //logging
-              new InstantCommand(() -> DogLog.log("initial pose from choreo", test_path.getInitialPose().get())),
-              new InstantCommand(() -> DogLog.log("final pose from choreo", test_path.getFinalPose().get())),
-
-              new InstantCommand(() -> DogLog.log("gyro BEFORE conditional", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees())),
-              new InstantCommand(() -> DogLog.log("limelight yaw BEFORE resetOdometry", Units.radiansToDegrees(LimelightHelpers.getBotPose3d("limelight-front").getRotation().getZ()))),
-              new InstantCommand(() -> DogLog.log("should flip?", ChoreoAllianceFlipUtil.shouldFlip())),
-
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
 
               //step three: set LL heading to gyro (aka starting) heading
               new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
-              new InstantCommand(() -> DogLog.log("gyro position after 'setting' it", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees())),
 
-              new InstantCommand(() -> DogLog.log("limelight yaw AFTER resetOdometry", Units.radiansToDegrees(LimelightHelpers.getBotPose3d("limelight-front").getRotation().getZ()))),
-                
               //step four: run the path!
               test_path.cmd()          
           )
@@ -132,11 +109,13 @@ public class Robot extends TimedRobot {
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("TestTrench2");
 
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
+
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -161,11 +140,13 @@ public class Robot extends TimedRobot {
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("AngleRedTrench");
 
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
+
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -188,12 +169,14 @@ public class Robot extends TimedRobot {
       // Load the routine's trajectories
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("TowerDepot");
+      
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
 
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -216,12 +199,14 @@ public class Robot extends TimedRobot {
       // Load the routine's trajectories
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("TowerOutpost");
+      
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
 
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -244,12 +229,14 @@ public class Robot extends TimedRobot {
       // Load the routine's trajectories
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("TowerWrong");
+      
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
 
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -274,12 +261,14 @@ public class Robot extends TimedRobot {
       // Load the routine's trajectories
       // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
       AutoTrajectory test_path = routine.trajectory("TowerWronger");
+      
+      double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
 
       // When the routine begins, reset odometry and start the first trajectory (1)
       routine.active().onTrue(
           Commands.sequence(
               //step one: set gyro to starting heading (flips for alliance)
-              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+              new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
 
               //step two: reset odometry to starting pose
               test_path.resetOdometry(),
@@ -302,6 +291,7 @@ public class Robot extends TimedRobot {
     // Load the routine's trajectories
     // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
     AutoTrajectory test_path = routine.trajectory("HubDivorce");
+    
     double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
 
     // When the routine begins, reset odometry and start the first trajectory (1)
@@ -326,47 +316,9 @@ public class Robot extends TimedRobot {
     return routine;
   }
 
-  // private AutoRoutine LeaveC() {
-  //   AutoRoutine routine = autoFactory.newRoutine("Leave C");
-  //   // Load the routine's trajectories
-  //   // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
-  //   AutoTrajectory test_path = routine.trajectory("Leave C");
-
-  //   // When the routine begins, reset odometry and start the first trajectory (1)
-  //   routine.active().onTrue(
-  //       Commands.sequence(
-  //           //step one: set gyro to starting heading (flips for alliance)
-  //           //new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
-
-  //           //step two: reset odometry to starting pose
-  //           test_path.resetOdometry(),
-
-  //           //step three: set LL heading to gyro (aka starting) heading
-  //           //new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
-              
-  //           //step four: run the path!
-  //           test_path.cmd(),
-  //           new AlignTowerPose(m_robotContainer.drivetrain)
-  //       )
-  //   );
-
-  //   //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
-  //   return routine;
-  // }
-
-
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
-
-    /* if (enableLimelight) {
-
-      LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-      if (limelightMeasurement.tagCount >= 2) {
-        RobotContainer.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
-        RobotContainer.drivetrain.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
-      }
-    } */
   }
 
 
@@ -383,29 +335,12 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SignalLogger.stop();
-    //m_robotContainer.drivetrain.getPigeon2().setYaw(LimelightHelpers.getBotPose3d_wpiBlue("limelight-front").getRotation().getAngle());
   }
 
   @Override
   public void disabledPeriodic() {
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
-
-    // LimelightHelpers.SetIMUMode("limelight-back", 0);
-    // LimelightHelpers.SetThrottle("limelight-back", 200);
-    
-    // AutoRoutine routine = autoFactory.newRoutine("TowerMcQueen");
-    // // Load the routine's trajectories
-    // // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
-    // //AutoTrajectory test_path = routine.trajectory("TowerMcQueen");
-
-    // AutoTrajectory test_path = routine.trajectory("TowerMcQueen");
-
-    // new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees()));
-    // //step two: reset odometry to starting pose
-    // test_path.resetOdometry();
-    // //step three: set LL heading to gyro (aka starting) heading
-    // new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0));
   }
 
   @Override
@@ -434,7 +369,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     // LimelightHelpers.SetThrottle("limelight-back", 0);
-    m_robotContainer.vision.setFirstVisionPose();
+    m_robotContainer.visionUpdate.setFirstVisionPose();
   }
 
   @Override

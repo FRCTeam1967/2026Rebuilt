@@ -13,21 +13,16 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -53,40 +48,14 @@ public class RobotContainer {
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
     
-    public VisionUpdate vision = new VisionUpdate(drivetrain);
+    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
+    public Vision vision = new Vision(MaxAngularRate);
     
     Optional<Alliance> ally = DriverStation.getAlliance(); 
 
     public RobotContainer() {
-        //drivetrain.getPigeon2().setYaw(-23.06);
         configureBindings();
         configLLTab(limelightTab, fieldTab);        
-    }
-
-    private double limelight_aim_proportional() {        
-        double kP = 0.02; //0.035
-        double targetingAngularVelocity = 0.0; 
-        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
-        // your limelight 3 feed, tx should return roughly 31 degrees.
-
-        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
-
-        // convert to radians per second for our drive method
-        targetingAngularVelocity *= MaxAngularRate;
-        //invert since tx is positive when the target is to the right of the crosshair
-        targetingAngularVelocity *= -1.0;
-        return targetingAngularVelocity;
-    }
-    // simple proportional ranging control with Limelight's "ty" value
-    // this works best if your Limelight's mount height and target mount height are different.
-    // if your limelight and target are mounted at the same or similar heights, use "ta" (area) for target ranging rather than "ty"
-    private double limelight_range_proportional(){
-        double kP = 0.01;
-        double error = LimelightHelpers.getTY("limelight-front") - 10.0;
-        double targetingForwardSpeed = error * kP;
-        targetingForwardSpeed *= MaxSpeed;
-        targetingForwardSpeed *= -1.0;
-        return targetingForwardSpeed;
     }
 
     private void configureBindings() {
@@ -154,7 +123,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
+                    .withRotationalRate(vision.limelight_aim_proportional()) // Drive with targetAngularVelocity
             )
         );
         // // ranging
@@ -171,16 +140,6 @@ public class RobotContainer {
 
         // tower alignment using pose
         joystick.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
-
-
-        //do both
-        joystick.y().whileTrue(
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(limelight_range_proportional()) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
-            )
-        );
 
         joystick.x().onTrue(new SequentialCommandGroup(
             // ROTATION2D IS IN **RADIANS!!!!**
