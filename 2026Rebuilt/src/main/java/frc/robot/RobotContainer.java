@@ -6,23 +6,32 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.VisionUpdate;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 
@@ -45,6 +54,8 @@ public class RobotContainer {
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
     
     public VisionUpdate vision = new VisionUpdate(drivetrain);
+    
+    Optional<Alliance> ally = DriverStation.getAlliance(); 
 
     public RobotContainer() {
         //drivetrain.getPigeon2().setYaw(-23.06);
@@ -58,9 +69,7 @@ public class RobotContainer {
         // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
         // your limelight 3 feed, tx should return roughly 31 degrees.
 
-        if (LimelightHelpers.getFiducialID("limelight-front") == 10 || LimelightHelpers.getFiducialID("limelight-front") == 26) {
-            targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
-        }
+        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
 
         // convert to radians per second for our drive method
         targetingAngularVelocity *= MaxAngularRate;
@@ -173,6 +182,26 @@ public class RobotContainer {
             )
         );
 
+        joystick.x().onTrue(new SequentialCommandGroup(
+            // ROTATION2D IS IN **RADIANS!!!!**
+            // SET YAW IS IN **DEGREES!!!!**
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> drivetrain.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> drivetrain.getPigeon2().setYaw(180.0)),
+                    new InstantCommand(() -> drivetrain.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> drivetrain.resetPose(new Pose2d(drivetrain.getPose().getX(), drivetrain.getPose().getY(), new Rotation2d(Math.PI))))        
+                ),
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> drivetrain.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> drivetrain.getPigeon2().setYaw(0.0)),
+                    new InstantCommand(() -> drivetrain.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> drivetrain.resetPose(new Pose2d(drivetrain.getPose().getX(), drivetrain.getPose().getY(), new Rotation2d(0))))
+                ),
+                () -> ally.get() == Alliance.Blue
+            )
+        ));
+            
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
@@ -181,9 +210,14 @@ public class RobotContainer {
     // }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
-        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.11:5801/"); //http://10.19.67.202:5801/
+        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/
         CameraServer.addCamera(httpCamera1);
         tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
+        .withSize(3, 2);
+
+        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.11:5801/"); //http://10.19.67.202:5801/
+        CameraServer.addCamera(httpCamera2);
+        tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
         .withSize(3, 2);
 
         tab.addBoolean("LL isInRange", () -> getInRange(LimelightHelpers.getTY("limelight-front")))
@@ -191,10 +225,10 @@ public class RobotContainer {
         .withSize(1, 1);
 
         tab.addBoolean("LL isAligned", () -> isAligned(LimelightHelpers.getTX("limelight-front")))
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(6, 2)
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
         .withSize(1, 1);
 
-        fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
+        //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
     }
 
     public boolean getInRange(double position) {

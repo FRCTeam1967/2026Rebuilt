@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -19,7 +20,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableListener;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -50,7 +54,7 @@ public class Robot extends TimedRobot {
   private final AutoChooser autoChooser;
 
   private final StructPublisher<Pose2d> choreoPublisher;
-
+  //private final NetworkTableListener autoPublisher;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -71,7 +75,10 @@ public class Robot extends TimedRobot {
     autoChooser.addRoutine("TowerOutpost", this::TowerOutpost);
     autoChooser.addRoutine("TowerWrong", this::TowerWrong);
     autoChooser.addRoutine("TowerWronger", this::TowerWronger);
+    autoChooser.addRoutine("HubDivorce", this::HubDivorce);
+    // autoChooser.addRoutine("Leave C", this::LeaveC);
 
+    //autoPublisher = NetworkTableInstance.getDefault().getTable("selected_auto");
 
     matchTab.add("auto chooser lol", autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
     
@@ -290,6 +297,63 @@ public class Robot extends TimedRobot {
       return routine;
   }
 
+  private AutoRoutine HubDivorce() {
+    AutoRoutine routine = autoFactory.newRoutine("HubDivorce");
+    // Load the routine's trajectories
+    // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+    AutoTrajectory test_path = routine.trajectory("HubDivorce");
+    double initialOrientation = test_path.getInitialPose().get().getRotation().getDegrees();
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(
+        Commands.sequence(
+            //step one: set gyro to starting heading (flips for alliance)
+            new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
+
+            //step two: reset odometry to starting pose
+            test_path.resetOdometry(),
+
+            //step three: set LL heading to gyro (aka starting) heading
+            new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+              
+            //step four: run the path!
+            test_path.cmd()
+            // new AlignTowerPose(m_robotContainer.drivetrain)
+        )
+    );
+
+    //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
+    return routine;
+  }
+
+  // private AutoRoutine LeaveC() {
+  //   AutoRoutine routine = autoFactory.newRoutine("Leave C");
+  //   // Load the routine's trajectories
+  //   // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+  //   AutoTrajectory test_path = routine.trajectory("Leave C");
+
+  //   // When the routine begins, reset odometry and start the first trajectory (1)
+  //   routine.active().onTrue(
+  //       Commands.sequence(
+  //           //step one: set gyro to starting heading (flips for alliance)
+  //           //new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees())),
+
+  //           //step two: reset odometry to starting pose
+  //           test_path.resetOdometry(),
+
+  //           //step three: set LL heading to gyro (aka starting) heading
+  //           //new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+              
+  //           //step four: run the path!
+  //           test_path.cmd(),
+  //           new AlignTowerPose(m_robotContainer.drivetrain)
+  //       )
+  //   );
+
+  //   //m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees());
+  //   return routine;
+  // }
+
 
   @Override
   public void robotPeriodic() {
@@ -326,6 +390,22 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0);
+    // LimelightHelpers.SetThrottle("limelight-back", 200);
+    
+    // AutoRoutine routine = autoFactory.newRoutine("TowerMcQueen");
+    // // Load the routine's trajectories
+    // // Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("test");
+    // //AutoTrajectory test_path = routine.trajectory("TowerMcQueen");
+
+    // AutoTrajectory test_path = routine.trajectory("TowerMcQueen");
+
+    // new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(test_path.getInitialPose().get().getRotation().getDegrees()));
+    // //step two: reset odometry to starting pose
+    // test_path.resetOdometry();
+    // //step three: set LL heading to gyro (aka starting) heading
+    // new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0));
   }
 
   @Override
@@ -334,12 +414,17 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
-    LimelightHelpers.SetThrottle("limelight-front", 0);
+    LimelightHelpers.SetThrottle("limelight-front", 50);
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); // robot gyro
+    // LimelightHelpers.SetThrottle("limelight-back", 50);
   }
 
   @Override
   public void autonomousPeriodic() {
     LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); // robot gyro
   }
 
   @Override
@@ -348,12 +433,15 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
+    // LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.vision.setFirstVisionPose();
   }
 
   @Override
   public void teleopPeriodic() {
     LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); //robot gyro
   }
 
   @Override

@@ -133,7 +133,7 @@ public class VisionUpdate extends SubsystemBase {
       drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
       drivetrain.addVisionMeasurement(
           mt2.pose,
-          Utils.fpgaToCurrentTime(mt2.timestampSeconds));
+          mt2.timestampSeconds);
       limelightPublisher.set(mt2.pose);
       updatePublisher.set(++odometryUpdates);
     }
@@ -144,6 +144,5 @@ public class VisionUpdate extends SubsystemBase {
     LLtimestamp.set(mt2.timestampSeconds);
     fpgaTimestamp.set(Utils.getCurrentTimeSeconds());
     LLtoFPGA.set(Utils.fpgaToCurrentTime(mt2.timestampSeconds));
-
   }
 }

@@ -20,8 +20,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import dev.doglog.DogLog;
 import frc.robot.subsystems.*;
@@ -35,12 +38,13 @@ public class AlignTowerPose extends Command {
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
       
-  Optional<Alliance> ally = DriverStation.getAlliance(); 
+  Optional<Alliance> ally = DriverStation.getAlliance();
+  final StructPublisher<Pose2d> towerPublisher = NetworkTableInstance.getDefault().getTable("alignment").getStructTopic("tower", Pose2d.struct).publish();  
+  Pose2d towerPose = new Pose2d();
 
   private static final double kP_translational = 0.85;
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
-  private Pose2d towerPose;
 
   public AlignTowerPose(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
