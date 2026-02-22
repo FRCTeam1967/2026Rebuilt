@@ -68,9 +68,9 @@ public class Pivot extends SubsystemBase {
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
-    //ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
-    ccdConfigs.MagnetSensor.MagnetOffset = 0;
+    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;
 
     
 
@@ -117,6 +117,7 @@ public class Pivot extends SubsystemBase {
     //   .getStructTopic("MyPose", Pose3d.struct).publish();
     // StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
     //   .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
+    setRelToAbs();
   }
 
     
@@ -131,8 +132,8 @@ public class Pivot extends SubsystemBase {
     return diff < 5; 
   }
 
-  public void moveTo(double rotations){
-    revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
+  public void moveTo(double degrees){
+    revsToMove = degrees*Constants.Pivot.DEGREES_TO_REVS*Constants.Pivot.GEAR_RATIO;
     MotionMagicVoltage request = new MotionMagicVoltage(revsToMove);
     motor.setControl(request);
     setRelToSafe();
@@ -158,6 +159,10 @@ public class Pivot extends SubsystemBase {
       ) {
       motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
     }
+  }
+
+  public void setRelToAbs() {
+    motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
   }
 /* 
   @Override
@@ -201,7 +206,7 @@ public class Pivot extends SubsystemBase {
   */
 
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addBoolean("pivot at safe?", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360 > Constants.Pivot.SAFE - Constants.Pivot.THRESHOLD && absEncoder.getAbsolutePosition().getValueAsDouble()*360 < Constants.Pivot.SAFE + Constants.Pivot.THRESHOLD);
+    tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
     tab.addNumber("current pivot pos degrees", () -> (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
     tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
     tab.addBoolean("pivot reached?", () -> isReached());

@@ -86,7 +86,7 @@ public class FlywheelShooter extends SubsystemBase {
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = Constants.FlywheelShooter.CRUISE_VELOCITY;
     motionMagicConfigs.MotionMagicAcceleration = Constants.FlywheelShooter.ACCELERATION;
-    motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
+//motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
@@ -140,6 +140,7 @@ public class FlywheelShooter extends SubsystemBase {
   public void configDashboard(ShuffleboardTab tab) {
     tab.addDouble("Flywheel Left Speed", () -> getMotorVelocity(flywheelMotor1));
     tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
+    tab.addDouble("Flywheel Average Velocity", () -> getAverageVelocity());
   }
 
   @Override

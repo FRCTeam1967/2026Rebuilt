@@ -84,6 +84,7 @@ public class Hood extends SubsystemBase {
   }
   public void setZero() {
     hoodMotor.setPosition(0);
+    absEncoder.setPosition(Constants.Hood.HOOD_MAX);
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees
@@ -119,16 +120,16 @@ public class Hood extends SubsystemBase {
   }
 
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addDouble("Hood Position (deg)", () -> (hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360);
+    tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
     tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
     //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
     tab.addBoolean("Hood at Target?", () -> isReached());
     tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
   }
 
-  public void maintainPosition() {
-      moveTo(Constants.Hood.HOOD_HOLD_DEG);
-   }
+  // public void maintainPosition() {
+  //     moveTo(Constants.Hood.HOOD_HOLD_DEG);
+  //  }
 
   @Override
   public void periodic() {}

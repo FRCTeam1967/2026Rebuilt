@@ -21,10 +21,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -90,6 +86,7 @@ public class RobotContainer {
         configureBindings();
         autoes.configDashboard(matchTab);
         hood.configDashboard(matchTab);
+        flywheelShooter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
       
       flywheelShooter.setDefaultCommand(
@@ -150,34 +147,37 @@ public class RobotContainer {
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.x()
       .whileTrue(
-        new ParallelCommandGroup(
+        new SequentialCommandGroup(
           // new ParallelCommandGroup(
           //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
           //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
           // ),
-
-          new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-
-          new SequentialCommandGroup(
-            new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+          new ParallelRaceGroup(
+            new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+            new WaitCommand(5.0)
+          ),
+          //new SequentialCommandGroup(
+            //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
             new ParallelCommandGroup(
               new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)) 
-          )
+              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+              new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+            )
+          //)
         )
       );
        m_operatorController.y()
       .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //INTAKE AND INDEXER BUTTON BINDINGS
-      m_operatorController.leftTrigger().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+      m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
       m_operatorController.rightTrigger().whileTrue(
         new ParallelCommandGroup(
           new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
           new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
           new RunIndexer(indexer, 10.0)));
-          //new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)));
+          new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
 
       m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
 
