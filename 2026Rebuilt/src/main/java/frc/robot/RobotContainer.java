@@ -1,11 +1,13 @@
 package frc.robot;
-
+import java.util.Optional;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.util.Color;
@@ -13,7 +15,6 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Percent;
@@ -37,6 +38,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Pivot;
+import frc.robot.subsystems.VisionUpdate;
 import frc.robot.subsystems.FlywheelShooter;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
@@ -58,6 +60,8 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
+    public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
+
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
 
@@ -74,6 +78,7 @@ public class RobotContainer {
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
 
+    public VisionUpdate vision = new VisionUpdate(drivetrain);
 
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
     public final FlywheelShooter flywheelShooter = new FlywheelShooter();
@@ -88,6 +93,7 @@ public class RobotContainer {
         hood.configDashboard(matchTab);
         flywheelShooter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
+        configLLTab(limelightTab, fieldTab);   
       
       flywheelShooter.setDefaultCommand(
         new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
@@ -99,6 +105,20 @@ public class RobotContainer {
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     }
     
+    private double limelight_aim_proportional() {        
+        double kP = 0.02; //0.035
+        double targetingAngularVelocity = 0.0; 
+        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
+        // your limelight 3 feed, tx should return roughly 31 degrees.
+
+        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
+
+        // convert to radians per second for our drive method
+        targetingAngularVelocity *= MaxAngularRate;
+        //invert since tx is positive when the target is to the right of the crosshair
+        targetingAngularVelocity *= -1.0;
+        return targetingAngularVelocity;
+    }
     
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -143,6 +163,15 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
+        // hub alignment
+        m_driverController.rightTrigger().whileTrue(
+            drivetrain.applyRequest(() ->
+                drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
+            )
+        );
+
         drivetrain.registerTelemetry(logger::telemeterize);
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.x()
@@ -166,7 +195,14 @@ public class RobotContainer {
           //)
         )
       );
-       m_operatorController.y()
+
+      // eject button
+      m_operatorController.rightBumper().whileTrue(
+        new RunFeeder(feeder, 5)
+      );
+
+
+      m_operatorController.y()
       .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //INTAKE AND INDEXER BUTTON BINDINGS
@@ -175,8 +211,8 @@ public class RobotContainer {
       m_operatorController.rightTrigger().whileTrue(
         new ParallelCommandGroup(
           new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-          new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-          new RunIndexer(indexer, 10.0)));
+          new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED),
+          new RunIndexer(indexer, 10.0))); //is this formatting intended?
           new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
 
       m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
@@ -184,6 +220,21 @@ public class RobotContainer {
       m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
     }
+
+    public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
+        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/
+        CameraServer.addCamera(httpCamera1);
+        tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
+        .withSize(3, 2);
+
+        // HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.11:5801/"); //http://10.19.67.202:5801/
+        // CameraServer.addCamera(httpCamera2);
+        // tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
+        // .withSize(3, 2);
+
+        //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
+    }
+
 
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
