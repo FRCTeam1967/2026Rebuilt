@@ -9,17 +9,13 @@ import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
-import java.util.Optional;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
@@ -28,17 +24,15 @@ import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class VisionUpdate extends SubsystemBase {
   /** Creates a new VisionUpdate. */
 
   // visibility dataType name;
   private CommandSwerveDrivetrain drivetrain;
+  private SwerveDrivePoseEstimator m_poseEstimator;
 
   private final StructPublisher<Pose2d> limelightPublisher;
-  Optional<Alliance> ally = DriverStation.getAlliance();
 
   private long odometryUpdates = 0;
   private long odometryDiscards = 0;
@@ -48,8 +42,6 @@ public class VisionUpdate extends SubsystemBase {
   DoublePublisher LLtimestamp;
   DoublePublisher fpgaTimestamp;
   DoublePublisher LLtoFPGA;
-
-  public static Pose2d towerPose;
 
   
   public VisionUpdate(CommandSwerveDrivetrain drivetrain) {
@@ -67,18 +59,6 @@ public class VisionUpdate extends SubsystemBase {
     LLtimestamp = table.getDoubleTopic("limelight timestamp").publish();
     fpgaTimestamp = table.getDoubleTopic("fpga timestamp").publish();
     LLtoFPGA = table.getDoubleTopic("LL converted to fpga").publish();
-       
-    if (ally.isPresent()) {
-        if (ally.get() == Alliance.Red) {
-            towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-            //DogLog.log("Tower Pose: ", towerPose);
-        }
-        if (ally.get() == Alliance.Blue) {
-            towerPose = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
-            //DogLog.log("Tower Pose: ", towerPose);
-        }
-    }
-    DogLog.log("Tower Pose: ", towerPose);
 
   }
 
@@ -140,6 +120,11 @@ public class VisionUpdate extends SubsystemBase {
 
     LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
 
+    // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+    // if(Math.abs(drivetrain.getPigeon2().getRotation2d().getDegrees()) > 360) {
+    //   doRejectUpdate = true;
+    // }
+    
     if(mt2.tagCount == 0) {
       doRejectUpdate = true;
     }

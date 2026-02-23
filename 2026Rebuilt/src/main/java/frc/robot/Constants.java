@@ -109,26 +109,5 @@ public final class Constants {
         public static final double FEEDER_SPEED = -10.0;
     }
 
-  public static class Vision {
-    public static final double DEGREE_ERROR = 4.0;
-
-    public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
-    public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify
-    public static final double TARGET_HEIGHT_INCHES = 54; //need to verify
-    public static final double LIMELIGHT_ALIGN_LEFT_OFFSET = -0.156;//-0.125;//11.0812301635 //10.6631250381 //10.234612469perhaps in //-0.1175; // -0.125 //-0.1175; //-0.1256; //-0.1556 /-0.181 //-0.18129 //-0.10509 //-0.0889-0.0762 // -0.1200 //-0.14605
-    public static final double LIMELIGHT_ALIGN_RIGHT_OFFSET = 0.2;//0.18; //-11.5789194107 //-11.9671554656/0.15875; //0.17145 //0.1524 //0.1905; //0.18415; //0.1685 //0.1513 //0.2275-0.076 //0.2286, left, -.0658890 // 0.1885 // 0.1905
-    public static final double LIMELIGHT_ALIGN_Z_OFFSET = 0.0; //LimelightHelpers.setFiducial3DOffset("limelight", 0.0, 0.0, 0.001);
-    public static final double LIMELIGHT_ALIGN_CENTER_OFFSET = -0.1431036;
-    public static final double LIMELIGHT_AUTO_LEFT_OFFSET = -0.11;
-    public static final double LIMELIGHT_L4_LEFT_OFFSET = -0.1;
-    public static final double ALIGNMENT_THRESHOLD = 1.0;
-    public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
-    public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA
-    public static final double ALIGNMENT_RIGHT_OFFSET = -9.2;//-11.86;//-0.8; //-1.0; //-1.1; //-13.1; //in LL degrees //TODO: test at EPA
-    public static final double ALIGNMENT_FORWARD_OFFSET = 0.0; //TODO: test at EPA //-5.16 center for left branch aligned
-
-    public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
-    public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
-  }
 
 }
