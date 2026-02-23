@@ -7,11 +7,11 @@ import frc.robot.Constants;
 public class RunHood extends Command {
 
   private final Hood hood;
-  private final double targetDeg;
+  private final double targetPosRevs;
 
-  public RunHood(Hood hood, double targetDeg) {
+  public RunHood(Hood hood, double targetPosRevs) {
     this.hood = hood;
-    this.targetDeg = targetDeg;
+    this.targetPosRevs = targetPosRevs;
     addRequirements(hood);
   }
 
@@ -23,7 +23,7 @@ public class RunHood extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    hood.moveTo(targetDeg); //target degree
+    hood.moveTo(targetPosRevs); //changed name to reflect parameter type and not cause confusion
   }
 
   // Called once the command ends or is interrupted.

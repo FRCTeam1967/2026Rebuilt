@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Pivot;
+import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.VisionUpdate;
 import frc.robot.subsystems.FlywheelShooter;
 import frc.robot.subsystems.Hood;
@@ -78,7 +79,8 @@ public class RobotContainer {
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
 
-    public VisionUpdate vision = new VisionUpdate(drivetrain);
+    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
+    public Vision vision = new Vision(drivetrain, MaxAngularRate);
 
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
     public final FlywheelShooter flywheelShooter = new FlywheelShooter();
@@ -173,7 +175,8 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
-      //SHOOTER AND HOOD BUTTON BINDINGS
+      
+        //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.x()
       .whileTrue(
         new SequentialCommandGroup(
@@ -196,14 +199,33 @@ public class RobotContainer {
         )
       );
 
+      //TODO: use this to test after populating speed + angle interp tables
+      m_operatorController.povUp() //for now, can change
+      .whileTrue(
+        new SequentialCommandGroup(
+          new ParallelRaceGroup(
+            new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+            new WaitCommand(5.0)
+          ),
+            new ParallelCommandGroup(
+              new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+              new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+            )
+          //)
+        )
+      );
+
+      //TODO: use this to test after populating angle table
+      m_operatorController.povDown().onTrue(new RunHood(hood, hood.getNecessaryAngle(vision.getDisFromHub())));
+
+
       // eject button
       m_operatorController.rightBumper().whileTrue(
         new RunFeeder(feeder, 5)
       );
 
-
-      m_operatorController.y()
-      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
+      m_operatorController.y().onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //INTAKE AND INDEXER BUTTON BINDINGS
       m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));

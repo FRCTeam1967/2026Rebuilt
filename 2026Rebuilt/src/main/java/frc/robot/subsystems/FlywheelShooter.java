@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
@@ -40,6 +41,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   private boolean reachedShooterSpeed = false;
 
+  private InterpolatingDoubleTreeMap speedTable; 
 
   // private static final double kSimDt = 0.02;
   // private double simRotorPosRot = 0.0;
@@ -86,7 +88,7 @@ public class FlywheelShooter extends SubsystemBase {
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = Constants.FlywheelShooter.CRUISE_VELOCITY;
     motionMagicConfigs.MotionMagicAcceleration = Constants.FlywheelShooter.ACCELERATION;
-//motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
+    //motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
@@ -100,6 +102,10 @@ public class FlywheelShooter extends SubsystemBase {
 
     reachedShooterSpeed = false;
     //SmartDashboard.putData("ShooterMech2d", shooterMech);
+
+    //TODO: populate this tree map for distance vs speeds 
+    speedTable = new InterpolatingDoubleTreeMap();
+    populateTreeMap();
   }
 
   public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
@@ -128,12 +134,12 @@ public class FlywheelShooter extends SubsystemBase {
 
   }
 
-  public void stopMotor() { //stops the hood motor (obviously : ))
+  public void stopMotor() { //stops the motor (obviously : ))
     flywheelMotor1.stopMotor();
     flywheelMotor2.stopMotor();
   }
 
-  public double getMotorVelocity(TalonFX motor) { //stops the hood motor (obviously : ))
+  public double getMotorVelocity(TalonFX motor) {
     return (motor.getVelocity().getValueAsDouble());
   }
 
@@ -141,6 +147,17 @@ public class FlywheelShooter extends SubsystemBase {
     tab.addDouble("Flywheel Left Speed", () -> getMotorVelocity(flywheelMotor1));
     tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
     tab.addDouble("Flywheel Average Velocity", () -> getAverageVelocity());
+  }
+
+  //TODO: fill in these values
+  private void populateTreeMap() {
+    //distance from hub (m), shooter speeds
+    speedTable.put(1.0, 200.0); //example
+  }
+
+  //TODO: call this in robot container when setting speed
+  public double getNecessarySpeed(double distanceToHub) {
+    return speedTable.get(distanceToHub);
   }
 
   @Override

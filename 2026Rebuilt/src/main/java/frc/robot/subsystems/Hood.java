@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -27,10 +28,14 @@ public class Hood extends SubsystemBase {
 
   private final CANBus canbus = new CANBus("CANivore");
 
+  private InterpolatingDoubleTreeMap angleTable;
+
   //private double targetMotorRot = 0.0;
 
   public Hood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
+
+    //TODO: double check what the actual id is
     absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
@@ -47,8 +52,6 @@ public class Hood extends SubsystemBase {
     talonFXConfigs.MotionMagic.MotionMagicAcceleration = Constants.Hood.ACCELERATION;
     talonFXConfigs.MotionMagic.MotionMagicJerk = Constants.Hood.JERK;
 
-    //ccdConfigs.MagnetSensor.MagnetOffset = Constants.Hood.OFFSET;
-
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
@@ -57,34 +60,71 @@ public class Hood extends SubsystemBase {
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    //ccdConfigs.MagnetSensor.MagnetOffset = 0.337646484375;
+    
+    //TODO: go to tuner x, rezero the absolute encoder, 
+    //then get the magnet offset (which they provide) and add it here. 
+    //now, whenever the hood is all the way down, the abs encoder 
+    //will always read 0
+    ccdConfigs.MagnetSensor.MagnetOffset = 0.0;
+
     absEncoder.getConfigurator().apply(ccdConfigs);
 
     // moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
-    setZero();
+    setRelToAbs();
+    resetEncoder();
     //stop();
+
+    //TODO: populate this tree map for angles vs speeds 
+    angleTable = new InterpolatingDoubleTreeMap();
+    populateTreeMap();
   }
 
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
-    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove)).withFeedForward(0.0);
+    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove)).withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
     hoodMotor.setControl(request);
-   }
+  }
 
-  // private static double clampDeg(double deg) { //putting mech limits for max and min degrees 
-  //   return Math.max(Constants.Hood.MIN_DEG, Math.min(Constants.Hood.MAX_DEG, deg));
-  // }
-
-  // public static double motorRotToDeg(double motorRot) { //converts motor rotations to degrees
-  //   return (motorRot / Constants.Hood.GEAR_RATIO) * 360.0;
-  // }
+  public void setRelToAbs(){
+    //this should take care of the initial "set zero" method 
+    //because the abs encoder will be zero at the start too
+    hoodMotor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
+  }
 
   public void stop() { //stop motor (obviously :) )
     hoodMotor.stopMotor();
   }
-  public void setZero() {
-    hoodMotor.setPosition(0);
-    absEncoder.setPosition(Constants.Hood.HOOD_MAX);
+
+  //changed this method from set zero to reset encoders, 
+  //then put it in periodic to always check if we're at zero and to reset if so
+  public void resetEncoder() {
+    if (getAbsPos() == 0.0) {
+      hoodMotor.setPosition(0.0);
+    }
+  }
+
+  public double getAbsPos() { //gets the absolute position from abs encoder
+    return (absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
+  }
+
+  public double getAbsDeg() { //gets the absolute position in degrees from abs encoder
+    return absEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
+  }
+
+  /** checks if the position the motor is at is within error threshold of the end goal */
+  public boolean isReached() {
+      return Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+  }
+
+  //TODO: fill in these values
+  private void populateTreeMap() {
+    //distance from hub (m), hood angle
+    angleTable.put(1.0, 20.0); //example
+  }
+
+  //TODO: call this in robot container when setting speed
+  public double getNecessaryAngle(double distanceToHub) {
+    return angleTable.get(distanceToHub);
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees
@@ -97,9 +137,13 @@ public class Hood extends SubsystemBase {
   //   return motorRotToDeg(motorRot);
   // }
 
-  public double getAbsDeg() { //gets the absolute position from abs encoder
-    return absEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
-  }
+  // private static double clampDeg(double deg) { //putting mech limits for max and min degrees 
+  //   return Math.max(Constants.Hood.MIN_DEG, Math.min(Constants.Hood.MAX_DEG, deg));
+  // }
+
+  // public static double motorRotToDeg(double motorRot) { //converts motor rotations to degrees
+  //   return (motorRot / Constants.Hood.GEAR_RATIO) * 360.0;
+  // }
 
   // public boolean isReachedDeg(double toleranceDeg) { //checks if the hood has met the error threshold
   //   double targetDeg = motorRotToDeg(targetMotorRot);
@@ -109,15 +153,6 @@ public class Hood extends SubsystemBase {
   // public boolean isReached() { //uses tolerance deg to check if hood met error threshold :)
   //   return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
   // }
-
-  /** checks if the position the motor is at is within error threshold of the end goal */
-   public boolean isReached() {
-      return Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
-   }
-
-  public void setRelToAbs(){
-    hoodMotor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
-  }
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
