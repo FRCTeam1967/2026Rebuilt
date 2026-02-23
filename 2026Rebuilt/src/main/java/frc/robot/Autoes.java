@@ -81,18 +81,7 @@ public class Autoes {
         // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
     }
 
-    private AutoRoutine test() {
-    AutoRoutine routine = autoFactory.newRoutine("Test");
-    
-    AutoTrajectory testPath = routine.trajectory("test");
-    routine.active().onTrue(
-      Commands.sequence(
-          testPath.resetOdometry(),
-          testPath.cmd() 
-    ));
-    return routine;
-  }
-  
+   
   private AutoRoutine otn() {
     AutoRoutine routine = autoFactory.newRoutine("OT_N");
     
@@ -112,6 +101,44 @@ public class Autoes {
     return routine;
   }
 
+  private AutoRoutine dtdtw(){
+    AutoRoutine routine = autoFactory.newRoutine("DTW");
+
+    AutoTrajectory trenchToDepot = routine.trajectory("DT_D");
+    AutoTrajectory depotToShoot = routine.trajectory("D_Shoot");
+    AutoTrajectory shootToClimb = routine.trajectory("Shoot_TW");
+
+    routine.active().onTrue(
+      Commands.sequence(
+        trenchToDepot.resetOdometry(),
+        trenchToDepot.cmd()
+      )
+    );
+    trenchToDepot.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(6)
+      .andThen(depotToShoot.cmd())
+    );
+    depotToShoot.atPose("Start Shoot", 0.02, Math.PI/6).onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0)
+      .andThen(shootToClimb.cmd())
+    );
+    //TODO: add climb sequencing
+    
+    return routine;
+  }
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
 
@@ -157,39 +184,118 @@ public class Autoes {
 
   private AutoRoutine otctw() {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
-    AutoTrajectory goToFuel = routine.trajectory("OT_N");
-    AutoTrajectory fuel  = routine.trajectory("OT_N_fuelBranch");
+    AutoTrajectory trenchToCenter = routine.trajectory("OT_N");
+    AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch");
     AutoTrajectory shootClimb = routine.trajectory("N_ScoreClimb");
 
         // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(
         Commands.sequence(
-          goToFuel.resetOdometry(),
-          goToFuel.cmd()
-                
+          trenchToCenter.resetOdometry(),
+          trenchToCenter.cmd()
         )
-      );    
+    );
+    
+    trenchToCenter.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
+    );
+
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger doneGo = goToFuel.done();
-    // doneGo.and(()-> disSensor.getDistance().getValueAsDouble() >=27).onTrue(fuel.cmd());//if true then intake 
+    // Trigger atCenter = trenchToCenter.done();
+    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
     // //  //write intake for fuel traj if true 
-    // doneGo.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
+    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
     
-        //write shoot for shootClimb
-    fuel.done().onTrue(shootClimb.cmd());
-    shootClimb.atPose("Marker", 0.0,0.0);//keep shooting after you reach event marker name Marker
+    shootClimb.atPose("Start Score", 0.02,Math.PI/6).onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0) // might have to edit timeout
+    );
+    
+    // edit command sequence for climb
+    shootClimb.atPose("Climb", 0.02,Math.PI/6).onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0)
+    );
+
     return routine;
   }
+  
   private AutoRoutine otc2x(){
     AutoRoutine routine = autoFactory.newRoutine("OTC 2 Cycle");
-    AutoTrajectory otc2x = routine.trajectory("OT_C_2");
+    AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
+    AutoTrajectory neutralScore = routine.trajectory("OT_N_score");
+    AutoTrajectory scoreNeutral = routine.trajectory("ScoreToN");
     routine.active().onTrue(
       Commands.sequence(
-        otc2x.resetOdometry(),
-        otc2x.cmd()
+        trenchNeutral.resetOdometry(),
+        trenchNeutral.cmd()
       )
     );
+    trenchNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
+       Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
+    );
+    trenchNeutral.done().onTrue(
+      neutralScore.cmd()
+    );
+    neutralScore.done().onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0)
+      .andThen(scoreNeutral.cmd())
+    );
+    scoreNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
+    );
+    scoreNeutral.done().onTrue(
+      neutralScore.cmd()
+    );
+     neutralScore.done().onTrue(
+      Commands.parallel(
+        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        Commands.sequence(
+          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          Commands.parallel(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        )
+      ).withTimeout(5.0));
     return routine;
     
     } 
