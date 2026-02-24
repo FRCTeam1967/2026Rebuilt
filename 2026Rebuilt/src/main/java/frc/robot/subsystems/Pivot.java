@@ -140,7 +140,6 @@ public class Pivot extends SubsystemBase {
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
     MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
     motor.setControl(request);
-    setRelToAbs();
   }
 
   public void stop(){
@@ -171,6 +170,8 @@ public class Pivot extends SubsystemBase {
   }
 
   public void maintainPosition() {
+    double currentPos = motor.getRotorPosition().getValueAsDouble();
+    motor.setControl(new MotionMagicVoltage(currentPos));
   }
 /* 
   @Override

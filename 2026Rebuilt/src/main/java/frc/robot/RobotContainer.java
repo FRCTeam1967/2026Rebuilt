@@ -94,11 +94,6 @@ public class RobotContainer {
         flywheelShooter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
         configLLTab(limelightTab, fieldTab);   
-      
-      flywheelShooter.setDefaultCommand(
-        new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter)
-      );
-
    
         
         // Schedule the selected auto during the autonomous period
@@ -173,6 +168,12 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+      //DEFAULT COMMANDS
+      pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
+      //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+      flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.x()
       .whileTrue(
@@ -206,13 +207,13 @@ public class RobotContainer {
       .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //INTAKE AND INDEXER BUTTON BINDINGS
-      m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+      //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
       m_operatorController.rightTrigger().whileTrue(
         new ParallelCommandGroup(
           new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
           new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED),
-          new RunIndexer(indexer, 10.0))); //is this formatting intended?
+          new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
           new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
 
       m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
