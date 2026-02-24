@@ -167,5 +167,7 @@ public class Hood extends SubsystemBase {
   //  }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    resetEncoder();
+  }
 }
