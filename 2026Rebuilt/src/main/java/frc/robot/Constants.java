@@ -75,7 +75,7 @@ public final class Constants {
         public static final double kS = 0.25;
         public static final double kV = 0.12;
         public static final double kA = 0.01;
-        public static final double kP = 1.5;
+        public static final double kP = 5;
         public static final int kI = 0;
         public static final int kD = 0;
         
@@ -84,13 +84,13 @@ public final class Constants {
         public static final int JERK = 1000;
         public static final double GEAR_RATIO = 36/1.0;
         public static final double FEED_FORWARD = 1;
-        public static final int SAFE = 66;
+        public static final int SAFE = 5;
 
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 0.0277778;
-        public static final double MAGNET_OFFSET = -120.849609375;
+        public static final double MAGNET_OFFSET = -0.3349609375;
 
-        public static final double DOWN_POSITION = 290; // * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 40 * DEGREES_TO_REVS;
     }
 
     public static class Intake{

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -126,21 +127,25 @@ public class Pivot extends SubsystemBase {
   }
 
   public boolean isReached(){
-    double currentPos = (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360;
+    double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
     double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
     double diff = Math.abs(currentPos - targetPosition);
-    return diff < 5; 
+    return diff < 10; 
+    // double targetPosition = revsToMove/Constants.Pivot.GEAR_RATIO;
+    // double diff = Math.abs(currentPos - targetPosition);
+    // return diff < 0.1;
   }
 
-  public void moveTo(double degrees){
-    revsToMove = degrees*Constants.Pivot.DEGREES_TO_REVS*Constants.Pivot.GEAR_RATIO;
-    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove);
+  public void moveTo(double rotations){
+    revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
+    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
     motor.setControl(request);
-    setRelToSafe();
+    setRelToAbs();
   }
 
-  public void stopMotor(){
-    motor.stopMotor();
+  public void stop(){
+    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0.0).withFeedForward(0.0);
+    motor.setControl(request.withVelocity(0));
   }
 
   public void resetAbsEncoder(){
@@ -152,17 +157,20 @@ public class Pivot extends SubsystemBase {
     // motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
   }
 
-  public void setRelToSafe() {
-    if (
-        absEncoder.getAbsolutePosition().getValueAsDouble()*360 > Constants.Pivot.SAFE - Constants.Pivot.THRESHOLD && 
-        absEncoder.getAbsolutePosition().getValueAsDouble()*360 < Constants.Pivot.SAFE + Constants.Pivot.THRESHOLD
-      ) {
-      motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
-    }
-  }
+  // public void setRelToSafe() {
+  //   if (
+  //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 > Constants.Pivot.SAFE - Constants.Pivot.THRESHOLD && 
+  //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 < Constants.Pivot.SAFE + Constants.Pivot.THRESHOLD
+  //     ) {
+  //     motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
+  //   }
+  // }
 
   public void setRelToAbs() {
     motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
+  }
+
+  public void maintainPosition() {
   }
 /* 
   @Override
@@ -207,7 +215,9 @@ public class Pivot extends SubsystemBase {
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
-    tab.addNumber("current pivot pos degrees", () -> (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
+    tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
     tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
     tab.addBoolean("pivot reached?", () -> isReached());
   }
