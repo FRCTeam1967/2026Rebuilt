@@ -59,8 +59,8 @@ public final class Constants {
     //public static final double JERK = 800.0;           // placeholder
 
     public static final double PRELOAD_SHOOTER_SPEED = 70.0; 
-    public static final double FLYWHEEL_SHOOTER_SPEED = 630.0; //75; //rotations per second
-    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 200.0;
+    public static final double FLYWHEEL_SHOOTER_SPEED = 80.0; //75; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_ACCELERATION = 500.0;
 
     public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5*Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
     //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
@@ -96,7 +96,7 @@ public final class Constants {
 
     public static class Intake{
         public static final int INTAKE_MOTOR_ID = 11;
-        public static final int INTAKE_MOTOR_SPEED = 15;
+        public static final int INTAKE_MOTOR_SPEED = 30;
     }
 
     public static class Indexer{

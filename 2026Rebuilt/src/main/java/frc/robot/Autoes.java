@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -70,6 +71,7 @@ public class Autoes {
     //autoChooserLOL.addRoutine("Test Conditional", this::testConditional);
     autoChooserLOL.addRoutine("Hub to Tower Preload", this::htw);
     autoChooserLOL.addRoutine("Trench to Neutral Intake", this::otn);
+    autoChooserLOL.addRoutine("Trench to Neutral Intake Climb", this::otctw);    
     
     //m_robotContainer.autoChooserLOL.addRoutine("OTN", this::otn);
     //autoChooserLOL.addRoutine("disSensorTest", this::disSensorTest);
@@ -147,30 +149,44 @@ public class Autoes {
     
     routine.active().onTrue(
       Commands.sequence(
-        shootFromABitBack.resetOdometry(),
-        shootFromABitBack.cmd()
+        hubTowerShoot.resetOdometry(),
+        Commands.sequence(
+        new ParallelRaceGroup(
+          new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+          new WaitCommand(2.5)
+        ),
+        new ParallelCommandGroup(
+                new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+              ).withTimeout(5.0)
+      )
+      .andThen(hubTowerShoot.cmd()),
+        hubTowerShoot.cmd()
       )
     ); 
-    shootFromABitBack.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
-      Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
-    );
-    shootFromABitBack.done().onTrue(
-      Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-        Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-          Commands.parallel(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-          )
-        )
-      ).withTimeout(5.0)
-      .andThen(hubTowerShoot.cmd()));
-
+    // shootFromABitBack.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+    //   Commands.parallel(
+    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //     new RunIndexer(m_robotContainer.indexer, 10.0)
+    //   ).withTimeout(3)
+    // );
+    // shootFromABitBack.done().onTrue(
+    //   Commands.sequence(
+    //     new ParallelRaceGroup(
+    //       new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+    //       new WaitCommand(2.5)
+    //     ),
+    //     new ParallelCommandGroup(
+    //             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //             new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+    //           ).withTimeout(5.0)
+    //   )
+    //   .andThen(hubTowerShoot.cmd())
+    // );
+          
     return routine;
   }
 
@@ -186,7 +202,8 @@ public class Autoes {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
     AutoTrajectory trenchToCenter = routine.trajectory("OT_N");
     AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch");
-    AutoTrajectory shootClimb = routine.trajectory("N_ScoreClimb");
+    AutoTrajectory toZone = routine.trajectory("N_Trench");
+    AutoTrajectory shootClimb = routine.trajectory("TrenchShootClimb");
 
         // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(
@@ -196,12 +213,49 @@ public class Autoes {
         )
     );
     
-    trenchToCenter.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+    // trenchToCenter.atPose("Deploy Intake", 0.02, Math.PI/4).onTrue(
+    //   Commands.parallel(
+    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //     new RunIndexer(m_robotContainer.indexer, 10.0)
+    //   ).withTimeout(3)
+    // );
+
+    trenchToCenter.done().onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
+        Commands.parallel(
+          new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+          new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+          new RunIndexer(m_robotContainer.indexer, 10.0)
+        ), //.withTimeout(5), 
+        intakeMore.cmd()
+      )
+    );
+
+    // intakeMore.atPose("Deploy Intake", 0.02, Math.PI/4).onTrue(
+    //   Commands.parallel(
+    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //     new RunIndexer(m_robotContainer.indexer, 10.0)
+    //   ).withTimeout(3)
+    // );
+
+    intakeMore.done().onTrue(toZone.cmd());
+    toZone.done().onTrue(
+      Commands.parallel(
+        Commands.sequence(
+          new ParallelRaceGroup(
+            new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+            new WaitCommand(2.5)
+          ),
+          new ParallelCommandGroup(
+                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                  new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                  new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+          )
+        ), //.withTimeout(5), 
+        shootClimb.cmd()
+      )
     );
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
@@ -211,32 +265,33 @@ public class Autoes {
     // //  //write intake for fuel traj if true 
     // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
     
-    shootClimb.atPose("Start Score", 0.02,Math.PI/6).onTrue(
-      Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-        Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-          Commands.parallel(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-          )
-        )
-      ).withTimeout(5.0) // might have to edit timeout
-    );
+    // shootClimb.atPose("Start Score", 0.02,Math.PI/6).onTrue(
+    //   Commands.sequence(
+    //     new ParallelRaceGroup(
+    //       new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+    //       new WaitCommand(2.5)
+    //     ),
+    //     new ParallelCommandGroup(
+    //             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //             new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+    //           ).withTimeout(5.0)
+    //   )
+    // );
     
     // edit command sequence for climb
-    shootClimb.atPose("Climb", 0.02,Math.PI/6).onTrue(
-      Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-        Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-          Commands.parallel(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-          )
-        )
-      ).withTimeout(5.0)
-    );
+    // shootClimb.atPose("Climb", 0.02,Math.PI/6).onTrue(
+    //   Commands.parallel(
+    //     new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+    //     Commands.sequence(
+    //       new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+    //       Commands.parallel(
+    //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+    //       )
+    //     )
+    //   ).withTimeout(5.0)
+    // );
 
     return routine;
   }
@@ -252,13 +307,13 @@ public class Autoes {
         trenchNeutral.cmd()
       )
     );
-    trenchNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
-       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
-    );
+    // trenchNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
+    //    Commands.parallel(
+    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //     new RunIndexer(m_robotContainer.indexer, 10.0)
+    //   ).withTimeout(3)
+    // );
     trenchNeutral.done().onTrue(
       neutralScore.cmd()
     );
