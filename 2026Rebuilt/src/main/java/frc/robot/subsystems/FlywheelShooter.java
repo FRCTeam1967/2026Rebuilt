@@ -5,12 +5,18 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import dev.doglog.DogLog;
 
 import com.ctre.phoenix6.CANBus;
 
@@ -35,13 +41,15 @@ import static edu.wpi.first.units.Units.Volts;
 public class FlywheelShooter extends SubsystemBase {
 
   private TalonFX flywheelMotor1;
-  private TalonFX flywheelMotor2;
+  //private TalonFX flywheelMotor2;
 
   private final CANBus canbus = new CANBus("CANivore");
 
   private boolean reachedShooterSpeed = false;
 
   private InterpolatingDoubleTreeMap speedTable; 
+
+  private Follower motorTwo;
 
   // private static final double kSimDt = 0.02;
   // private double simRotorPosRot = 0.0;
@@ -73,7 +81,10 @@ public class FlywheelShooter extends SubsystemBase {
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
     flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
-    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
+    //flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
+
+    motorTwo = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
+
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -93,10 +104,7 @@ public class FlywheelShooter extends SubsystemBase {
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
-    flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
-
-    flywheelMotor1.getConfigurator().apply(talonFXConfigs);
-    flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+    //flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -106,6 +114,9 @@ public class FlywheelShooter extends SubsystemBase {
     //TODO: populate this tree map for distance vs speeds 
     speedTable = new InterpolatingDoubleTreeMap();
     populateTreeMap();
+  
+    flywheelMotor1.getConfigurator().apply(talonFXConfigs);
+    //flywheelMotor2.getConfigurator().apply(talonFXConfigs);
   }
 
   public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
@@ -113,12 +124,16 @@ public class FlywheelShooter extends SubsystemBase {
       .withAcceleration(acceleration);
       //.withFeedForward(5.0);
 
-    MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
-      .withAcceleration(acceleration);
-      //.withFeedForward(5.0);
+    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
+      .withFeedForward(0.12); //kS value ?
+
+    // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
+    //   .withAcceleration(acceleration);
+    //   //.withFeedForward(5.0);
 
     flywheelMotor1.setControl(requestOne);
-    flywheelMotor2.setControl(requestTwo);
+    flywheelMotor1.setControl(torqueRequest);
+    //flywheelMotor2.setControl(requestTwo);
   }
 
   public boolean reachedShooterSpeed() { //checks if the shooter has reached the target speed
@@ -128,15 +143,17 @@ public class FlywheelShooter extends SubsystemBase {
   public double getAverageVelocity() { //checks if the shooter has reached the target speed
   
     double currentVelocity1 = flywheelMotor1.getVelocity().getValueAsDouble();
-    double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
-    double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
-    return(averageVelocity);
+    //double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
+    //ouble averageVelocity = (currentVelocity1 + currentVelocity2)/2;
+    //return(averageVelocity);
+
+    return(currentVelocity1);
 
   }
 
   public void stopMotor() { //stops the motor (obviously : ))
     flywheelMotor1.stopMotor();
-    flywheelMotor2.stopMotor();
+    //flywheelMotor2.stopMotor();
   }
 
   public double getMotorVelocity(TalonFX motor) {
@@ -145,7 +162,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.addDouble("Flywheel Left Speed", () -> getMotorVelocity(flywheelMotor1));
-    tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
+    //tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
     tab.addDouble("Flywheel Average Velocity", () -> getAverageVelocity());
   }
 
@@ -161,7 +178,9 @@ public class FlywheelShooter extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {    
+  public void periodic() {   
+    DogLog.log("current velocity", flywheelMotor1.getVelocity().getValueAsDouble()); 
+    DogLog.log("target velocity", Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED); 
   }
 
   @Override
