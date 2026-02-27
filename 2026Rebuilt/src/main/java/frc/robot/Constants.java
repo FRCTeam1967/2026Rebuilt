@@ -20,10 +20,10 @@ public final class Constants {
     public static final double ACCELERATION = 300;     // placeholder
     public static final double JERK = 300;            // placeholder
 
-    public static final double kP = 5.0;  // placeholder
+    public static final double kP = 3.0;  // placeholder
     public static final double kI = 0.0;  // placeholder
     public static final double kD = 0.0;  // placeholder
-    public static final double kS = 0.0;  // placeholder
+    public static final double kS = 3.0;  // placeholder
     public static final double kV = 0.0;  // placeholder
     public static final double kA = 0.0;  // placeholder
 
@@ -47,19 +47,19 @@ public final class Constants {
     public static final int FLYWHEELSHOOTER_MOTOR1_ID = 37; 
     public static final int FLYWHEELSHOOTER_MOTOR2_ID = 18; 
 
-    public static final double kP = 0.8; // placeholder
+    public static final double kP = 0.67; // placeholder
     public static final double kI = 0.0; // placeholder
     public static final double kD = 0.0; // placeholder
     public static final double kS = 0.0; // placeholder
-    public static final double kV = 0.0; // placeholder
+    public static final double kV = 0.13; // placeholder
     public static final double kA = 0.0; // placeholder
 
     public static final double CRUISE_VELOCITY = 100.0; // placeholder
     public static final double ACCELERATION = 300.0;   // placeholder
     //public static final double JERK = 800.0;           // placeholder
 
-    public static final double PRELOAD_SHOOTER_SPEED = 70.0; 
-    public static final double FLYWHEEL_SHOOTER_SPEED = 80.0; //75; //rotations per second
+    public static final double PRELOAD_SHOOTER_SPEED = 700.0; 
+    public static final double FLYWHEEL_SHOOTER_SPEED = 82.0; //75; //rotations per second
     public static final double FLYWHEEL_SHOOTER_ACCELERATION = 500.0;
 
     public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5*Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;

@@ -82,7 +82,7 @@ public class RobotContainer {
 
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
     public final FlywheelShooter flywheelShooter = new FlywheelShooter();
-    private final Hood hood = new Hood();  
+    public final Hood hood = new Hood();  
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
 
     public RobotContainer() {  
@@ -173,6 +173,7 @@ public class RobotContainer {
       //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
       flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+      hood.setDefaultCommand(new RunCommand(()-> hood.maintainPosition(), hood));
 
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.leftTrigger()

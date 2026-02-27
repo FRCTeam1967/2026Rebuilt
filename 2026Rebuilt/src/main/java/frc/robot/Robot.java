@@ -18,6 +18,7 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
+import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -106,7 +107,13 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotContainer.flywheelShooter.logLeftShooterSpeed();
+    m_robotContainer.flywheelShooter.logRightShooterSpeed();
+    m_robotContainer.flywheelShooter.logAverageShooterSpeed();
+    m_robotContainer.hood.logAbsEncoder();
+    DogLog.log("TargetVelocity", Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED);
+  }
 
   @Override
   public void teleopExit() {}
