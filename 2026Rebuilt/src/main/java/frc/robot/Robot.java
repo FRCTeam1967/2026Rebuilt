@@ -9,6 +9,8 @@ import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.MovePivot;
+import frc.robot.subsystems.Pivot;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -78,6 +80,15 @@ public class Robot extends TimedRobot {
     @Override
     public void testExit() {}
 
+  /** This function is called once when the robot is first started up. */
     @Override
-    public void simulationPeriodic() {}
+    public void simulationInit() {
+        m_robotContainer.pivot.simulationInit();
+    }
+
+  /** This function is called periodically whilst in simulation. */
+    @Override
+    public void simulationPeriodic() {
+        m_robotContainer.pivot.simulationPeriodic();
+    }
 }

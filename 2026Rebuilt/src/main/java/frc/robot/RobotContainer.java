@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.*;
+import frc.robot.subsystems.ExampleSubsystem;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -11,6 +17,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -20,6 +27,20 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
+  // The robot's subsystems and commands are defined here...
+  Pivot pivot = new Pivot();
+  Intake intake = new Intake();
+  Indexer indexer = new Indexer();
+  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController m_driverController =
+      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+
+  private final CommandXboxController m_operatorController =
+      new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+
+  public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
+
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -39,6 +60,16 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
     }
+
+  /**
+   * Use this method to define your trigger->command mappings. Triggers can be created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * predicate, or via the named factories in {@link
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
+   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * joysticks}.
+   */
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -75,6 +106,18 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // mechanism button bindings
+        m_operatorController.x().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+        m_operatorController.rightTrigger().whileTrue(new ParallelCommandGroup(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), new RunIndexer(indexer,Constants.Indexer.INDEXER_SPEED)));
+        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+
+        //SIMULATION BUTTON BINDINGS
+        //new JoystickButton(joystick, 1).onTrue(new MovePivot(pivot, 8));
+        //new JoystickButton(joystick, 2).onTrue(new MovePivot(pivot, 0));
+
+        pivot.configDashboard(fieldTab);
     }
 
     public Command getAutonomousCommand() {
