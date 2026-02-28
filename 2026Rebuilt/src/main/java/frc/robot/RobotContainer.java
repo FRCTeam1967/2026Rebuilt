@@ -28,6 +28,11 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.*;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -42,27 +47,30 @@ import edu.wpi.first.wpilibj.Joystick;
 
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.simulation.JoystickSim;
 
+
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;  
+
+/**
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and trigger mappings) should be declared here.
+ */
 public class RobotContainer {    
+    //drivetrain
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public LED ledSubsystem = new LED();
-    public Autoes autoes = new Autoes(this);
-    public final Pivot pivot = new Pivot();
-    public final Intake intake = new Intake();
-    public final Indexer indexer = new Indexer();
-    public final Feeder feeder = new Feeder();
-    public final FlywheelShooter flywheelShooter = new FlywheelShooter();
-    public final Hood hood = new Hood();
-    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
-
-    //public Vision vision = new Vision(drivetrain, MaxAngularRate);
-
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private final Telemetry logger = new Telemetry(MaxSpeed);
-
-    public Vision vision = new Vision(drivetrain, MaxAngularRate);
-
+    public Autoes autoes = new Autoes(this);
+  
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -70,18 +78,33 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
+    //vision
+    public Vision vision = new Vision(drivetrain, MaxAngularRate);
+    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
+  
+    //mechanism
+    public final Pivot pivot = new Pivot();
+    public final Intake intake = new Intake();
+    public final Indexer indexer = new Indexer();
+    public final Feeder feeder = new Feeder();
+    public final FlywheelShooter flywheelShooter = new FlywheelShooter();
+    public final Hood hood = new Hood();
+    public final Climb climb = new Climb();
+
+    //control
+    private final CommandXboxController m_driverController = new CommandXboxController(0);
+    private final CommandXboxController m_operatorController = new CommandXboxController(1);
+  
+    public LED ledSubsystem = new LED();
     LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
     LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
     Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
+    private Optional<Alliance> ally; 
+  
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
-
-    private final CommandXboxController m_driverController = new CommandXboxController(0);
-    private final CommandXboxController m_operatorController = new CommandXboxController(1);
-
-    private Optional<Alliance> ally;
 
     public RobotContainer() {
         configureBindings();
@@ -89,7 +112,8 @@ public class RobotContainer {
         hood.configDashboard(matchTab);
         flywheelShooter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
-        configLLTab(limelightTab, fieldTab);   
+        configLLTab(limelightTab, fieldTab);
+        climb.configDashboard(fieldTab);
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
@@ -148,6 +172,7 @@ public class RobotContainer {
 
         /* brake mode */
         m_driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        
         /* defense mode? */
         m_driverController.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
@@ -200,61 +225,62 @@ public class RobotContainer {
             )
         ));
     
-      //MECHANISM DEFAULT COMMANDS
-      //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-      pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
-      flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-<<<<<<< Updated upstream
-      hood.setDefaultCommand(new RunHood(hood, Constants.Hood.HOOD_MIN));
-=======
->>>>>>> Stashed changes
+        //MECHANISM DEFAULT COMMANDS
+        //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
+        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+        flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+        hood.setDefaultCommand(new RunHood(hood, Constants.Hood.HOOD_MIN));
 
-      //SHOOTER AND HOOD BUTTON BINDINGS
-      m_operatorController.leftTrigger()
-      .whileTrue(
-        new SequentialCommandGroup(
-          // new ParallelCommandGroup(
-          //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-          //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-          // ),
-          /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
-          new ParallelRaceGroup(
-            new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-            new WaitCommand(2.5)
-          ),
-          //new SequentialCommandGroup(
-            //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
-            new ParallelCommandGroup(
-              new RunHood(hood, Constants.Hood.HOOD_MAX),
-              new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-              new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-              new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-            )
-          //)
-        )
-      );
+        //SHOOTER AND HOOD BUTTON BINDINGS
+        m_operatorController.leftTrigger()
+        .whileTrue(
+          new SequentialCommandGroup(
+            // new ParallelCommandGroup(
+            //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+            //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+            // ),
+            /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
+            new ParallelRaceGroup(
+              new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+              new WaitCommand(2.5)
+            ),
+            //new SequentialCommandGroup(
+              //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+              new ParallelCommandGroup(
+                new RunHood(hood, Constants.Hood.HOOD_MAX),
+                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+              )
+            //)
+          )
+        );
 
-      m_operatorController.y()
-      .whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
+        //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
-      //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
-      //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-      // eject button
-      m_operatorController.rightBumper().whileTrue(
-        new RunFeeder(feeder, 5)
-      );
+        //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
+        //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+        
+        // eject button
+        m_operatorController.rightBumper().whileTrue(
+          new RunFeeder(feeder, 5)
+        );
 
-      m_operatorController.rightTrigger().whileTrue(
-        new ParallelCommandGroup(
-          new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-          new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)));
-          //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
-          
-          new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
+        m_operatorController.rightTrigger().whileTrue(
+          new ParallelCommandGroup(
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)));
+            //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
-      m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+            new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
 
-      m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
+        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+
+        //CLIMB
+        m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
+        m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
+        m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
 
     }
 
@@ -272,10 +298,6 @@ public class RobotContainer {
         targetingAngularVelocity *= -1.0;
         return targetingAngularVelocity;
     }
-
-    // public Command getAutonomousCommand() {
-    //     return Commands.print("No autonomous command configured");
-    // }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
         HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/
@@ -304,6 +326,7 @@ public class RobotContainer {
         double threshold = 5.0;
         return position <=  (target + threshold) && position >= (target - threshold);
     }
+  
     public boolean isAligned(double position) {
         double target = 0.0;
         double threshold = 5.0;

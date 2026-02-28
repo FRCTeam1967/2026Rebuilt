@@ -4,6 +4,13 @@
 
 package frc.robot;               
 
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.MoveClimbUp;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -177,12 +184,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {}
+  
   public void simulationInit() {
     m_robotContainer.pivot.simulationInit();
   }
 
   @Override
   public void simulationPeriodic() {
+    m_robotContainer.climb.simulationPeriodic();
     m_robotContainer.pivot.simulationPeriodic();
   }
 }
