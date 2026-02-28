@@ -5,11 +5,16 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
@@ -36,13 +41,15 @@ import static edu.wpi.first.units.Units.Volts;
 public class FlywheelShooter extends SubsystemBase {
 
   private TalonFX flywheelMotor1;
-  private TalonFX flywheelMotor2;
+  //private TalonFX flywheelMotor2;
 
   private final CANBus canbus = new CANBus("CANivore");
 
   private boolean reachedShooterSpeed = false;
 
-  private InterpolatingDoubleTreeMap speedTable; 
+  private InterpolatingDoubleTreeMap speedTable;
+
+  private Follower flywheelMotor2;
 
   // private static final double kSimDt = 0.02;
   // private double simRotorPosRot = 0.0;
@@ -57,15 +64,15 @@ public class FlywheelShooter extends SubsystemBase {
   //     DCMotor.getKrakenX60Foc(1)
   // );
   // private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
-  // private final MechanismRoot2d shooterRoot = shooterMech.getRoot("shooterRoot", 1, 1);
+  // private final MechanismRoot2d shooterRoot = shooterMech.getRoot(“shooterRoot”, 1, 1);
 
-  // // A "spoke" that rotates to show the flywheel spinning
+  // // A “spoke” that rotates to show the flywheel spinning
   // private final MechanismLigament2d flywheelSpoke =
   //     shooterRoot.append(new MechanismLigament2d(
-  //         "flywheelSpoke",
+  //         “flywheelSpoke”,
   //         0.8,  // length
   //         0.0,  // initial angle (deg)
-  //         6,    
+  //         6,
   //         new Color8Bit(Color.kOrange)
   //     ));
 
@@ -74,7 +81,8 @@ public class FlywheelShooter extends SubsystemBase {
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
     flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
-    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
+    //flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
+    flywheelMotor2 = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -94,19 +102,20 @@ public class FlywheelShooter extends SubsystemBase {
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
-    flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
+    //flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
 
-    flywheelMotor1.getConfigurator().apply(talonFXConfigs);
-    flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     reachedShooterSpeed = false;
-    //SmartDashboard.putData("ShooterMech2d", shooterMech);
+    //SmartDashboard.putData(“ShooterMech2d”, shooterMech);
 
-    //TODO: populate this tree map for distance vs speeds 
+    //TODO: populate this tree map for distance vs speeds
     speedTable = new InterpolatingDoubleTreeMap();
     populateTreeMap();
+
+     flywheelMotor1.getConfigurator().apply(talonFXConfigs);
   }
 
   public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
@@ -114,30 +123,33 @@ public class FlywheelShooter extends SubsystemBase {
       .withAcceleration(acceleration);
       //.withFeedForward(5.0);
 
-    MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
-      .withAcceleration(acceleration);
-      //.withFeedForward(5.0);
+      MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
+      .withFeedForward(0.12); //kS value ?
+
+    // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
+    //   .withAcceleration(acceleration);
+    //   //.withFeedForward(5.0);
 
     flywheelMotor1.setControl(requestOne);
-    flywheelMotor2.setControl(requestTwo);
+    flywheelMotor1.setControl(torqueRequest);
   }
 
   public boolean reachedShooterSpeed() { //checks if the shooter has reached the target speed
-    return (getAverageVelocity() >= Constants.FlywheelShooter.SHOOTER_THRESHOLD_SPEED1);
+    return (getCurrentVelocity() >= Constants.FlywheelShooter.SHOOTER_THRESHOLD_SPEED1);
   }
 
-  public double getAverageVelocity() { //checks if the shooter has reached the target speed
-  
-    double currentVelocity1 = flywheelMotor1.getVelocity().getValueAsDouble();
-    double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
-    double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
-    return(averageVelocity);
+  public double getCurrentVelocity() { //checks if the shooter has reached the target speed
 
+    double currentVelocity1 = flywheelMotor1.getVelocity().getValueAsDouble();
+    // double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
+    // double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
+    // return(averageVelocity);
+    return(currentVelocity1);
   }
 
   public void stopMotor() { //stops the motor (obviously : ))
     flywheelMotor1.stopMotor();
-    flywheelMotor2.stopMotor();
+    //flywheelMotor2.stopMotor();
   }
 
   public double getMotorVelocity(TalonFX motor) {
@@ -145,15 +157,21 @@ public class FlywheelShooter extends SubsystemBase {
   }
 
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addDouble("Flywheel Left Speed", () -> getMotorVelocity(flywheelMotor1));
-    tab.addDouble("Flywheel Right Speed", () -> getMotorVelocity(flywheelMotor2));
-    tab.addDouble("Flywheel Average Velocity", () -> getAverageVelocity());
+    //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
+    tab.addDouble("FlywheelSpeed", () -> getMotorVelocity(flywheelMotor1));
   }
 
   //TODO: fill in these values
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
-    speedTable.put(1.0, 200.0); //example
+    speedTable.put(0.9144, 59.0); //3 feet
+    speedTable.put(1.2192, 63.0); //4 feet
+    speedTable.put(1.524, 65.0); //5 feet
+    speedTable.put(1.8288, 72.0); //6 feet
+    speedTable.put(2.1336, 72.0); //7 feet
+    speedTable.put(2.4384, 80.0); //8 feet
+    speedTable.put(2.7432, 82.0); //9 feet
+    speedTable.put(3.084, 83.0); //10 feet
   }
 
   //TODO: call this in robot container when setting speed
@@ -161,26 +179,18 @@ public class FlywheelShooter extends SubsystemBase {
     return speedTable.get(distanceToHub);
   }
 
-  public void logLeftShooterSpeed(){
-    DogLog.log("LeftShooterSpeed", getMotorVelocity(flywheelMotor1));
-  }
-
-  public void logRightShooterSpeed(){
-    DogLog.log("RightShooterSpeed", getMotorVelocity(flywheelMotor2));
-  }
-
-  public void logAverageShooterSpeed(){
-    DogLog.log("AverageShooterSpeed", getAverageVelocity());
+  public void logShooterSpeed(){
+    DogLog.log("ShooterSpeed", getMotorVelocity(flywheelMotor1));
   }
 
   @Override
-  public void periodic() {    
+  public void periodic() {
   }
 
   @Override
   public void simulationPeriodic() {
 
-    
+
     // if (RobotState.isDisabled()) {
     //   stopMotor();
 
@@ -204,7 +214,7 @@ public class FlywheelShooter extends SubsystemBase {
     //   sim2.setRawRotorPosition(0.0);
 
     //   flywheelSpoke.setAngle(0.0);
-    //   SmartDashboard.putNumber("Flywheel/RotorRPS", 0.0);
+    //   SmartDashboard.putNumber(“Flywheel/RotorRPS”, 0.0);
     //   return;
     // }
 
@@ -235,8 +245,8 @@ public class FlywheelShooter extends SubsystemBase {
     // spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
     // flywheelSpoke.setAngle(spokeAngleDeg);
 
-    // SmartDashboard.putNumber("Flywheel/RotorRPS", rotorRps);
-    // SmartDashboard.putNumber("Flywheel/MotorVolts", motorVolts);
-    // SmartDashboard.putNumber("Flywheel/SpokeAngleDeg", spokeAngleDeg);
+    // SmartDashboard.putNumber(“Flywheel/RotorRPS”, rotorRps);
+    // SmartDashboard.putNumber(“Flywheel/MotorVolts”, motorVolts);
+    // SmartDashboard.putNumber(“Flywheel/SpokeAngleDeg”, spokeAngleDeg);
   }
 }

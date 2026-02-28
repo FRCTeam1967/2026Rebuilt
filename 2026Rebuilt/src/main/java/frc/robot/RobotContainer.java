@@ -28,17 +28,13 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
-import frc.robot.subsystems.LED;
-
+import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
@@ -59,10 +55,13 @@ public class RobotContainer {
     public final Hood hood = new Hood();
     public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
 
+    //public Vision vision = new Vision(drivetrain, MaxAngularRate);
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
     private final Telemetry logger = new Telemetry(MaxSpeed);
+
+    public Vision vision = new Vision(drivetrain, MaxAngularRate);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -179,7 +178,7 @@ public class RobotContainer {
             )
         );
 
-        m_driverController.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
+        //m_driverController.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
 
         m_driverController.x().onTrue(new SequentialCommandGroup(
             // ROTATION2D IS IN **RADIANS!!!!**
@@ -205,7 +204,10 @@ public class RobotContainer {
       //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
       flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+<<<<<<< Updated upstream
       hood.setDefaultCommand(new RunHood(hood, Constants.Hood.HOOD_MIN));
+=======
+>>>>>>> Stashed changes
 
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.leftTrigger()
@@ -215,8 +217,9 @@ public class RobotContainer {
           //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
           //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
           // ),
+          /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
           new ParallelRaceGroup(
-            new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+            new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
             new WaitCommand(2.5)
           ),
           //new SequentialCommandGroup(
@@ -225,7 +228,7 @@ public class RobotContainer {
               new RunHood(hood, Constants.Hood.HOOD_MAX),
               new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
               new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-              new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+              new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
             )
           //)
         )
