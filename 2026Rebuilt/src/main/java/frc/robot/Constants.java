@@ -21,11 +21,11 @@ public final class Constants {
     public static final double ACCELERATION = 300;     // placeholder
     public static final double JERK = 300;            // placeholder
 
-    public static final double kP = 3.0;  // placeholder
+    public static final double kP = 1.0;  // placeholder
     public static final double kI = 0.0;  // placeholder
     public static final double kD = 0.0;  // placeholder
-    public static final double kS = 3.0;  // placeholder
-    public static final double kV = 0.0;  // placeholder
+    public static final double kS = 0.12;  // placeholder
+    public static final double kV = 0.3;  // placeholder
     public static final double kA = 0.0;  // placeholder
 
     public static final double GEAR_RATIO = 1.5;      // motor_rot / hood_rot
@@ -34,7 +34,8 @@ public final class Constants {
     //public static final double MAX_DEG = 86.0;
 
     public static final double HOOD_HOLD_DEG = 30.0;
-    public static final double HOOD_MAX = 57 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+    public static final double HOOD_MAX = 390.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+    public static final double HOOD_MIN = 0.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
     public static final double HOOD_TOLERANCE_DEG = 5.00;
 
     public static final double DEGREES_TO_REVS = 1.0/360.0;
@@ -60,7 +61,7 @@ public final class Constants {
     //public static final double JERK = 800.0;           // placeholder
 
     public static final double PRELOAD_SHOOTER_SPEED = 700.0; 
-    public static final double FLYWHEEL_SHOOTER_SPEED = 82.0; //75; //rotations per second
+    public static final double FLYWHEEL_SHOOTER_SPEED = 72.0; //75; //rotations per second
     public static final double FLYWHEEL_SHOOTER_ACCELERATION = 500.0;
 
     public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5*Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;

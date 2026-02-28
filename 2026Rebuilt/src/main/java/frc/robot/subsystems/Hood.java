@@ -66,13 +66,13 @@ public class Hood extends SubsystemBase {
     //then get the magnet offset (which they provide) and add it here. 
     //now, whenever the hood is all the way down, the abs encoder 
     //will always read 0
-    ccdConfigs.MagnetSensor.MagnetOffset = 0.315185546875;
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.313720703125;
 
     absEncoder.getConfigurator().apply(ccdConfigs);
 
     // moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
     setRelToAbs();
-    resetEncoder();
+    //resetEncoder();
     //stop();
 
     //TODO: populate this tree map for angles vs speeds 
@@ -82,7 +82,8 @@ public class Hood extends SubsystemBase {
 
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
-    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove)).withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
+    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove));
+    //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
     hoodMotor.setControl(request);
   }
 
@@ -166,7 +167,7 @@ public class Hood extends SubsystemBase {
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
-    tab.addDouble("Hood Absolute (deg)", () -> getAbsDeg());
+    tab.addDouble("Hood Absolute (rot)", () -> getAbsPos());
     //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
     tab.addBoolean("Hood at Target?", () -> isReached());
     tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
@@ -178,6 +179,6 @@ public class Hood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    resetEncoder();
+    //resetEncoder();
   }
 }

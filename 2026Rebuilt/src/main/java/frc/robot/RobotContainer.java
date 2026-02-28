@@ -205,7 +205,7 @@ public class RobotContainer {
       //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
       flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-      hood.setDefaultCommand(new RunCommand(()-> hood.maintainPosition(), hood));
+      hood.setDefaultCommand(new RunHood(hood, Constants.Hood.HOOD_MIN));
 
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.leftTrigger()
@@ -222,6 +222,7 @@ public class RobotContainer {
           //new SequentialCommandGroup(
             //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
             new ParallelCommandGroup(
+              new RunHood(hood, Constants.Hood.HOOD_MAX),
               new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
               new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
               new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
@@ -231,7 +232,7 @@ public class RobotContainer {
       );
 
       m_operatorController.y()
-      .onTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
+      .whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
       //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
       //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
