@@ -41,11 +41,9 @@ import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Pivot;
 
 public class Robot extends TimedRobot {
-  private final RobotContainer m_robotContainer;
+  private RobotContainer m_robotContainer;
 
   boolean enableLimelight = false;
-  
-
 
   private final StructPublisher<Pose2d> choreoPublisher;
   //private final NetworkTableListener autoPublisher;

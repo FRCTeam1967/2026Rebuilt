@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.robot.generated.TunerConstants;
 
 public final class Constants {
 
@@ -122,7 +123,7 @@ public final class Constants {
     public static final double LIMELIGHT_ALIGN_CENTER_OFFSET = -0.1431036;
     public static final double LIMELIGHT_AUTO_LEFT_OFFSET = -0.11;
     public static final double LIMELIGHT_L4_LEFT_OFFSET = -0.1;
-    public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * Swerve.SWERVE_MAX_SPEED; //0.43 //0.425
+    public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * TunerConstants.maxSpeed; //0.43 //0.425
     public static final double ALIGNMENT_THRESHOLD = 1.0;
     public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
     public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA

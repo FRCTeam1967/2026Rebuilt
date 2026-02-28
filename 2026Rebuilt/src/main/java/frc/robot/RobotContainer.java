@@ -57,7 +57,7 @@ public class RobotContainer {
     public final Feeder feeder = new Feeder();
     public final FlywheelShooter flywheelShooter = new FlywheelShooter();
     public final Hood hood = new Hood();
-    public VisionUpdate vision = new VisionUpdate(drivetrain);
+    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -82,6 +82,8 @@ public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
 
+    private Optional<Alliance> ally;
+
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
@@ -92,7 +94,7 @@ public class RobotContainer {
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-        Optional<Alliance> ally = DriverStation.getAlliance(); 
+        ally = DriverStation.getAlliance(); 
 
     }
     

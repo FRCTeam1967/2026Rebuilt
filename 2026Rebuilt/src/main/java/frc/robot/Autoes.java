@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -86,11 +87,15 @@ public class Autoes {
    
   private AutoRoutine otn() {
     AutoRoutine routine = autoFactory.newRoutine("OT_N");
-    
     AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
+    double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
     routine.active().onTrue(
       Commands.sequence(
+        //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
           trenchNeutral.resetOdometry(),
+           //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
           trenchNeutral.cmd() 
     ));
     trenchNeutral.atPose("Start Intake", 0.2,0.2).onTrue(
@@ -109,10 +114,16 @@ public class Autoes {
     AutoTrajectory trenchToDepot = routine.trajectory("DT_D");
     AutoTrajectory depotToShoot = routine.trajectory("D_Shoot");
     AutoTrajectory shootToClimb = routine.trajectory("Shoot_TW");
+    double initialOrientation = trenchToDepot.getInitialPose().get().getRotation().getDegrees();
 
     routine.active().onTrue(
       Commands.sequence(
+        //step one: set gyro to starting heading (flips for alliance)
+        new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
         trenchToDepot.resetOdometry(),
+        //step three: set LL heading to gyro (aka starting) heading
+        new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+              
         trenchToDepot.cmd()
       )
     );
