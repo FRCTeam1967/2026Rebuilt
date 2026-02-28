@@ -56,7 +56,7 @@ public class RobotContainer {
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
     public final FlywheelShooter flywheelShooter = new FlywheelShooter();
-    public final Hood hood = new Hood();  
+    public final Hood hood = new Hood();
     public VisionUpdate vision = new VisionUpdate(drivetrain);
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -75,7 +75,7 @@ public class RobotContainer {
     LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
     Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
-    public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
+    public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
@@ -203,6 +203,7 @@ public class RobotContainer {
       //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
       flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
+      hood.setDefaultCommand(new RunCommand(()-> hood.maintainPosition(), hood));
 
       //SHOOTER AND HOOD BUTTON BINDINGS
       m_operatorController.leftTrigger()

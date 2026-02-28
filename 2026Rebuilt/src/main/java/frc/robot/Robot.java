@@ -19,6 +19,7 @@ import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import dev.doglog.DogLog;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -40,8 +41,6 @@ import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Pivot;
 
 public class Robot extends TimedRobot {
-  public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
-
   private final RobotContainer m_robotContainer;
 
   boolean enableLimelight = false;
@@ -158,8 +157,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
+    m_robotContainer.flywheelShooter.logLeftShooterSpeed();
+    m_robotContainer.flywheelShooter.logRightShooterSpeed();
+    m_robotContainer.flywheelShooter.logAverageShooterSpeed();
+    m_robotContainer.hood.logAbsEncoder();
+    DogLog.log("TargetVelocity", Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED);
 
+    LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0); //robot gyro
   }
 

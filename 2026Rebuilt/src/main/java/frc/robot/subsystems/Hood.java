@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import dev.doglog.DogLog;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -59,13 +60,13 @@ public class Hood extends SubsystemBase {
     hoodMotor.getConfigurator().apply(talonFXConfigs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
     
     //TODO: go to tuner x, rezero the absolute encoder, 
     //then get the magnet offset (which they provide) and add it here. 
     //now, whenever the hood is all the way down, the abs encoder 
     //will always read 0
-    ccdConfigs.MagnetSensor.MagnetOffset = -0.16015625;
+    ccdConfigs.MagnetSensor.MagnetOffset = 0.315185546875;
 
     absEncoder.getConfigurator().apply(ccdConfigs);
 
@@ -125,6 +126,15 @@ public class Hood extends SubsystemBase {
   //TODO: call this in robot container when setting speed
   public double getNecessaryAngle(double distanceToHub) {
     return angleTable.get(distanceToHub);
+  }
+
+  public void logAbsEncoder(){
+    DogLog.log("AbsoluteHoodPosition", getAbsPos());
+  }
+
+  public void maintainPosition() {
+    double currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
+    hoodMotor.setControl(new MotionMagicVoltage(currentPos));
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees

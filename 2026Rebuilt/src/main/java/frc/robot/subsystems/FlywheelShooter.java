@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import dev.doglog.DogLog;
 
 import frc.robot.Constants;
 
@@ -158,6 +159,18 @@ public class FlywheelShooter extends SubsystemBase {
   //TODO: call this in robot container when setting speed
   public double getNecessarySpeed(double distanceToHub) {
     return speedTable.get(distanceToHub);
+  }
+
+  public void logLeftShooterSpeed(){
+    DogLog.log("LeftShooterSpeed", getMotorVelocity(flywheelMotor1));
+  }
+
+  public void logRightShooterSpeed(){
+    DogLog.log("RightShooterSpeed", getMotorVelocity(flywheelMotor2));
+  }
+
+  public void logAverageShooterSpeed(){
+    DogLog.log("AverageShooterSpeed", getAverageVelocity());
   }
 
   @Override
