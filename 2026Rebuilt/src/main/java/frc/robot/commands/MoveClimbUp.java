@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Climb;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class MoveClimb extends Command {
+public class MoveClimbUp extends Command {
   private Climb climb;
-  private double meters;
+  private double inches;
 
   /** Creates a new MoveClimb. */
-  public MoveClimb(Climb climb, double meters) {
+  public MoveClimbUp(Climb climb, double inches) {
     this.climb = climb;
-    this.meters = meters;
+    this.inches = inches;
     addRequirements(climb);
     
     // Use addRequirements() here to declare subsystem dependencies.
@@ -27,12 +27,20 @@ public class MoveClimb extends Command {
   public void initialize(){
     
   }
-  
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climb.moveTo(meters);
+    /* 
+    if (climb.isReachedTopSwitch() || climb.isReachedBottomSwitch()) {
+      climb.stopMotor();
+    } else {
+       climb.moveTo(inches);
+    }
+    */
+    climb.moveTo(inches);
+
+    //climb.move(meters);
   }
 
   // Called once the command ends or is interrupted.
@@ -44,8 +52,8 @@ public class MoveClimb extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return climb.atHeight();
-    //return false;
+    return (climb.isReachedTopSwitch());
+    //return climb.atHeight();
   }
 }
 

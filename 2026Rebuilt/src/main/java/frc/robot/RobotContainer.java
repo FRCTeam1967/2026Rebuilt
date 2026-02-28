@@ -6,8 +6,8 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Climb;
-import frc.robot.commands.*;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.simulation.JoystickSim;
 
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;  
 
 /**
@@ -33,12 +35,13 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   // public final CommandXboxController m_driverController =
   //     new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  // public final CommandXboxController m_operatorController =
-  // new CommandXboxController(OperatorConstants.kOperatorControllerPort);
+  public final CommandXboxController m_operatorController = new CommandXboxController(OperatorConstants.kOperatorControllerPort);
   
   //public final JoystickSim simJoystick = new JoystickSim(1);
   public final Joystick joystick = new Joystick(0);
   public final JoystickSim joystickSim = new JoystickSim(joystick);
+
+  public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
 
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -58,8 +61,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // new Trigger(m_exampleSubsystem::exampleCondition)
+    //     .onTrue(new ExampleCommand(m_exampleSubsystem));
 
         final XboxController driverController = new XboxController(0);
 
@@ -67,18 +70,26 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
 
-    // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    // m_operatorController.a().onTrue(new MoveClimb(climb, 20));
+    m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
+    m_operatorController.a().onTrue(new MoveClimbUp(climb, -15)); 
+    m_operatorController.b().onTrue(new MoveClimbtoZero(climb, 15)); 
+
+
+    /* 
     new JoystickButton(joystick, 1).onTrue(new MoveClimb(climb,3));
     new JoystickButton(joystick, 2).onTrue(new MoveClimb(climb, 0));
 
-    new JoystickButton(driverController, XboxController.Button.kY.value)
       .onTrue(new MoveClimb(climb, 0.35));
 
     // Move climb DOWN
     new JoystickButton(driverController, XboxController.Button.kA.value)
         .onTrue(new MoveClimb(climb, 0.0));
+        
+    */
+
+  climb.configDashboard(fieldTab);
   }
 
 

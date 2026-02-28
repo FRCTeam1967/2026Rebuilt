@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
@@ -38,13 +39,19 @@ import frc.robot.Constants;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 
 
@@ -54,17 +61,20 @@ public class Climb extends SubsystemBase {
   private TalonFX motor; 
   private TalonFXConfiguration config;
   // private MotionMagicVoltage request;
-  private DigitalInput sensor;
+  private DigitalInput bottomSensor;
+  private DigitalInput topSensor;
   private double rotations;
   private double appliedVoltage;
   private DifferentialDrivetrainSim swerve;
+  private double speed;
+  final CANBus canbus = new CANBus("CANivore");
 
   // private ProfiledPIDController m_controller;
   // private EncoderSim encoderSim;
   private DIOSim sensorSim;
   private ElevatorSim climbSim; //new ElevatorSim(plant, gearbox, Constants.Climb.MIN_HEIGHT, Constants.Climb.MAX_HEIGHT, true, Constants.Climb.SAFE, 0);
-  // private ElevatorFeedforward m_feedforward;
-  // private DCMotorSim gearbox;
+  private ElevatorFeedforward m_feedforward;
+  private DCMotorSim gearbox;
   private double simRotorPosition;
 
   private Mechanism2d mechanism;
@@ -78,14 +88,20 @@ public class Climb extends SubsystemBase {
   private Rotation3d rotation;
 
   public Climb() {
-    motor = new TalonFX(Constants.Climb.MOTOR_ID);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
     config = new TalonFXConfiguration();
-    sensor = new DigitalInput(Constants.Climb.SENSOR_CHANNEL);
+    bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
+    topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
     motorSim = motor.getSimState();
     field = new Field2d();
     swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
     rotation = new Rotation3d();
     poses = new Pose3d(0.0,0.0,0.0,rotation);
+    speed = 5.0;
+
+    CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
+
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     
 
     config.Slot0.kP = Constants.Climb.kP;
@@ -99,7 +115,8 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
-    
+  }
+    /* 
     if (RobotBase.isSimulation()) {
       motorSim = motor.getSimState();
       climbSim =
@@ -123,8 +140,8 @@ public class Climb extends SubsystemBase {
               new MechanismLigament2d(
                   "carriage", 5, 0, 6, new Color8Bit(Color.kBlue)));
     */
-         
-      sensorSim = new DIOSim(sensor);
+    /*     
+      sensorSim = new DIOSim(bottomSensor);
 
       mechanism = new Mechanism2d(2, 2);
 
@@ -152,7 +169,7 @@ public class Climb extends SubsystemBase {
       // plate
       MechanismLigament2d plate =
           carriage.append(new MechanismLigament2d(
-              "plate", 0.6, 0, t, new Color8Bit(Color.kBlue))); //length:0.6
+              "plate", 0.6, 0, t, new Color8Bit(Color.kBlue)));
 
       // hook
       plate.append(new MechanismLigament2d(
@@ -167,11 +184,14 @@ public class Climb extends SubsystemBase {
       .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
   }
 }
+*/
 
+/* 
   public void simulationInit(){
     motorSim = motor.getSimState();
     motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
   }
+*/
 
   public void resetEncoders() {
     if (RobotBase.isSimulation()) {
@@ -182,29 +202,60 @@ public class Climb extends SubsystemBase {
     }
   }
 
-  public void moveTo(double meters) {  
-    rotations = meters*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
+  public void moveTo(double inches) {  
+    rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
     appliedVoltage = Constants.Climb.FEED_FORWARD;
     MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
     motor.setControl(request);
   }
 
   public boolean atHeight(){
-    double currentPosition = RobotBase.isSimulation() ? simRotorPosition : motor.getRotorPosition().getValueAsDouble();
+    double currentPosition = motor.getRotorPosition().getValueAsDouble();
     return Math.abs(rotations - currentPosition) < Constants.Climb.ERROR_THRESHOLD;
+  
+
+    /*
+    if (getBottomSensor() || getTopSensor()){
+      return true;
+    }
+    return false; */
   }
 
   public void setSafe(){
-    if(!sensor.get()){
+    if(!bottomSensor.get()){
       motor.setPosition(0);
     }
   }
-  public boolean getSensor(){
-    return !sensor.get();
+
+  public boolean getBottomSensor(){
+    return !bottomSensor.get();
+  }
+    public boolean getTopSensor(){
+    return !topSensor.get();
+  }
+
+  public boolean isReachedTopSwitch(){
+    return (!topSensor.get());
+  }
+
+  public boolean isReachedBottomSwitch(){
+    return (!bottomSensor.get());
+  }
+
+  public void setMotor() {
+    motor.set(speed);
   }
 
   public void stopMotor() {
     motor.stopMotor();
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addBoolean("at height", ()-> (Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble())) < Constants.Climb.ERROR_THRESHOLD);
+    tab.addNumber("rotations", () -> motor.getRotorPosition().getValueAsDouble());
+    tab.addNumber("inches", () -> motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    tab.addBoolean("bottom sensor", () -> getBottomSensor());
+    tab.addBoolean("top sensor", () -> getTopSensor());
   }
 
   // public void reachGoal(double goal) {
@@ -214,8 +265,13 @@ public class Climb extends SubsystemBase {
   //   double feedforwardOutput = m_feedforward.calculate(m_controller.getSetpoint().velocity);
   //   gearbox.setInputVoltage(pidOutput + feedforwardOutput);
   // }
-  
+
   @Override
+  public void periodic() {
+    setSafe();
+  }
+  /*
+   * @Override
   public void simulationPeriodic() {
     double error = rotations - simRotorPosition;
     double kSimP = 1.0; 
@@ -242,14 +298,7 @@ public class Climb extends SubsystemBase {
     SmartDashboard.putBoolean("sensor val", getSensor());
     SmartDashboard.putNumber("position", currentHeight);
     SmartDashboard.putNumber("voltage", voltage);
-    /*
-    SmartDashboard.putNumber("pose3d x", poses.getX());
-    SmartDashboard.putNumber("pose3d y", poses.getY());
-    SmartDashboard.putNumber("pose3d z", poses.getZ());
-    SmartDashboard.putNumber("pose3d rotx", poses.getRotation().getX());
-    SmartDashboard.putNumber("pose3d roty", poses.getRotation().getY());
-    SmartDashboard.putNumber("pose3d rotz", poses.getRotation().getZ());
-    */
+   
     SmartDashboard.putNumberArray("robotPose", new double[] {
       poses.getX(),
       poses.getY(),
@@ -262,6 +311,8 @@ public class Climb extends SubsystemBase {
     
 
   }
+  */
+  
   
 }
 
