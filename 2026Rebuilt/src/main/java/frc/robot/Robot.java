@@ -11,14 +11,15 @@ import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
 
-import choreo.Choreo;
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-import choreo.trajectory.SwerveSample;
-import choreo.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.LEDPattern;
+import choreo.util.ChoreoAllianceFlipUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -28,19 +29,30 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.commands.*;
+//import frc.robot.LimelightHelpers.PoseEstimate;
+import dev.doglog.DogLog;
 import frc.robot.subsystems.LED;
-import frc.robot.commands.MovePivot;
 import frc.robot.subsystems.Pivot;
 
 public class Robot extends TimedRobot {
+  public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+
+  private final RobotContainer m_robotContainer;
+
+  boolean enableLimelight = false;
+  
+
+
+  private final StructPublisher<Pose2d> choreoPublisher;
+  //private final NetworkTableListener autoPublisher;
+
   private Command m_autonomousCommand; //AutoRoutine
-  public static RobotContainer m_robotContainer;
+  
   
   //public final AutoChooser autoChooserLOL = new AutoChooser();
   //public ShuffleboardTab matchTab;
@@ -51,6 +63,7 @@ public class Robot extends TimedRobot {
     // Put the auto chooser on the dashboard
     //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     //SmartDashboard.putData(autoChooser)
+  choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
   }
 
    
@@ -61,59 +74,100 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_robotContainer = new RobotContainer();
   }
-  
+
+// private Command testCmd() {
+//     return Commands.sequence(
+//       autoFactory.resetOdometry("test"),
+//       autoFactory.trajectoryCmd("test")
+//     );
+//   }
+//gerryrig auto 
+// private AutoRoutine runMotor() {
+//   AutoRoutine routine = autoFactory.newRoutine("run");
+//   // AutoTrajectory gerryMotor = routine.trajectory("run");
+//   // Load the routine's trajectories
+
+//   // When the routine begins, reset odometry and start the first trajectory (1)
+// //   routine.active().onTrue(new RunCommand(() -> m_gerryRig.runMotor(0.7), m_gerryRig));
+
+//   return routine;
+// }
+
+// public void addToChooser(String title, AutoRoutine routine) {
+//   autoChooser.addRoutine(title, routine);
+// }
+
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
   }
+
+
+  /*
+   * Limelight IMU Modes:
+   * 0: No internal IMU processing. MT2 uses interpolated yaw from robot's gyro sent via SetRobotOrientation().
+   * 1: Internal IMU offset is calibrated to match external yaw each frame (seeding). MT2 still uses external yaw for botpose.
+   * 2: Uses internal IMU's fused yaw only. No external input required.
+   * 3: Complementary filter fuses internal IMU with MT1 vision yaw. When MT1 gets a valid pose, it slowly corrects internal IMU drift.
+   * 4: Complementary filter fuses internal IMU with external yaw from SetRobotOrientation(). This is the recommended mode, as the internal IMU's 
+   * 1khz update rate is utilized for frame-by-frame motion while the robot's IMU corrects for any drift over time.
+   */
 
   @Override
   public void disabledInit() {
     SignalLogger.stop();
   }
 
+
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    LimelightHelpers.SetIMUMode("limelight-front", 0);
+    LimelightHelpers.SetThrottle("limelight-front", 200);
+  }
 
   @Override
   public void disabledExit() {}
 
   @Override
   public void autonomousInit() {
-    // //m_autonomousCommand = pickupAndScoreAuto();
-    // // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    // m_autonomousCommand = autoChooser.selectedCommand();
-  
-    // if (m_autonomousCommand != null) {
-    //   //autoChooser.selectedCommandScheduler();
-    //   m_autonomousCommand.schedule();
-    // }
+    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
+    LimelightHelpers.SetThrottle("limelight-front", 50);
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); // robot gyro
+    // LimelightHelpers.SetThrottle("limelight-back", 50);
     SignalLogger.start();
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); // robot gyro
+  }
 
   @Override
   public void autonomousExit() {}
 
   @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    LimelightHelpers.SetThrottle("limelight-front", 0);
+    // LimelightHelpers.SetThrottle("limelight-back", 0);
+    m_robotContainer.visionUpdate.setFirstVisionPose();
     SignalLogger.start();
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
+
+    // LimelightHelpers.SetIMUMode("limelight-back", 0); //robot gyro
+  }
 
   @Override
   public void teleopExit() {}
 
   @Override
   public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
   }
 
   @Override

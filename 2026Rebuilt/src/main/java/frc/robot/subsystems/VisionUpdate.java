@@ -10,15 +10,11 @@ import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -30,7 +26,6 @@ public class VisionUpdate extends SubsystemBase {
 
   // visibility dataType name;
   private CommandSwerveDrivetrain drivetrain;
-  private SwerveDrivePoseEstimator m_poseEstimator;
 
   private final StructPublisher<Pose2d> limelightPublisher;
 
@@ -120,11 +115,6 @@ public class VisionUpdate extends SubsystemBase {
 
     LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
 
-    // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-    // if(Math.abs(drivetrain.getPigeon2().getRotation2d().getDegrees()) > 360) {
-    //   doRejectUpdate = true;
-    // }
-    
     if(mt2.tagCount == 0) {
       doRejectUpdate = true;
     }
