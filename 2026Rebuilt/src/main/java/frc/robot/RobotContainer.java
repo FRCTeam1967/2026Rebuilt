@@ -64,7 +64,7 @@ public class RobotContainer {
     // cancelling on release.
     //m_driverController.b().onTrue(m_exampleSubsystem.exampleMethodCommand());
     m_operatorController.x().whileTrue(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED));
-    m_operatorController.rightTrigger().whileTrue(new ParallelCommandGroup(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), new RunIndexer(indexer, 10.0)));
+    m_operatorController.rightTrigger().whileTrue(new ParallelCommandGroup(new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED), new RunIndexer(indexer,Constants.Indexer.INDEXER_SPEED)));
     m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
     m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
