@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -175,8 +176,10 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
-      
+       
+        
         //SHOOTER AND HOOD BUTTON BINDINGS
+         m_operatorController.x().whileTrue(new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION));
       m_operatorController.x()
       .whileTrue(
         new SequentialCommandGroup(
@@ -186,7 +189,7 @@ public class RobotContainer {
           // ),
           new ParallelRaceGroup(
             new RunFlywheelShooter(flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-            new WaitCommand(5.0)
+            new WaitCommand(2.5)
           ),
           //new SequentialCommandGroup(
             //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),

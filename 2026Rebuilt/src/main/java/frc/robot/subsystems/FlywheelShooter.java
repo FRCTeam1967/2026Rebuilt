@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import dev.doglog.DogLog;
 
 import frc.robot.Constants;
 
@@ -80,8 +81,8 @@ public class FlywheelShooter extends SubsystemBase {
 
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
-    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
-    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
+    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID);
+    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -101,7 +102,7 @@ public class FlywheelShooter extends SubsystemBase {
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     flywheelMotor1.setNeutralMode(NeutralModeValue.Coast);
-    //flywheelMotor2.setNeutralMode(NeutralModeValue.Coast);
+    flywheelMotor2.setNeutralMode(NeutralModeValue.Coast);
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -128,14 +129,15 @@ public class FlywheelShooter extends SubsystemBase {
       .withAcceleration(acceleration);
       //.withFeedForward(5.0);
 
-    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
-      .withFeedForward(0.12); //kS value ?
+    // MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
+    //   .withFeedForward(0.12); //kS value ?
 
     // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
     //   .withAcceleration(acceleration);
     //   //.withFeedForward(5.0);
 
     flywheelMotor1.setControl(requestOne);
+    flywheelMotor2.setControl(followerRequest);
     // flywheelMotor1.setControl(torqueRequest);
     //flywheelMotor2.setControl(requestTwo);
   }
@@ -157,7 +159,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   public void stopMotor() { //stops the motor (obviously : ))
     flywheelMotor1.stopMotor();
-    //flywheelMotor2.stopMotor();
+    flywheelMotor2.stopMotor();
   }
 
   public double getMotorVelocity(TalonFX motor) {

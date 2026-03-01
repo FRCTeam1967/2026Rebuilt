@@ -24,12 +24,14 @@ public class RunFlywheelShooter extends Command {
     this.shooter = shooter;
     this.speed = speed;
     this.acceleration = acceleration;
+    
 
     addRequirements(shooter);
   }
 
   @Override
   public void initialize() {
+    System.out.println("command ran");
   
   }
 
