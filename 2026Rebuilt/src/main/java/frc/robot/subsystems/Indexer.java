@@ -18,12 +18,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
  private TalonFX motor;
- final CANBus canbus = new CANBus("CANivore");
+ //final CANBus canbus = new CANBus("CANivore");
 
 
  /** Creates a new Indexer. */
  public Indexer() {
-   motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID, canbus);
+   motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID);
 
 
    var talonFXConfigurator = motor.getConfigurator();

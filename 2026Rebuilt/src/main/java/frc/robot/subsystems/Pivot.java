@@ -81,7 +81,7 @@ public class Pivot extends SubsystemBase {
    CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
 
-   ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+   ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
    //ccdConfigs.MagnetSensor.MagnetOffset = 0;
    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;
 
@@ -163,6 +163,7 @@ public class Pivot extends SubsystemBase {
    revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
    motor.setControl(request);
+   setRelToAbs();
  }
 
 

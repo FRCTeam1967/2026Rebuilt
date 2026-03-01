@@ -16,19 +16,19 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
  private TalonFX intakeMotor;
- final CANBus canbus = new CANBus("CANivore");
+ //final CANBus canbus = new CANBus("CANivore");
 
 
 
 
  /** Creates a new Intake. */
  public Intake() {
-   intakeMotor = new TalonFX(Constants.Intake.INTAKE_MOTOR_ID, canbus);
+   intakeMotor = new TalonFX(Constants.Intake.INTAKE_MOTOR_ID);
    var talonFXConfigurator = intakeMotor.getConfigurator();
    var motorConfigs = new MotorOutputConfigs();
 
 
-   motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+   motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
    talonFXConfigurator.apply(motorConfigs);
  }
 

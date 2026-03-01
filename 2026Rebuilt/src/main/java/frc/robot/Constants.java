@@ -21,22 +21,22 @@ public class Constants {
        public static final int CRUISE_VELOCITY = 40;
        public static final int ACCELERATION = 100;
        public static final int JERK = 1000;
-       public static final double GEAR_RATIO = 36/1.0;
+       public static final double GEAR_RATIO = 20.25/1.0;
        public static final double FEED_FORWARD = 1;
     
        public static final double THRESHOLD = 1;
        public static final double DEGREES_TO_REVS = 1.0/360.0;
-       public static final double MAGNET_OFFSET = -0.416259765625;
+       public static final double MAGNET_OFFSET = 0.419921875;
 
 
-       public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
+       public static final double DOWN_POSITION = 140 * DEGREES_TO_REVS;
        public static final double SAFE = 5 * DEGREES_TO_REVS;
    }
 
 
     public static class Intake{
        public static final int INTAKE_MOTOR_ID = 9;
-       public static final int INTAKE_MOTOR_SPEED = 30;
+       public static final int INTAKE_MOTOR_SPEED = 70;
    }
 
    public static class Indexer{
