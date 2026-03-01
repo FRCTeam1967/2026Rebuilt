@@ -7,8 +7,8 @@ public class Constants {
         public static final int kOperatorControllerPort = 1;
     }
     public static class Pivot{
-       public static final int MOTOR_ID = 10;
-       public static final int ENCODER_ID = 27;
+       public static final int MOTOR_ID = 11;
+       public static final int ENCODER_ID = 0;
 
 
        public static final double kS = 0.25;
@@ -26,7 +26,7 @@ public class Constants {
     
        public static final double THRESHOLD = 1;
        public static final double DEGREES_TO_REVS = 1.0/360.0;
-       public static final double MAGNET_OFFSET = -0.3349609375;
+       public static final double MAGNET_OFFSET = -0.416259765625;
 
 
        public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
@@ -35,7 +35,7 @@ public class Constants {
 
 
     public static class Intake{
-       public static final int INTAKE_MOTOR_ID = 11;
+       public static final int INTAKE_MOTOR_ID = 9;
        public static final int INTAKE_MOTOR_SPEED = 30;
    }
 

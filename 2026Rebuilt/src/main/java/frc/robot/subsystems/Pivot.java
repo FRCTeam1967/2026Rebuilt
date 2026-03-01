@@ -50,7 +50,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 
 public class Pivot extends SubsystemBase {
- final CANBus canbus = new CANBus("CANivore");
+ //final CANBus canbus = new CANBus("CANivore");
  private TalonFX motor;
  private CANcoder absEncoder;
  public double revsToMove;
@@ -74,8 +74,10 @@ public class Pivot extends SubsystemBase {
 
  /** Creates a new Pivot. */
  public Pivot() {
-   motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
-   absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
+   //motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
+   motor = new TalonFX (Constants.Pivot.MOTOR_ID);
+   //absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
+   absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID);
    CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
 
