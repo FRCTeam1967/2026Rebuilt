@@ -71,7 +71,6 @@ public class Autoes {
     //m_robotContainer.autoChooserLOL.addRoutine("Test Path", this::test);
     //autoChooserLOL.addRoutine("Test Conditional", this::testConditional);
     autoChooserLOL.addRoutine("Hub to Tower Preload", this::htw);
-    autoChooserLOL.addRoutine("Trench to Neutral Intake", this::otn);
     autoChooserLOL.addRoutine("Trench to Neutral Intake Climb", this::otctw);    
     
     //m_robotContainer.autoChooserLOL.addRoutine("OTN", this::otn);
@@ -88,17 +87,17 @@ public class Autoes {
   private AutoRoutine otn() {
     AutoRoutine routine = autoFactory.newRoutine("OT_N");
     AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
-    double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
+    //double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
     routine.active().onTrue(
       Commands.sequence(
         //step one: set gyro to starting heading (flips for alliance)
-          new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
+          //new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
           trenchNeutral.resetOdometry(),
            //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+         // new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
           trenchNeutral.cmd() 
     ));
-    trenchNeutral.atPose("Start Intake", 0.2,0.2).onTrue(
+    trenchNeutral.atPose("Deploy Intake", 0.2,0.2).onTrue(
       Commands.parallel(
         new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
@@ -154,14 +153,24 @@ public class Autoes {
   }
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-
     AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
     AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
     
     routine.active().onTrue(
       Commands.sequence(
-        hubTowerShoot.resetOdometry(),
-        Commands.sequence(
+        shootFromABitBack.resetOdometry(),
+        shootFromABitBack.cmd()
+      )
+    ); 
+    shootFromABitBack.atPose("Deploy Intake", 0.2, Math.PI/4).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
+    );
+    shootFromABitBack.done().onTrue(
+      Commands.sequence(
         new ParallelRaceGroup(
           new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
           new WaitCommand(2.5)
@@ -172,31 +181,9 @@ public class Autoes {
                 new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
               ).withTimeout(5.0)
       )
-      .andThen(hubTowerShoot.cmd()),
-        hubTowerShoot.cmd()
-      )
-    ); 
-    // shootFromABitBack.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
-    //   Commands.parallel(
-    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-    //     new RunIndexer(m_robotContainer.indexer, 10.0)
-    //   ).withTimeout(3)
-    // );
-    // shootFromABitBack.done().onTrue(
-    //   Commands.sequence(
-    //     new ParallelRaceGroup(
-    //       new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-    //       new WaitCommand(2.5)
-    //     ),
-    //     new ParallelCommandGroup(
-    //             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-    //             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //             new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-    //           ).withTimeout(5.0)
-    //   )
-    //   .andThen(hubTowerShoot.cmd())
-    // );
+      .andThen(hubTowerShoot.cmd())
+      //TODO: add climb sequencing
+    );
           
     return routine;
   }
@@ -211,10 +198,11 @@ public class Autoes {
 
   private AutoRoutine otctw() {
     AutoRoutine routine = autoFactory.newRoutine("OTCTW");
-    AutoTrajectory trenchToCenter = routine.trajectory("OT_N");
-    AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch");
+
+    AutoTrajectory trenchToCenter = routine.trajectory("OT_N_EM");
+    AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch_EM");
     AutoTrajectory toZone = routine.trajectory("N_Trench");
-    AutoTrajectory shootClimb = routine.trajectory("TrenchShootClimb");
+    AutoTrajectory shootClimb = routine.trajectory("TrenchScoreClimb");
 
         // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(
@@ -224,24 +212,26 @@ public class Autoes {
         )
     );
     
-    // trenchToCenter.atPose("Deploy Intake", 0.02, Math.PI/4).onTrue(
-    //   Commands.parallel(
-    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-    //     new RunIndexer(m_robotContainer.indexer, 10.0)
-    //   ).withTimeout(3)
-    // );
-
-    trenchToCenter.done().onTrue(
+    trenchToCenter.atPose("Deploy Intake", 0.2, Math.PI/4).onTrue(
       Commands.parallel(
-        Commands.parallel(
-          new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-          new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-          new RunIndexer(m_robotContainer.indexer, 10.0)
-        ), //.withTimeout(5), 
-        intakeMore.cmd()
-      )
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(4)
     );
+
+    trenchToCenter.done().onTrue(intakeMore.cmd()); //TODO: make a version of this path w/o event markers, add event marker on intakeMore to intake
+
+    // trenchToCenter.done().onTrue(
+    //   Commands.parallel(
+    //     Commands.parallel(
+    //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //       new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //       new RunIndexer(m_robotContainer.indexer, 10.0)
+    //     ), //.withTimeout(5), 
+    //     intakeMore.cmd()
+    //   )
+    // );
 
     // intakeMore.atPose("Deploy Intake", 0.02, Math.PI/4).onTrue(
     //   Commands.parallel(
@@ -252,22 +242,22 @@ public class Autoes {
     // );
 
     intakeMore.done().onTrue(toZone.cmd());
-    toZone.done().onTrue(
-      Commands.parallel(
-        Commands.sequence(
-          new ParallelRaceGroup(
-            new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-            new WaitCommand(2.5)
-          ),
-          new ParallelCommandGroup(
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                  new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                  new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-          )
-        ), //.withTimeout(5), 
-        shootClimb.cmd()
-      )
-    );
+    // toZone.done().onTrue(
+    //   Commands.parallel(
+    //     Commands.sequence(
+    //       new ParallelRaceGroup(
+    //         new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+    //         new WaitCommand(2.5)
+    //       ),
+    //       new ParallelCommandGroup(
+    //               new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //               new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //               new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+    //       )
+    //     ), //.withTimeout(5), 
+    //     shootClimb.cmd()
+    //   )
+    // );
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
