@@ -40,8 +40,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 public class FlywheelShooter extends SubsystemBase {
 
-  private TalonFX flywheelMotor1;
-  //private TalonFX flywheelMotor2;
+  private TalonFX flywheelMotor1; // Leader
+  private TalonFX flywheelMotor2; // Follower
 
   private final CANBus canbus = new CANBus("CANivore");
 
@@ -49,7 +49,7 @@ public class FlywheelShooter extends SubsystemBase {
 
   private InterpolatingDoubleTreeMap speedTable; 
 
-  private Follower motorTwo;
+  private Follower followerRequest = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
   // private static final double kSimDt = 0.02;
   // private double simRotorPosRot = 0.0;
@@ -81,10 +81,7 @@ public class FlywheelShooter extends SubsystemBase {
   /** Creates a new FlywheelShooter. */
   public FlywheelShooter() {
     flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
-    //flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
-
-    motorTwo = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
-
+    flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -103,8 +100,8 @@ public class FlywheelShooter extends SubsystemBase {
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
-    flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
-    //flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
+    flywheelMotor1.setNeutralMode(NeutralModeValue.Coast);
+    //flywheelMotor2.setNeutralMode(NeutralModeValue.Coast);
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -116,7 +113,14 @@ public class FlywheelShooter extends SubsystemBase {
     populateTreeMap();
   
     flywheelMotor1.getConfigurator().apply(talonFXConfigs);
-    //flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+    flywheelMotor2.getConfigurator().apply(talonFXConfigs);
+
+    // Motor 2's output should probably be inverted vs. motor 1, but I think the Follow configuration
+    // overrides what's in the talonFXConfig, so maybe this is fine?
+
+    // Motor 2 should always follow motor 1
+    // This might not work until the robot is enabled. If so, we'll need to move it into setVelocity()
+    flywheelMotor2.setControl(followerRequest);
   }
 
   public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
@@ -132,7 +136,7 @@ public class FlywheelShooter extends SubsystemBase {
     //   //.withFeedForward(5.0);
 
     flywheelMotor1.setControl(requestOne);
-    flywheelMotor1.setControl(torqueRequest);
+    // flywheelMotor1.setControl(torqueRequest);
     //flywheelMotor2.setControl(requestTwo);
   }
 
