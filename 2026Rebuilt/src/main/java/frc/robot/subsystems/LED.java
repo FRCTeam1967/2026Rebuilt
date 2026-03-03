@@ -21,11 +21,6 @@ public class LED extends SubsystemBase {
     m_buffer = new AddressableLEDBuffer(kLength);
     m_led.setLength(kLength);
     m_led.start();
-
-    // Set the default command to turn the strip off, otherwise the last colors written by
-    // the last command to run will continue to be displayed.
-    // Note: Other default patterns could be used instead!
-    setDefaultCommand(runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
   }
 
   @Override
@@ -36,8 +31,8 @@ public class LED extends SubsystemBase {
 
   /**
    * Creates a command that runs a pattern on the entire LED strip.
-   *
    * @param pattern the LED pattern to run
+   * @return the command created
    */
   public Command runPattern(LEDPattern pattern) {
     Command runCommand = run(() -> pattern.applyTo(m_buffer));
@@ -45,6 +40,10 @@ public class LED extends SubsystemBase {
     return runCommand;
   }
 
+  /**
+   * applies pattern to strip
+   * @param pattern
+   */
   public void applyPattern(LEDPattern pattern) {
     pattern.applyTo(m_buffer);
   }

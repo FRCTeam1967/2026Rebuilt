@@ -6,7 +6,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.subsystems.FlywheelShooter;
+import frc.robot.subsystems.Yeeter;
 import frc.robot.commands.RunIndexer;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Feeder;
@@ -15,19 +15,19 @@ import dev.doglog.DogLog;
 
 
 
-public class RunFlywheelShooter extends Command {
+public class RunYeeter extends Command {
   /** Creates a new RunFlywheelShooter. */
-
-  private final FlywheelShooter shooter;
+  private final Yeeter yeeter;
   private final double speed;
   private final double acceleration;
     
-  public RunFlywheelShooter(FlywheelShooter shooter, double speed, double acceleration) {
-    this.shooter = shooter;
+  //public RunYeeter(Yeeter shooter, DoubleSupplier speed, double acceleration)
+  public RunYeeter(Yeeter yeeter, double speed, double acceleration) {
+    this.yeeter = yeeter;
     this.speed = speed;
     this.acceleration = acceleration;
 
-    addRequirements(shooter);
+    addRequirements(yeeter);
   }
 
   @Override
@@ -37,12 +37,12 @@ public class RunFlywheelShooter extends Command {
 
   @Override
   public void execute() {
-    shooter.setVelocity(speed, acceleration);
+    yeeter.setVelocity(speed, acceleration);
   }
   
    @Override
   public void end(boolean interrupted) {
-    shooter.stopMotor();
+    yeeter.stopMotor();
   }
 
  // Returns true when the command should end.

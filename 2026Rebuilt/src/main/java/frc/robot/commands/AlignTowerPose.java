@@ -31,7 +31,7 @@ import frc.robot.subsystems.*;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTowerPose extends Command {
-  private final CommandSwerveDrivetrain drivetrain;
+  private final SwerveOnTheseBows swerve;
 
   private SwerveRequest.ApplyRobotSpeeds request = new SwerveRequest.ApplyRobotSpeeds();
 
@@ -42,16 +42,15 @@ public class AlignTowerPose extends Command {
   final StructPublisher<Pose2d> towerPublisher = NetworkTableInstance.getDefault().getTable("alignment").getStructTopic("tower", Pose2d.struct).publish();  
   
   //tower pose - RED ALLIANCE
-  Pose2d towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
 
   private static final double kP_translational = 0.85;
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
 
-  public AlignTowerPose(CommandSwerveDrivetrain drivetrain) {
-    this.drivetrain = drivetrain;
+  public AlignTowerPose(SwerveOnTheseBows swerve) {
+    this.swerve = swerve;
 
-    addRequirements(drivetrain);
+    addRequirements(swerve);
   }
 
   // Called when the command is initially scheduled.
@@ -67,16 +66,15 @@ public class AlignTowerPose extends Command {
         //     //DogLog.log("Tower Pose: ", towerPose);
         // }
     // }
-    DogLog.log("Tower Pose: ", towerPose);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d drivetrainPose = drivetrain.getPose();
+    Pose2d drivetrainPose = swerve.getPose();
     // 0.84, 4.8, 0
 
-    difference = towerPose.minus(drivetrainPose);
+    difference = VisabelleUpdate.towerpose.minus(drivetrainPose);
     // 1.092, 4.61, 3.14
         DogLog.log("Pose difference: ", difference);
         DogLog.log("pose diff x", difference.getX());
@@ -94,7 +92,7 @@ public class AlignTowerPose extends Command {
         ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
         DogLog.log("alignmentSpeed: ", alignmentSpeed);
 
-        drivetrain.setControl(request.withSpeeds(alignmentSpeed));
+        swerve.setControl(request.withSpeeds(alignmentSpeed));
         DogLog.log("x isFinished: ", Math.abs(difference.getX()) < 0.05);
         DogLog.log("y isFinished: ", Math.abs(difference.getY()) < 0.05);
         DogLog.log("rotation isFinished: ", Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2));
@@ -156,7 +154,7 @@ public class AlignTowerPose extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-      drivetrain.setControl(request.withSpeeds(new ChassisSpeeds()));
+      swerve.setControl(request.withSpeeds(new ChassisSpeeds()));
   }
 
   // Returns true when the command should end.

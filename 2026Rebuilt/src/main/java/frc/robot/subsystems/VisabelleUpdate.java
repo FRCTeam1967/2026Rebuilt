@@ -11,9 +11,11 @@ import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 import com.ctre.phoenix6.Utils;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
@@ -21,11 +23,11 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 
-public class VisionUpdate extends SubsystemBase {
+public class VisabelleUpdate extends SubsystemBase {
   /** Creates a new VisionUpdate. */
 
   // visibility dataType name;
-  private CommandSwerveDrivetrain drivetrain;
+  private SwerveOnTheseBows swerve;
 
   private final StructPublisher<Pose2d> limelightPublisher;
 
@@ -38,9 +40,10 @@ public class VisionUpdate extends SubsystemBase {
   DoublePublisher fpgaTimestamp;
   DoublePublisher LLtoFPGA;
 
-  
-  public VisionUpdate(CommandSwerveDrivetrain drivetrain) {
-    this.drivetrain = drivetrain;
+  public static Pose2d towerpose;
+
+  public VisabelleUpdate(SwerveOnTheseBows swerve) {
+    this.swerve = swerve;
 
     limelightPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
 
@@ -55,14 +58,16 @@ public class VisionUpdate extends SubsystemBase {
     fpgaTimestamp = table.getDoubleTopic("fpga timestamp").publish();
     LLtoFPGA = table.getDoubleTopic("LL converted to fpga").publish();
 
+    Pose2d towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+    DogLog.log("Tower Pose: ", towerPose);
   }
 
   public void setFirstVisionPose() {
     LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
 
-    drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
+    swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
 
-    drivetrain.addVisionMeasurement(
+    swerve.addVisionMeasurement(
       mt2.pose,
       Utils.fpgaToCurrentTime(mt2.timestampSeconds));
   }
@@ -111,7 +116,7 @@ public class VisionUpdate extends SubsystemBase {
   @Override
   public void periodic() {
     boolean doRejectUpdate = false;
-    LimelightHelpers.SetRobotOrientation("limelight-front", (drivetrain.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
 
     LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
 
@@ -120,8 +125,8 @@ public class VisionUpdate extends SubsystemBase {
     }
     
     if(!doRejectUpdate){
-      drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-      drivetrain.addVisionMeasurement(
+      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+      swerve.addVisionMeasurement(
           mt2.pose,
           mt2.timestampSeconds);
       limelightPublisher.set(mt2.pose);

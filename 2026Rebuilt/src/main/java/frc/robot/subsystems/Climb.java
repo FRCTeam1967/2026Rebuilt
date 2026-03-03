@@ -36,6 +36,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 import java.util.function.DoubleSupplier;
 
@@ -55,22 +56,19 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 
 
-public class Climb extends SubsystemBase {
-  /** Creates a new Climb. */
-  
+public class Climb extends SubsystemBase {  
   private TalonFX motor; 
   private TalonFXConfiguration config;
-  // private MotionMagicVoltage request;
   private DigitalInput bottomSensor;
   private DigitalInput topSensor;
   private double rotations;
   private double appliedVoltage;
-  private DifferentialDrivetrainSim swerve;
-  private double speed;
-  final CANBus canbus = new CANBus("CANivore");
+  private final CANBus canbus = RobotContainer.CANBus;
 
+  // SIM FIELDS
   // private ProfiledPIDController m_controller;
   // private EncoderSim encoderSim;
+  private DifferentialDrivetrainSim swerve;
   private DIOSim sensorSim;
   private ElevatorSim climbSim; //new ElevatorSim(plant, gearbox, Constants.Climb.MIN_HEIGHT, Constants.Climb.MAX_HEIGHT, true, Constants.Climb.SAFE, 0);
   private ElevatorFeedforward m_feedforward;
@@ -92,18 +90,18 @@ public class Climb extends SubsystemBase {
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
+
+    // SIM INITS
     motorSim = motor.getSimState();
     field = new Field2d();
     swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
     rotation = new Rotation3d();
     poses = new Pose3d(0.0,0.0,0.0,rotation);
-    speed = 5.0;
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     
-
     config.Slot0.kP = Constants.Climb.kP;
     config.Slot0.kI = Constants.Climb.kI;
     config.Slot0.kD = Constants.Climb.kD;
@@ -192,7 +190,9 @@ public class Climb extends SubsystemBase {
     motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
   }
 */
-
+  /**
+   * set existing position of motors to be 0
+   */
   public void resetEncoders() {
     if (RobotBase.isSimulation()) {
       motorSim.setRawRotorPosition(0);
@@ -202,6 +202,11 @@ public class Climb extends SubsystemBase {
     }
   }
 
+  /**
+   * @param inches - converted to rotations </p>
+   * sets appliedVoltage to feedforward </p>
+   * creates and sets a MotionMagicVoltage request with rotations and feedforward
+   */
   public void moveTo(double inches) {  
     rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
     appliedVoltage = Constants.Climb.FEED_FORWARD;
@@ -209,10 +214,12 @@ public class Climb extends SubsystemBase {
     motor.setControl(request);
   }
 
+  /**
+   * @return true if motor's current position is within error threshold of target height
+   */
   public boolean atHeight(){
     double currentPosition = motor.getRotorPosition().getValueAsDouble();
     return Math.abs(rotations - currentPosition) < Constants.Climb.ERROR_THRESHOLD;
-  
 
     /*
     if (getBottomSensor() || getTopSensor()){
@@ -221,8 +228,11 @@ public class Climb extends SubsystemBase {
     return false; */
   }
 
+  /**
+   * TODO: write comments for climb once we figure out 
+   */
   public void setSafe(){
-    if(!bottomSensor.get()){
+    if(getBottomSensor()){
       motor.setPosition(0);
     }
   }
@@ -235,17 +245,16 @@ public class Climb extends SubsystemBase {
   }
 
   public boolean isReachedTopSwitch(){
-    return (!topSensor.get());
+    return (getTopSensor());
   }
 
   public boolean isReachedBottomSwitch(){
-    return (!bottomSensor.get());
+    return (getBottomSensor());
   }
 
-  public void setMotor() {
-    motor.set(speed);
-  }
-
+  /**
+   * Stops motor
+   */
   public void stopMotor() {
     motor.stopMotor();
   }

@@ -11,28 +11,34 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
-public class Intake extends SubsystemBase {
-  private TalonFX intakeMotor;
-  final CANBus canbus = new CANBus("CANivore");
-
-
+public class Eater extends SubsystemBase {
+  private TalonFX motor;
+  private final CANBus canbus = RobotContainer.CANBus;
+  
   /** Creates a new Intake. */
-  public Intake() {
-    intakeMotor = new TalonFX(Constants.Intake.INTAKE_MOTOR_ID, canbus);
-    var talonFXConfigurator = intakeMotor.getConfigurator();
+  public Eater() {
+    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID, canbus);
+    var talonFXConfigurator = motor.getConfigurator();
     var motorConfigs = new MotorOutputConfigs();
 
     motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
     talonFXConfigurator.apply(motorConfigs);
   }
 
+  /**
+   * @param speed - sets motor to speed
+   */
   public void setMotor(double speed) {
-    intakeMotor.set(speed);
+    motor.set(speed);
   }
   
+  /**
+   * stops motor
+   */
   public void stopMotor(){
-    intakeMotor.stopMotor();
+    motor.stopMotor();
   }
 
   @Override

@@ -25,10 +25,9 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-public class Vision extends SubsystemBase {
-  /** Creates a new Vision. */
+public class Visabelle extends SubsystemBase {
   private double maxAngularRate;
-  private CommandSwerveDrivetrain drivetrain;
+  private SwerveOnTheseBows swerve;
 
   private DoublePublisher visionDist;
   private DoublePublisher visionBlueDist;
@@ -36,8 +35,8 @@ public class Vision extends SubsystemBase {
   private BooleanPublisher allianceIsBlue;
 
 
-  public Vision(CommandSwerveDrivetrain drivetrain, double maxAngularRate) {
-    this.drivetrain = drivetrain;
+  public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
+    this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -74,7 +73,7 @@ public class Vision extends SubsystemBase {
     //   hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
     // }
 
-    Translation2d ourPose = drivetrain.getPose().getTranslation();
+    Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
     visionDist.set(eucDist);

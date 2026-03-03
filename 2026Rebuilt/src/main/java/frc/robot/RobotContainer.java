@@ -9,14 +9,17 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.Optional;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color;
@@ -29,17 +32,13 @@ import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.Climb;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.commands.*;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
-import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
@@ -63,9 +62,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer {    
+public class RobotContainer {
     //drivetrain
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final SwerveOnTheseBows swerve = TunerConstants.createDrivetrain();
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -79,16 +78,17 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     //vision
-    public Vision vision = new Vision(drivetrain, MaxAngularRate);
-    public VisionUpdate visionUpdate = new VisionUpdate(drivetrain);
+    public Visabelle visabelle = new Visabelle(swerve, MaxAngularRate);
+    public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
+    public static final CANBus CANBus = new CANBus("CANivore");
     public final Pivot pivot = new Pivot();
-    public final Intake intake = new Intake();
+    public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
-    public final FlywheelShooter flywheelShooter = new FlywheelShooter();
-    public final Hood hood = new Hood();
+    public final Yeeter yeeter = new Yeeter();
+    public final TheHood theHood = new TheHood();
     public final Climb climb = new Climb();
 
     //control
@@ -106,11 +106,14 @@ public class RobotContainer {
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
+    public DoubleSubscriber speedTunable = DogLog.tunable("Tunable Speed", Constants.Yeeter.YEETER_SPEED);
+    public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
+
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        hood.configDashboard(matchTab);
-        flywheelShooter.configDashboard(matchTab);
+        theHood.configDashboard(matchTab);
+        yeeter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
         configLLTab(limelightTab, fieldTab);
         climb.configDashboard(fieldTab);
@@ -118,15 +121,14 @@ public class RobotContainer {
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
         ally = DriverStation.getAlliance(); 
-
     }
     
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
+        swerve.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
+            swerve.applyRequest(() ->
                 drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
@@ -134,28 +136,28 @@ public class RobotContainer {
         );
 
         /* reset gyro */
-        m_driverController.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));//.seedFieldCentric()
+        m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
 
         //POV buttons
-        m_driverController.povUp().whileTrue(drivetrain.applyRequest(() ->
+        m_driverController.povUp().whileTrue(swerve.applyRequest(() ->
         drive.withVelocityX(0.2 * MaxSpeed) // Drive forward with negative Y (forward)
             .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-        m_driverController.povDown().whileTrue(drivetrain.applyRequest(() ->
+        m_driverController.povDown().whileTrue(swerve.applyRequest(() ->
         drive.withVelocityX(-0.2 * MaxSpeed) // Drive forward with negative Y (forward)
             .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-        m_driverController.povRight().whileTrue(drivetrain.applyRequest(() ->
+        m_driverController.povRight().whileTrue(swerve.applyRequest(() ->
         drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
             .withVelocityY(-0.2 * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-        m_driverController.povLeft().whileTrue(drivetrain.applyRequest(() ->
+        m_driverController.povLeft().whileTrue(swerve.applyRequest(() ->
         drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
             .withVelocityY(0.2 * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
@@ -165,16 +167,16 @@ public class RobotContainer {
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(
-            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
+            swerve.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        swerve.registerTelemetry(logger::telemeterize);
 
         /* brake mode */
-        m_driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        m_driverController.a().whileTrue(swerve.applyRequest(() -> brake));
         
         /* defense mode? */
-        m_driverController.b().whileTrue(drivetrain.applyRequest(() ->
+        m_driverController.b().whileTrue(swerve.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
         ));
 
@@ -186,17 +188,17 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        m_driverController.povDown().and(m_driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        m_driverController.povDown().and(m_driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        m_driverController.povUp().and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        m_driverController.povUp().and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        m_driverController.povDown().and(m_driverController.y()).whileTrue(swerve.sysIdDynamic(Direction.kForward));
+        m_driverController.povDown().and(m_driverController.x()).whileTrue(swerve.sysIdDynamic(Direction.kReverse));
+        m_driverController.povUp().and(m_driverController.y()).whileTrue(swerve.sysIdQuasistatic(Direction.kForward));
+        m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
 
         // hub alignment
         m_driverController.rightTrigger().whileTrue(
-            drivetrain.applyRequest(() ->
+            swerve.applyRequest(() ->
                 drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
@@ -205,21 +207,22 @@ public class RobotContainer {
 
         //m_driverController.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
 
+        // yaw setter --> 0 faces hub 
         m_driverController.x().onTrue(new SequentialCommandGroup(
             // ROTATION2D IS IN **RADIANS!!!!**
             // SET YAW IS IN **DEGREES!!!!**
             new ConditionalCommand(
                 new SequentialCommandGroup(
-                    new InstantCommand(() -> drivetrain.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
-                    new InstantCommand(() -> drivetrain.getPigeon2().setYaw(180.0)),
-                    new InstantCommand(() -> drivetrain.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> drivetrain.resetPose(new Pose2d(drivetrain.getPose().getX(), drivetrain.getPose().getY(), new Rotation2d(Math.PI))))        
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
                 ),
                 new SequentialCommandGroup(
-                    new InstantCommand(() -> drivetrain.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
-                    new InstantCommand(() -> drivetrain.getPigeon2().setYaw(0.0)),
-                    new InstantCommand(() -> drivetrain.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> drivetrain.resetPose(new Pose2d(drivetrain.getPose().getX(), drivetrain.getPose().getY(), new Rotation2d(0))))
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
                 ),
                 () -> ally.get() == Alliance.Blue
             )
@@ -228,8 +231,9 @@ public class RobotContainer {
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
-        flywheelShooter.setDefaultCommand(new RunCommand(() -> flywheelShooter.stopMotor(), flywheelShooter));
-        hood.setDefaultCommand(new RunHood(hood, Constants.Hood.HOOD_MIN));
+        yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
+        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger()
@@ -240,39 +244,40 @@ public class RobotContainer {
             //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
             // ),
             /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
+            new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
             new ParallelRaceGroup(
-              new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+              new RunYeeter(yeeter, yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
               new WaitCommand(2.5)
             ),
             //new SequentialCommandGroup(
               //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
               new ParallelCommandGroup(
-                new RunHood(hood, Constants.Hood.HOOD_MAX),
                 new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                 new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunFlywheelShooter(flywheelShooter, flywheelShooter.getNecessarySpeed(vision.getDisFromHub()), Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
+                new RunYeeter(yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
               )
             //)
           )
         );
 
+        m_driverController.y().whileTrue(new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE));
+
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
         //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-        
         // eject button
         m_operatorController.rightBumper().whileTrue(
-          new RunFeeder(feeder, 5)
+            new RunFeeder(feeder, 5)
         );
 
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)));
+            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+          )
+        );
             //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
-
-            new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED);
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
         m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
@@ -330,6 +335,6 @@ public class RobotContainer {
     public boolean isAligned(double position) {
         double target = 0.0;
         double threshold = 5.0;
-        return position <=  (target + threshold) && position >= (target - threshold);
+        return position <= (target + threshold) && position >= (target - threshold);
     }
 }

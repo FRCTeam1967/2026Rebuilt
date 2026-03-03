@@ -1,15 +1,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Hood;
+import frc.robot.subsystems.TheHood;
 import frc.robot.Constants;
 
-public class RunHood extends Command {
+public class RunninTheHood extends Command {
 
-  private final Hood hood;
+  private final TheHood hood;
   private final double targetPosRevs;
 
-  public RunHood(Hood hood, double targetPosRevs) {
+  public RunninTheHood(TheHood hood, double targetPosRevs) {
     this.hood = hood;
     this.targetPosRevs = targetPosRevs;
     addRequirements(hood);

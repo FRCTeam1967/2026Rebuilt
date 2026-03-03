@@ -44,8 +44,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 //import frc.robot.LimelightHelpers.PoseEstimate;
 import dev.doglog.DogLog;
-import frc.robot.subsystems.LED;
-import frc.robot.subsystems.Pivot;
+
 
 public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
@@ -54,58 +53,20 @@ public class Robot extends TimedRobot {
 
   private final StructPublisher<Pose2d> choreoPublisher;
   //private final NetworkTableListener autoPublisher;
-
-  private Command m_autonomousCommand; //AutoRoutine
-  
-  
-  //public final AutoChooser autoChooserLOL = new AutoChooser();
-  //public ShuffleboardTab matchTab;
   
   public Robot() {
-    //matchTab = Shuffleboard.getTab("match");
-    //m_gerryRig = new GerryRig();
-    // Put the auto chooser on the dashboard
-    //matchTab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-    //SmartDashboard.putData(autoChooser)
-  choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
+    choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
   }
 
-   
-    //private Command exampleAutoCommand() {
-        // ...
-   // }
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
   }
 
-// private Command testCmd() {
-//     return Commands.sequence(
-//       autoFactory.resetOdometry("test"),
-//       autoFactory.trajectoryCmd("test")
-//     );
-//   }
-//gerryrig auto 
-// private AutoRoutine runMotor() {
-//   AutoRoutine routine = autoFactory.newRoutine("run");
-//   // AutoTrajectory gerryMotor = routine.trajectory("run");
-//   // Load the routine's trajectories
-
-//   // When the routine begins, reset odometry and start the first trajectory (1)
-// //   routine.active().onTrue(new RunCommand(() -> m_gerryRig.runMotor(0.7), m_gerryRig));
-
-//   return routine;
-// }
-
-// public void addToChooser(String title, AutoRoutine routine) {
-//   autoChooser.addRoutine(title, routine);
-// }
-
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
   }
-
 
   /*
    * Limelight IMU Modes:
@@ -121,7 +82,6 @@ public class Robot extends TimedRobot {
   public void disabledInit() {
     SignalLogger.stop();
   }
-
 
   @Override
   public void disabledPeriodic() {
@@ -156,15 +116,14 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     // LimelightHelpers.SetThrottle("limelight-back", 0);
-    m_robotContainer.visionUpdate.setFirstVisionPose();
+    m_robotContainer.visabelleUpdate.setFirstVisionPose();
     SignalLogger.start();
   }
 
   @Override
   public void teleopPeriodic() {
-    m_robotContainer.hood.logAbsEncoder();
-    DogLog.log("TargetVelocity", Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED);
-
+    DogLog.log("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
+    m_robotContainer.yeeter.logYeeterSpeeds();
     LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0); //robot gyro
   }

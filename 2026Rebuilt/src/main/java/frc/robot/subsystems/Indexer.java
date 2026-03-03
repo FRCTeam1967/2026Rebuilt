@@ -9,12 +9,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import frc.robot.Constants;
-
+import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
   private TalonFX motor;
-  final CANBus canbus = new CANBus("CANivore");
+  private final CANBus canbus = RobotContainer.CANBus;
 
   /** Creates a new Indexer. */
   public Indexer() {
@@ -27,10 +27,16 @@ public class Indexer extends SubsystemBase {
     talonFXConfigurator.apply(motorConfigs);
   }
 
+  /**
+   * @param speed - sets motor to speed
+   */
   public void setMotor(double speed){
     motor.set(speed);
   }
 
+  /**
+   * stops motor
+   */
   public void stopMotor(){
     motor.stopMotor();
   }

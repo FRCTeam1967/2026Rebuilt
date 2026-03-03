@@ -19,26 +19,27 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
-public class Hood extends SubsystemBase {
-
+public class TheHood extends SubsystemBase {
   private final TalonFX hoodMotor;
   private final CANcoder absEncoder;
 
   public double revsToMove;
 
-  private final CANBus canbus = new CANBus("CANivore");
+  private final CANBus canbus = RobotContainer.CANBus;
 
   private InterpolatingDoubleTreeMap angleTable;
 
-  //private double targetMotorRot = 0.0;
-
-  public Hood() {
+  public TheHood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
-
-    //TODO: double check what the actual id is
     absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
+    angleTable = new InterpolatingDoubleTreeMap();
+
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.3056640625;
+    ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -60,26 +61,16 @@ public class Hood extends SubsystemBase {
     hoodMotor.getConfigurator().apply(talonFXConfigs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    
-    //TODO: go to tuner x, rezero the absolute encoder, 
-    //then get the magnet offset (which they provide) and add it here. 
-    //now, whenever the hood is all the way down, the abs encoder 
-    //will always read 0
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.313720703125;
-
     absEncoder.getConfigurator().apply(ccdConfigs);
 
-    // moveToDeg(Constants.Hood.HOOD_HOLD_DEG);
     setRelToAbs();
-    //resetEncoder();
-    //stop();
-
-    //TODO: populate this tree map for angles vs speeds 
-    angleTable = new InterpolatingDoubleTreeMap();
     populateTreeMap();
   }
 
+  /**
+   * @param revolutions - converted to revs
+   * creates and sets a MotionMagicVoltage request with revs
+   */
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
     MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove));
@@ -87,52 +78,71 @@ public class Hood extends SubsystemBase {
     hoodMotor.setControl(request);
   }
 
+  /**
+   * sets current position of motor to current position of encoder </p>
+   * USE AS RESET ENCODER IF NEEDED IN PERIODIC (add an if in periodic, instead of creating a new method)
+   */
   public void setRelToAbs(){
     //this should take care of the initial "set zero" method 
     //because the abs encoder will be zero at the start too
-    hoodMotor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
+    hoodMotor.setPosition(getAbsPos()*Constants.Hood.GEAR_RATIO);
   }
 
-  public void stop() { //stop motor (obviously :) )
+  /**
+   * stop motor obviously :)
+   */
+  public void stop() {
     hoodMotor.stopMotor();
   }
 
-  //changed this method from set zero to reset encoders, 
-  //then put it in periodic to always check if we're at zero and to reset if so
-  public void resetEncoder() {
-    if (getAbsPos() == 0.0) {
-      hoodMotor.setPosition(0.0);
-    }
+  /**
+   * @return position of absolute encoder
+   */
+  public double getAbsPos() {
+    return (absEncoder.getAbsolutePosition().getValueAsDouble());
   }
 
-  public double getAbsPos() { //gets the absolute position from abs encoder
-    return (absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Hood.GEAR_RATIO);
+  /**
+   * @return position of absolute encoder in degrees
+   */
+  public double getAbsDeg() {
+    return getAbsPos() * 360.0;
   }
 
-  public double getAbsDeg() { //gets the absolute position in degrees from abs encoder
-    return absEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
-  }
-
-  /** checks if the position the motor is at is within error threshold of the end goal */
+  /**
+   * @return true if the motor's position is within error threshold of the end goal
+   */
   public boolean isReached() {
-      return Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+    return getAbsDeg() >= Constants.Hood.HOOD_MAX * 360;///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
   }
 
-  //TODO: fill in these values
+  /**
+   * populates angle tables with given distance and hood angles
+   */
   private void populateTreeMap() {
     //distance from hub (m), hood angle
     angleTable.put(1.0, 20.0); //example
   }
 
   //TODO: call this in robot container when setting speed
+  /**
+   * @param distanceToHub
+   * @return angle of the hood based on distance in tree map
+   */
   public double getNecessaryAngle(double distanceToHub) {
     return angleTable.get(distanceToHub);
   }
 
-  public void logAbsEncoder(){
-    DogLog.log("AbsoluteHoodPosition", getAbsPos());
+  /**
+   * log value of absolute encoder to doglog
+   */
+  public void logRequest(){
+    DogLog.log("HoodRequest", Constants.Hood.HOOD_ANGLE);
   }
 
+  /**
+   * creates and sets a MotionMagicVoltage request with current position of motor
+   */
   public void maintainPosition() {
     double currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
     hoodMotor.setControl(new MotionMagicVoltage(currentPos));
@@ -167,7 +177,7 @@ public class Hood extends SubsystemBase {
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
-    tab.addDouble("Hood Absolute (rot)", () -> getAbsPos());
+    tab.addDouble("Hood AbsEnc (deg)", () -> getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
     //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
     tab.addBoolean("Hood at Target?", () -> isReached());
     tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());

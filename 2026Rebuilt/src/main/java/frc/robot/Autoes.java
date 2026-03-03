@@ -19,35 +19,36 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
-import frc.robot.commands.RunFlywheelShooter;
+import frc.robot.commands.RunYeeter;
 import frc.robot.commands.RunIndexer;
-import frc.robot.commands.RunIntake;
+import frc.robot.commands.RunEater;
 import frc.robot.generated.TunerConstants;
 
 /** Add your docs here. */
 public class Autoes {
-    private final AutoChooser autoChooserLOL = new AutoChooser();
-    private Command m_autonomousCommand; //AutoRoutine
-    private final AutoFactory autoFactory;
-    //private final int disSensorID = 0;
-    private final RobotContainer m_robotContainer; 
-    //private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
-    // Write these configs to the CANrange
+  private final AutoChooser autoChooserLOL = new AutoChooser();
+  private final AutoFactory autoFactory;
+  //private final int disSensorID = 0;
+  private final RobotContainer m_robotContainer; 
+  //private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
+  // Write these configs to the CANrange
 
-
-    public Autoes(RobotContainer container){
+  public Autoes(RobotContainer container) {
     m_robotContainer = container;
-    var drive = m_robotContainer.drivetrain;
+    var drive = m_robotContainer.swerve;
 
     CANrangeConfiguration config = new CANrangeConfiguration();
 
@@ -59,50 +60,329 @@ public class Autoes {
     //disSensor.getConfigurator().apply(config);
 
     autoFactory = new AutoFactory(
-            drive::getPose, // A function that returns the current robot pose
-            drive::resetPose, // A function that resets the current robot pose to the provided Pose2d
-            drive::followTrajectory, // The drive subsystem trajectory follower
-            true, // If alliance flipping should be enabled
-            drive
-        );
-    //autoChooser = new AutoChooser();
-    // Add options to the chooser
-    
-    //m_robotContainer.autoChooserLOL.addRoutine("Test Path", this::test);
-    //autoChooserLOL.addRoutine("Test Conditional", this::testConditional);
+      drive::getPose, // A function that returns the current robot pose
+      drive::resetPose, // A function that resets the current robot pose to the provided Pose2d
+      drive::followTrajectory, // The drive subsystem trajectory follower
+      true, // If alliance flipping should be enabled
+      drive
+    );
+
     autoChooserLOL.addRoutine("Hub to Tower Preload", this::htw);
-    autoChooserLOL.addRoutine("Trench to Neutral Intake Climb", this::otctw);    
-    
-    //m_robotContainer.autoChooserLOL.addRoutine("OTN", this::otn);
-    //autoChooserLOL.addRoutine("disSensorTest", this::disSensorTest);
+    autoChooserLOL.addRoutine("OTrench to Neutral Eater Climb", this::otntw);    
+
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
-    }
+  }
 
-    public void configDashboard(ShuffleboardTab tab) {
-        tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-        // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
-    }
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+    // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
+  }
 
-   
-  private AutoRoutine otn() {
-    AutoRoutine routine = autoFactory.newRoutine("OT_N");
-    AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
-    //double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
+  private AutoRoutine htw() {
+    AutoRoutine routine = autoFactory.newRoutine("HTW");
+      AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
+    AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
+    double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
+
     routine.active().onTrue(
       Commands.sequence(
+        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
         //step one: set gyro to starting heading (flips for alliance)
-          //new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
-          trenchNeutral.resetOdometry(),
-           //step three: set LL heading to gyro (aka starting) heading
-         // new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
-          trenchNeutral.cmd() 
-    ));
-    trenchNeutral.atPose("Deploy Intake", 0.2,0.2).onTrue(
+        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+        new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+        shootFromABitBack.resetOdometry(),
+
+        //step three: set LL heading to gyro (aka starting) heading
+        //if we can see a tag then run step 3 & path else just run path
+        new ConditionalCommand(
+          Commands.sequence(
+            new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+              m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+              0, 0, 0, 0, 0)), 
+            shootFromABitBack.cmd()
+          ), 
+          shootFromABitBack.cmd(),
+          () -> (LimelightHelpers.getTV("limelight-front"))
+        )
+      )
+    ); 
+
+    // WITH EVENT MARKER
+    shootFromABitBack.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
       Commands.parallel(
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(3)
+    );
+
+    shootFromABitBack.done().onTrue(
+      Commands.sequence(
+        new ParallelRaceGroup(
+          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new WaitCommand(2.5)
+        ),
+        new ParallelCommandGroup(
+                new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+              ).withTimeout(5.0)
+      )
+      .andThen(hubTowerShoot.cmd())
+      //TODO: add climb sequencing
+    );
+
+    // WITHOUT EVENT MARKER
+    // shootFromABitBack.done().onTrue(
+    //   Commands.sequence(
+    //     Commands.parallel(
+    //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    //       new RunEater(m_robotContainer.intake, Constants.Eater.EATER_MOTOR_SPEED), 
+    //       new RunIndexer(m_robotContainer.indexer, 10.0)
+    //     ).withTimeout(3),
+    //     new ParallelRaceGroup(
+    //       new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //       new WaitCommand(2.5)
+    //     ),
+    //     new ParallelCommandGroup(
+    //       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //       new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //       new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //     ).withTimeout(5.0)
+    //   ).andThen(hubTowerShoot.cmd())
+    //   //TODO: add climb sequencing
+    // );
+          
+    return routine;
+  }
+
+  private AutoRoutine otntw() {
+    AutoRoutine routine = autoFactory.newRoutine("OTNTW");
+
+    AutoTrajectory trenchToCenterEM = routine.trajectory("OT_N_EM");
+    AutoTrajectory intakeMoreEM  = routine.trajectory("OT_N_fuelBranch_EM");
+    AutoTrajectory shootClimbEM = routine.trajectory("N_O_TW");
+    double initialOrientationEM = trenchToCenterEM.getInitialPose().get().getRotation().getDegrees();
+
+
+    AutoTrajectory trenchToCenter = routine.trajectory("OT_N");
+    AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch");
+    AutoTrajectory toZone = routine.trajectory("N_OT");
+    AutoTrajectory shootClimb = routine.trajectory("OT_TW");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+
+    // WITH EVENT MARKER
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(
+        Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientationEM)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchToCenterEM.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+
+          trenchToCenterEM.cmd()
+        )
+    );
+    
+    trenchToCenterEM.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(4)
+    );
+
+    trenchToCenterEM.done().onTrue(intakeMoreEM.cmd());
+    intakeMoreEM.done().onTrue(shootClimbEM.cmd());
+
+    shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
+      Commands.sequence(
+        new ParallelRaceGroup(
+          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new WaitCommand(2.5)
+        ),
+        new ParallelCommandGroup(
+          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+        ).withTimeout(5.0)
       )
     );
+
+    // WITHOUT EVENT MARKER
+    // routine.active().onTrue(
+    //   Commands.sequence(
+    //       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+    //       //step one: set gyro to starting heading (flips for alliance)
+    //       new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
+    //       new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+    //       trenchToCenter.resetOdometry(),
+
+    //       //step three: set LL heading to gyro (aka starting) heading
+    //       new InstantCommand(
+    //         () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+    //         m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 
+    //         0, 0, 0, 0, 0)
+    //       ),
+    //       new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+    //       trenchToCenter.cmd()
+    //   )
+    // );
+
+    // trenchToCenter.done().onTrue(intakeMore.cmd());
+    // intakeMore.done().onTrue(toZone.cmd());
+    // toZone.done().onTrue(
+    //   Commands.parallel(
+    //     Commands.sequence(
+    //       new ParallelRaceGroup(
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new WaitCommand(2.5)
+    //       ),
+    //       new ParallelCommandGroup(
+    //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //       ).withTimeout(5.0)
+    //     ),
+    //     shootClimb.cmd()
+    //   )
+    // );
+
+    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
+    //the hopper is full, so we should continue with the rest of the auto and go shoot
+    // Trigger atNeutral = trenchToCenter.done();
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
+    // //  //write intake for fuel traj if true 
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
+
+    return routine;
+  }
+
+  private AutoRoutine dtntw() {
+    AutoRoutine routine = autoFactory.newRoutine("DTNTW");
+
+    AutoTrajectory trenchToCenterEM = routine.trajectory("DT_N_EM");
+    AutoTrajectory intakeMoreEM  = routine.trajectory("DT_N_fuelBranch_EM");
+    AutoTrajectory shootClimbEM = routine.trajectory("DT_O_TW");
+    double initialOrientationEM = trenchToCenterEM.getInitialPose().get().getRotation().getDegrees();
+
+
+    AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
+    AutoTrajectory intakeMore  = routine.trajectory("DT_N_fuelBranch");
+    AutoTrajectory toZone = routine.trajectory("N_DT");
+    AutoTrajectory shootClimb = routine.trajectory("DT_TW");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+
+    // WITH EVENT MARKER
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(
+        Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientationEM)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchToCenterEM.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+
+          trenchToCenterEM.cmd()
+        )
+    );
+    
+    trenchToCenterEM.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
+      Commands.parallel(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0)
+      ).withTimeout(4)
+    );
+
+    trenchToCenterEM.done().onTrue(intakeMoreEM.cmd());
+    intakeMoreEM.done().onTrue(shootClimbEM.cmd());
+
+    shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
+      Commands.sequence(
+        new ParallelRaceGroup(
+          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new WaitCommand(2.5)
+        ),
+        new ParallelCommandGroup(
+          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+        ).withTimeout(5.0)
+      )
+    );
+
+    // WITHOUT EVENT MARKER
+    // routine.active().onTrue(
+    //   Commands.sequence(
+    //       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+    //       //step one: set gyro to starting heading (flips for alliance)
+    //       new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
+    //       new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+    //       trenchToCenter.resetOdometry(),
+
+    //       //step three: set LL heading to gyro (aka starting) heading
+    //       new InstantCommand(
+    //         () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+    //         m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 
+    //         0, 0, 0, 0, 0)
+    //       ),
+    //       new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+    //       trenchToCenter.cmd()
+    //   )
+    // );
+
+    // trenchToCenter.done().onTrue(intakeMore.cmd());
+    // intakeMore.done().onTrue(toZone.cmd());
+    // toZone.done().onTrue(
+    //   Commands.parallel(
+    //     Commands.sequence(
+    //       new ParallelRaceGroup(
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new WaitCommand(2.5)
+    //       ),
+    //       new ParallelCommandGroup(
+    //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //       ).withTimeout(5.0)
+    //     ),
+    //     shootClimb.cmd()
+    //   )
+    // );
+
+    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
+    //the hopper is full, so we should continue with the rest of the auto and go shoot
+    // Trigger atNeutral = trenchToCenter.done();
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
+    // //  //write intake for fuel traj if true 
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
 
     return routine;
   }
@@ -118,27 +398,27 @@ public class Autoes {
     routine.active().onTrue(
       Commands.sequence(
         //step one: set gyro to starting heading (flips for alliance)
-        new InstantCommand(() -> m_robotContainer.drivetrain.getPigeon2().setYaw(initialOrientation)),
+        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
         trenchToDepot.resetOdometry(),
         //step three: set LL heading to gyro (aka starting) heading
-        new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.drivetrain.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
+        new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 0, 0, 0, 0, 0)),
               
         trenchToDepot.cmd()
       )
     );
-    trenchToDepot.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+    trenchToDepot.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(6)
       .andThen(depotToShoot.cmd())
     );
     depotToShoot.atPose("Start Shoot", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -151,42 +431,6 @@ public class Autoes {
     
     return routine;
   }
-  private AutoRoutine htw() {
-    AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
-    AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
-    
-    routine.active().onTrue(
-      Commands.sequence(
-        shootFromABitBack.resetOdometry(),
-        shootFromABitBack.cmd()
-      )
-    ); 
-    shootFromABitBack.atPose("Deploy Intake", 0.2, Math.PI/4).onTrue(
-      Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
-    );
-    shootFromABitBack.done().onTrue(
-      Commands.sequence(
-        new ParallelRaceGroup(
-          new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-          new WaitCommand(2.5)
-        ),
-        new ParallelCommandGroup(
-                new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-              ).withTimeout(5.0)
-      )
-      .andThen(hubTowerShoot.cmd())
-      //TODO: add climb sequencing
-    );
-          
-    return routine;
-  }
 
   /**
    * @return true if the motor is running
@@ -195,202 +439,35 @@ public class Autoes {
   //   return disSensor.getDistance().refresh().getValueAsDouble();
   // }
 
-
-  private AutoRoutine otctw() {
-    AutoRoutine routine = autoFactory.newRoutine("OTCTW");
-
-    AutoTrajectory trenchToCenter = routine.trajectory("OT_N_EM");
-    AutoTrajectory intakeMore  = routine.trajectory("OT_N_fuelBranch_EM");
-    AutoTrajectory toZone = routine.trajectory("N_Trench");
-    AutoTrajectory shootClimb = routine.trajectory("TrenchScoreClimb");
-
-        // When the routine begins, reset odometry and start the first trajectory (1)
-    routine.active().onTrue(
-        Commands.sequence(
-          trenchToCenter.resetOdometry(),
-          trenchToCenter.cmd()
-        )
-    );
-    
-    trenchToCenter.atPose("Deploy Intake", 0.2, Math.PI/4).onTrue(
-      Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(4)
-    );
-
-    trenchToCenter.done().onTrue(intakeMore.cmd()); //TODO: make a version of this path w/o event markers, add event marker on intakeMore to intake
-
-    // trenchToCenter.done().onTrue(
-    //   Commands.parallel(
-    //     Commands.parallel(
-    //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //       new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-    //       new RunIndexer(m_robotContainer.indexer, 10.0)
-    //     ), //.withTimeout(5), 
-    //     intakeMore.cmd()
-    //   )
-    // );
-
-    // intakeMore.atPose("Deploy Intake", 0.02, Math.PI/4).onTrue(
-    //   Commands.parallel(
-    //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-    //     new RunIndexer(m_robotContainer.indexer, 10.0)
-    //   ).withTimeout(3)
-    // );
-
-    intakeMore.done().onTrue(toZone.cmd());
-    // toZone.done().onTrue(
-    //   Commands.parallel(
-    //     Commands.sequence(
-    //       new ParallelRaceGroup(
-    //         new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-    //         new WaitCommand(2.5)
-    //       ),
-    //       new ParallelCommandGroup(
-    //               new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-    //               new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //               new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-    //       )
-    //     ), //.withTimeout(5), 
-    //     shootClimb.cmd()
-    //   )
-    // );
-
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atCenter = trenchToCenter.done();
-    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // //  //write intake for fuel traj if true 
-    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
-    
-    // shootClimb.atPose("Start Score", 0.02,Math.PI/6).onTrue(
-    //   Commands.sequence(
-    //     new ParallelRaceGroup(
-    //       new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-    //       new WaitCommand(2.5)
-    //     ),
-    //     new ParallelCommandGroup(
-    //             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-    //             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //             new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION)
-    //           ).withTimeout(5.0)
-    //   )
-    // );
-    
-    // edit command sequence for climb
-    // shootClimb.atPose("Climb", 0.02,Math.PI/6).onTrue(
-    //   Commands.parallel(
-    //     new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-    //     Commands.sequence(
-    //       new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-    //       Commands.parallel(
-    //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-    //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-    //       )
-    //     )
-    //   ).withTimeout(5.0)
-    // );
-
-    return routine;
-  }
-  private AutoRoutine left_Otctw() {
-    AutoRoutine routine = autoFactory.newRoutine("Left Branch OTCTW");
-    AutoTrajectory leftTrenchToCenter = routine.trajectory("DT_N");
-    AutoTrajectory fuelBranch  = routine.trajectory("DT_N_fuelBranch");
-    AutoTrajectory Shoot = routine.trajectory("DT_N_score");
-    AutoTrajectory Climb = routine.trajectory("DT_Climb");
-
-        // When the routine begins, reset odometry and start the first trajectory (1)
-    routine.active().onTrue(
-        Commands.sequence(
-          leftTrenchToCenter.resetOdometry(),
-          leftTrenchToCenter.cmd()
-        )
-    );
-    
-    leftTrenchToCenter.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
-      Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
-    );
-
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atCenter = trenchToCenter.done();
-    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // // fuelBranch.active().whileTrue(Commands.parallel(
-        //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        //new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
-        //new RunIndexer(m_robotContainer.indexer, 10.0)
-      //).withTimeout(3)
-      //fuelBranch.active.onTrue(Shoot.cmd)
-     //write intake for fuel traj if true 
-    // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shoot.cmd());
-    
-    Shoot.atPose("Start Score", 0.02,Math.PI/6).onTrue(
-      Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-        Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-          Commands.parallel(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-          )
-        )
-      ).withTimeout(5.0) // might have to edit timeout
-    );
-    
-    // edit command sequence for climb
-    Climb.atPose("Climb", 0.02,Math.PI/6).onTrue(
-      Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
-        Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
-          Commands.parallel(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-          )
-        )
-      ).withTimeout(5.0)
-    );
-
-    return routine;
-  }
-
   private AutoRoutine left_depotScore() {
     AutoRoutine routine = autoFactory.newRoutine("left_depotScore");
-    AutoTrajectory depotIntake = routine.trajectory("DT_D");
+    AutoTrajectory depotEater = routine.trajectory("DT_D");
     AutoTrajectory goToScore  = routine.trajectory("DT_score_intake");
-    AutoTrajectory Intake = routine.trajectory("DScoreToC");
+    AutoTrajectory Eater = routine.trajectory("DScoreToC");
      AutoTrajectory Score = routine.trajectory("DT_N_score");
 
         // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(
         Commands.sequence(
-          depotIntake.resetOdometry(),
-          depotIntake.cmd()
+          depotEater.resetOdometry(),
+          depotEater.cmd()
         )
     );
     
-    depotIntake.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+    depotEater.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)
     );
-    depotIntake.done().onTrue(goToScore.cmd());
+    depotEater.done().onTrue(goToScore.cmd());
 
     goToScore.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -398,33 +475,33 @@ public class Autoes {
         )
       ).withTimeout(5.0)
     );
-    goToScore.done().onTrue(Intake.cmd());
+    goToScore.done().onTrue(Eater.cmd());
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     // Trigger atCenter = trenchToCenter.done();
     // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
     // // fuelBranch.active().whileTrue(Commands.parallel(
         //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        //new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        //new RunEater(m_robotContainer.intake, Constants.Eater.EATER_MOTOR_SPEED), 
         //new RunIndexer(m_robotContainer.indexer, 10.0)
       //).withTimeout(3)
       //fuelBranch.active.onTrue(Shoot.cmd)
      //write intake for fuel traj if true 
     // atCenter.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shoot.cmd());
     
-    Intake.atPose("Deploy Intake", 0.02,Math.PI/6).onTrue(
+    Eater.atPose("Deploy Eater", 0.02,Math.PI/6).onTrue(
       Commands.parallel(
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3) // might have to edit timeout
     );
-    Intake.done().onTrue(Score.cmd());
+    Eater.done().onTrue(Score.cmd());
     Score.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -447,10 +524,10 @@ public class Autoes {
         trenchNeutral.cmd()
       )
     );
-    // trenchNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
+    // trenchNeutral.atPose("Start Eater", 0.02, Math.PI/6).onTrue(
     //    Commands.parallel(
     //     new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //     new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+    //     new RunEater(m_robotContainer.intake, Constants.Eater.EATER_MOTOR_SPEED), 
     //     new RunIndexer(m_robotContainer.indexer, 10.0)
     //   ).withTimeout(3)
     // );
@@ -459,9 +536,9 @@ public class Autoes {
     );
     neutralScore.done().onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -470,10 +547,10 @@ public class Autoes {
       ).withTimeout(5.0)
       .andThen(scoreNeutral.cmd())
     );
-    scoreNeutral.atPose("Start Intake", 0.02, Math.PI/6).onTrue(
+    scoreNeutral.atPose("Start Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)
     );
@@ -482,9 +559,9 @@ public class Autoes {
     );
      neutralScore.done().onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -504,10 +581,10 @@ public class Autoes {
         outpost.cmd()
       )
     );
-    outpost.atPose("Deploy Intake", 0.02, Math.PI/6).onTrue(
+    outpost.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
        Commands.parallel(
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-        new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED), 
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)
     );
@@ -516,9 +593,9 @@ public class Autoes {
     );
     scoreClimb.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
@@ -528,9 +605,9 @@ public class Autoes {
     );
     scoreClimb.atPose("Climb", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunFlywheelShooter(m_robotContainer.flywheelShooter, Constants.FlywheelShooter.PRELOAD_SHOOTER_SPEED, Constants.FlywheelShooter.FLYWHEEL_SHOOTER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
-          new WaitUntilCommand(() -> m_robotContainer.flywheelShooter.reachedShooterSpeed()),
+          new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
             new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)

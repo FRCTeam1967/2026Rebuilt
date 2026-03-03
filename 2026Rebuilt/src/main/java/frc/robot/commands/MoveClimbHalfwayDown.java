@@ -11,6 +11,7 @@ import frc.robot.subsystems.Climb;
 public class MoveClimbHalfwayDown extends Command {
   private Climb climb;
   private double inches;
+  
   /** Creates a new MoveClimbHalfwayDown. */
   public MoveClimbHalfwayDown(Climb climb, double inches) {
     this.climb = climb;

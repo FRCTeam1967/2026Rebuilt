@@ -11,10 +11,11 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class Feeder extends SubsystemBase {
   private TalonFX motor;
-  final CANBus canbus = new CANBus("CANivore");
+  private final CANBus canbus = RobotContainer.CANBus;
 
   /** Creates a new Feeder. */
   public Feeder() {
@@ -27,10 +28,16 @@ public class Feeder extends SubsystemBase {
     talonFXConfigurator.apply(motorConfigs);
   }
 
+  /**
+   * @param speed - sets motor to speed
+   */
   public void setMotor(double speed){
     motor.set(speed);
   }
 
+  /**
+   * stops motor
+   */
   public void stopMotor(){
     motor.stopMotor();
   }  

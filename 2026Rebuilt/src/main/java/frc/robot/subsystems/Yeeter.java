@@ -33,23 +33,18 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
-
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 import static edu.wpi.first.units.Units.Volts;
 
-public class FlywheelShooter extends SubsystemBase {
+public class Yeeter extends SubsystemBase {
+  private TalonFX motor1;
+  private TalonFX motor2; //private TalonFX flywheelMotor2;
 
-  private TalonFX flywheelMotor1;
-  //private TalonFX flywheelMotor2;
-
-  private final CANBus canbus = new CANBus("CANivore");
-
-  private boolean reachedShooterSpeed = false;
+  private final CANBus canbus = RobotContainer.CANBus;
 
   private InterpolatingDoubleTreeMap speedTable;
-
-  private Follower flywheelMotor2;
 
   // private static final double kSimDt = 0.02;
   // private double simRotorPosRot = 0.0;
@@ -79,108 +74,125 @@ public class FlywheelShooter extends SubsystemBase {
   // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
-  public FlywheelShooter() {
-    flywheelMotor1 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, canbus);
-    //flywheelMotor2 = new TalonFX(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR2_ID, canbus);
-    flywheelMotor2 = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
+  public Yeeter() {
+    speedTable = new InterpolatingDoubleTreeMap();
+    motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
+    motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
+    // flywheelMotor2 = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = Constants.FlywheelShooter.kS;
-    slot0Configs.kV = Constants.FlywheelShooter.kV;
-    slot0Configs.kA = Constants.FlywheelShooter.kA;
-    slot0Configs.kP = Constants.FlywheelShooter.kP;
-    slot0Configs.kI = Constants.FlywheelShooter.kI;
-    slot0Configs.kD = Constants.FlywheelShooter.kD;
+    slot0Configs.kS = Constants.Yeeter.kS;
+    slot0Configs.kV = Constants.Yeeter.kV;
+    slot0Configs.kA = Constants.Yeeter.kA;
+    slot0Configs.kP = Constants.Yeeter.kP;
+    slot0Configs.kI = Constants.Yeeter.kI;
+    slot0Configs.kD = Constants.Yeeter.kD;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.FlywheelShooter.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.FlywheelShooter.ACCELERATION;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Yeeter.CRUISE_VELOCITY;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.Yeeter.ACCELERATION;
     //motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
-    flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
+    // flywheelMotor1.setNeutralMode(NeutralModeValue.Brake);
     //flywheelMotor2.setNeutralMode(NeutralModeValue.Brake);
-
-
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    reachedShooterSpeed = false;
     //SmartDashboard.putData(“ShooterMech2d”, shooterMech);
-
-    //TODO: populate this tree map for distance vs speeds
-    speedTable = new InterpolatingDoubleTreeMap();
+    motor1.getConfigurator().apply(talonFXConfigs);
+    motor2.getConfigurator().apply(talonFXConfigs);
     populateTreeMap();
-
-     flywheelMotor1.getConfigurator().apply(talonFXConfigs);
   }
 
-  public void setVelocity(double velocity, double acceleration) { //set the velocity of the shooter
+  /**
+   * set velocity of the motor with MotionMagicVelocityVoltage requests params </p>
+   * creates torque request but doesn't use it?
+   * @param velocity
+   * @param acceleration
+   */
+  public void setVelocity(double velocity, double acceleration) {
     MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(velocity)
       .withAcceleration(acceleration);
       //.withFeedForward(5.0);
 
-      MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
+    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
       .withFeedForward(0.12); //kS value ?
 
-    // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
-    //   .withAcceleration(acceleration);
+    MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
+      .withAcceleration(acceleration);
     //   //.withFeedForward(5.0);
 
-    flywheelMotor1.setControl(requestOne);
-    flywheelMotor1.setControl(torqueRequest);
+    motor1.setControl(requestOne);
+    motor1.setControl(requestTwo); //TODO: this is what was in Sunday's code. should we be setting two different control requests on the same motor?
   }
 
-  public boolean reachedShooterSpeed() { //checks if the shooter has reached the target speed
-    return (getCurrentVelocity() >= Constants.FlywheelShooter.SHOOTER_THRESHOLD_SPEED1);
+  /**
+   * @return true if current speed of yeeter is >= threshold speed
+   */
+  public boolean reachedYeeterSpeed() {
+    return (getCurrentVelocity() >= Constants.Yeeter.YEETER_THRESHOLD_SPEED1);
   }
 
-  public double getCurrentVelocity() { //checks if the shooter has reached the target speed
-
-    double currentVelocity1 = flywheelMotor1.getVelocity().getValueAsDouble();
-    // double currentVelocity2 = Math.abs(flywheelMotor2.getVelocity().getValueAsDouble());
-    // double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
-    // return(averageVelocity);
-    return(currentVelocity1);
+  /**
+   * @return average velocity of both motors
+   */
+  public double getCurrentVelocity() {
+    double currentVelocity1 = motor1.getVelocity().getValueAsDouble();
+    double currentVelocity2 = Math.abs(motor2.getVelocity().getValueAsDouble());
+    double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
+    return(averageVelocity);
   }
 
-  public void stopMotor() { //stops the motor (obviously : ))
-    flywheelMotor1.stopMotor();
-    //flywheelMotor2.stopMotor();
+  /**
+   * stops both motors, obviously :)
+   */
+  public void stopMotor() {
+    motor1.stopMotor();
+    motor2.stopMotor();
   }
 
+  /**
+   * @param motor
+   * @return velocity as double of motor
+   */
   public double getMotorVelocity(TalonFX motor) {
     return (motor.getVelocity().getValueAsDouble());
   }
 
   public void configDashboard(ShuffleboardTab tab) {
     //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
-    tab.addDouble("FlywheelSpeed", () -> getMotorVelocity(flywheelMotor1));
+    tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
+    tab.addDouble("YeeterSpeed2", () -> getMotorVelocity(motor2));
+    tab.addDouble("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
   }
 
   //TODO: fill in these values
+  /**
+   * populates angle tables with given distance and hood angles
+   */
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
-    speedTable.put(0.9144, 59.0); //3 feet
-    speedTable.put(1.2192, 63.0); //4 feet
-    speedTable.put(1.524, 65.0); //5 feet
-    speedTable.put(1.8288, 72.0); //6 feet
-    speedTable.put(2.1336, 72.0); //7 feet
-    speedTable.put(2.4384, 80.0); //8 feet
-    speedTable.put(2.7432, 82.0); //9 feet
-    speedTable.put(3.084, 83.0); //10 feet
+    speedTable.put(3.3288, 68.0); //6 feet
+    speedTable.put(3.9384, 75.0); //8 feet
   }
 
+  /**
+   * @param distanceToHub
+   * @return speed of the shooter based on distance in tree map
+   */
   //TODO: call this in robot container when setting speed
   public double getNecessarySpeed(double distanceToHub) {
     return speedTable.get(distanceToHub);
   }
 
-  public void logShooterSpeed(){
-    DogLog.log("ShooterSpeed", getMotorVelocity(flywheelMotor1));
+  public void logYeeterSpeeds(){
+    DogLog.log("YeeterSpeed1", getMotorVelocity(motor1));
+    DogLog.log("YeeterSpeed2", getMotorVelocity(motor2));
+
   }
 
   @Override

@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -43,7 +44,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 
 public class Pivot extends SubsystemBase {
-  final CANBus canbus = new CANBus("CANivore");
+  private final CANBus canbus = RobotContainer.CANBus;
   private TalonFX motor;
   private CANcoder absEncoder;
   public double revsToMove;
@@ -66,14 +67,12 @@ public class Pivot extends SubsystemBase {
   /** Creates a new Pivot. */
   public Pivot() {
     motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
+
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
-
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
-    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;
-
-    
+    ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
     var talonFXconfigs = new TalonFXConfiguration();
 
@@ -84,14 +83,14 @@ public class Pivot extends SubsystemBase {
     slot0Configs.kP = Constants.Pivot.kP;
     slot0Configs.kI = Constants.Pivot.kI;
     slot0Configs.kD = Constants.Pivot.kD; 
-    
+
     var motionMagicConfigs = talonFXconfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
     motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
     motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
 
-    motor.getConfigurator().apply(talonFXconfigs);
     absEncoder.getConfigurator().apply(ccdConfigs);
+    motor.getConfigurator().apply(talonFXconfigs);
     motor.setNeutralMode(NeutralModeValue.Brake);
 
 
@@ -121,11 +120,16 @@ public class Pivot extends SubsystemBase {
     setRelToAbs();
   }
 
-    
+  /**
+   * set existing position of motors to be 0
+   */
   public void resetRelEncoder(){
     motor.setPosition(0);
   }
 
+  /**
+   * @return true if motor's current position is within error threshold of target position
+   */
   public boolean isReached(){
     double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
     double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
@@ -136,17 +140,27 @@ public class Pivot extends SubsystemBase {
     // return diff < 0.1;
   }
 
+  /**
+   * @param rotations - converted to revs </p>
+   * creates and sets a MotionMagicVoltage request with revs
+   */
   public void moveTo(double rotations){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
     MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
     motor.setControl(request);
   }
 
+  /**
+   * creates and sets a MotionMagicVoltage request with all 0 values
+   */
   public void stop(){
     MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0.0).withFeedForward(0.0);
     motor.setControl(request.withVelocity(0));
   }
 
+  /**
+   * sets the current position of the absolute encoder to 0
+   */
   public void resetAbsEncoder(){
     absEncoder.setPosition(0);
   }
@@ -165,10 +179,16 @@ public class Pivot extends SubsystemBase {
   //   }
   // }
 
+  /**
+   * sets current position of motor to current position of encoder
+   */
   public void setRelToAbs() {
     motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
   }
 
+  /**
+   * creates and sets a MotionMagicVoltage request with current position of motor
+   */
   public void maintainPosition() {
     double currentPos = motor.getRotorPosition().getValueAsDouble();
     motor.setControl(new MotionMagicVoltage(currentPos));

@@ -21,7 +21,7 @@ public final class Constants {
         public static final double ACCELERATION = 300;     // placeholder
         public static final double JERK = 300;            // placeholder
 
-        public static final double kP = 1.0;  // placeholder
+        public static final double kP = 1.5;  // placeholder
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
         public static final double kS = 0.12;  // placeholder
@@ -37,6 +37,7 @@ public final class Constants {
         public static final double HOOD_MAX = 390.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_MIN = 0.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_TOLERANCE_DEG = 5.00;
+        public static final double HOOD_ANGLE = 390.0 * Constants.Hood.DEGREES_TO_REVS;
 
         public static final double DEGREES_TO_REVS = 1.0/360.0;
 
@@ -45,12 +46,12 @@ public final class Constants {
 
     }
 
-    public static class FlywheelShooter {
-        public static final int FLYWHEELSHOOTER_MOTOR1_ID = 37; 
-        public static final int FLYWHEELSHOOTER_MOTOR2_ID = 18; 
+    public static class Yeeter {
+        public static final int YEETER_MOTOR1_ID = 37; 
+        public static final int YEETER_MOTOR2_ID = 18; 
 
-        public static final double kP = 0.67; // placeholder
-        public static final double kI = 0.0; // placeholder
+        public static final double kP = 1.1; // placeholder
+        public static final double kI = 0.1; // placeholder
         public static final double kD = 0.0; // placeholder
         public static final double kS = 0.0; // placeholder
         public static final double kV = 0.13; // placeholder
@@ -58,13 +59,13 @@ public final class Constants {
 
         public static final double CRUISE_VELOCITY = 100.0; // placeholder
         public static final double ACCELERATION = 300.0;   // placeholder
-        //public static final double JERK = 800.0;           // placeholder
+        public static final double JERK = 800.0;           // placeholder
 
-        public static final double PRELOAD_SHOOTER_SPEED = 700.0; 
-        public static final double FLYWHEEL_SHOOTER_SPEED = 72.0; //75; //rotations per second
-        public static final double FLYWHEEL_SHOOTER_ACCELERATION = 500.0;
+        public static final double PRELOAD_YEETER_SPEED = 700.0; 
+        public static final double YEETER_SPEED = 95.0; //75; //rotations per second
+        public static final double YEETER_ACCELERATION = 500.0;
 
-        public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5*Constants.FlywheelShooter.FLYWHEEL_SHOOTER_SPEED;
+        public static final double YEETER_THRESHOLD_SPEED1 = 0.5*Constants.Yeeter.YEETER_SPEED;
         //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
 
         public static final double GEAR_RATIO = 1.333; 
@@ -96,9 +97,9 @@ public final class Constants {
         public static final double SAFE = 5 * DEGREES_TO_REVS;
     }
 
-    public static class Intake{
-        public static final int INTAKE_MOTOR_ID = 11;
-        public static final int INTAKE_MOTOR_SPEED = 30;
+    public static class Eater{
+        public static final int EATER_MOTOR_ID = 11;
+        public static final int EATER_MOTOR_SPEED = 70;
     }
 
     public static class Indexer{
@@ -108,7 +109,7 @@ public final class Constants {
     }
 
     public static class Feeder{
-        public static final int FEEDER_MOTOR_ID = 36; //TODO: change this to actual ID
+        public static final int FEEDER_MOTOR_ID = 36;
         public static final double FEEDER_SPEED = -10.0;
     }
   
@@ -145,7 +146,7 @@ public final class Constants {
         public static final int TOP_SENSOR_CHANNEL = 9;
     }
 
-    public static class Vision {
+    public static class Visabelle {
         public static final double DEGREE_ERROR = 4.0;
 
         public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
