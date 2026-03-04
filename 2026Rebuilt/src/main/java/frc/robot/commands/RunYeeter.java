@@ -18,11 +18,11 @@ import dev.doglog.DogLog;
 public class RunYeeter extends Command {
   /** Creates a new RunFlywheelShooter. */
   private final Yeeter yeeter;
-  private final double speed;
+  private final DoubleSupplier speed;
   private final double acceleration;
     
   //public RunYeeter(Yeeter shooter, DoubleSupplier speed, double acceleration)
-  public RunYeeter(Yeeter yeeter, double speed, double acceleration) {
+  public RunYeeter(Yeeter yeeter, DoubleSupplier speed, double acceleration) {
     this.yeeter = yeeter;
     this.speed = speed;
     this.acceleration = acceleration;

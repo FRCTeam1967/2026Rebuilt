@@ -120,13 +120,13 @@ public class Autoes {
     shootFromABitBack.done().onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
           new WaitCommand(2.5)
         ),
         new ParallelCommandGroup(
                 new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
                 new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
               ).withTimeout(5.0)
       )
       .andThen(hubTowerShoot.cmd())
@@ -142,13 +142,13 @@ public class Autoes {
     //       new RunIndexer(m_robotContainer.indexer, 10.0)
     //     ).withTimeout(3),
     //     new ParallelRaceGroup(
-    //       new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //       new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
     //       new WaitCommand(2.5)
     //     ),
     //     new ParallelCommandGroup(
     //       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //       new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //       new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //       new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //     ).withTimeout(5.0)
     //   ).andThen(hubTowerShoot.cmd())
     //   //TODO: add climb sequencing
@@ -210,13 +210,13 @@ public class Autoes {
     shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
           new WaitCommand(2.5)
         ),
         new ParallelCommandGroup(
           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
         ).withTimeout(5.0)
       )
     );
@@ -249,13 +249,13 @@ public class Autoes {
     //   Commands.parallel(
     //     Commands.sequence(
     //       new ParallelRaceGroup(
-    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
     //         new WaitCommand(2.5)
     //       ),
     //       new ParallelCommandGroup(
     //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //       ).withTimeout(5.0)
     //     ),
     //     shootClimb.cmd()
@@ -325,13 +325,13 @@ public class Autoes {
     shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
           new WaitCommand(2.5)
         ),
         new ParallelCommandGroup(
           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
         ).withTimeout(5.0)
       )
     );
@@ -364,13 +364,13 @@ public class Autoes {
     //   Commands.parallel(
     //     Commands.sequence(
     //       new ParallelRaceGroup(
-    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
     //         new WaitCommand(2.5)
     //       ),
     //       new ParallelCommandGroup(
     //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //       ).withTimeout(5.0)
     //     ),
     //     shootClimb.cmd()
@@ -416,7 +416,7 @@ public class Autoes {
     );
     depotToShoot.atPose("Start Shoot", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -465,7 +465,7 @@ public class Autoes {
 
     goToScore.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -499,7 +499,7 @@ public class Autoes {
     Eater.done().onTrue(Score.cmd());
     Score.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -536,7 +536,7 @@ public class Autoes {
     );
     neutralScore.done().onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -559,7 +559,7 @@ public class Autoes {
     );
      neutralScore.done().onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -593,7 +593,7 @@ public class Autoes {
     );
     scoreClimb.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -605,7 +605,7 @@ public class Autoes {
     );
     scoreClimb.atPose("Climb", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(

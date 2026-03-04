@@ -78,7 +78,7 @@ public class Visabelle extends SubsystemBase {
     double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
     visionDist.set(eucDist);
     
-    DogLog.log("alliance", alliance);
+    DogLog.log("dist", eucDist);
     
     return eucDist;
   }

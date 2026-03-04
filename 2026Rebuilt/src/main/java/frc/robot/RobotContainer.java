@@ -106,8 +106,8 @@ public class RobotContainer {
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
-    public DoubleSubscriber speedTunable = DogLog.tunable("Tunable Speed", Constants.Yeeter.YEETER_SPEED);
-    public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
+    //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
+    //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     public RobotContainer() {
         configureBindings();
@@ -232,35 +232,31 @@ public class RobotContainer {
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger()
         .whileTrue(
-          new SequentialCommandGroup(
+          //new SequentialCommandGroup(
             // new ParallelCommandGroup(
             //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
             //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
             // ),
             /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
-            new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-            new ParallelRaceGroup(
-              new RunYeeter(yeeter, yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-              new WaitCommand(2.5)
-            ),
+
             //new SequentialCommandGroup(
               //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
               new ParallelCommandGroup(
                 new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                 new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunYeeter(yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
               )
             //)
-          )
+          //)
         );
 
-        m_driverController.y().whileTrue(new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE));
+        m_operatorController.leftBumper().whileTrue(new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE));
 
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
