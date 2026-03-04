@@ -232,7 +232,7 @@ public class RobotContainer {
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         //SHOOTER AND HOOD BUTTON BINDINGS
@@ -256,7 +256,13 @@ public class RobotContainer {
           //)
         );
 
-        m_operatorController.leftBumper().whileTrue(new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE));
+        //shuttling
+        m_operatorController.leftBumper().whileTrue(
+            new ParallelCommandGroup(
+                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+            )
+        );
 
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
