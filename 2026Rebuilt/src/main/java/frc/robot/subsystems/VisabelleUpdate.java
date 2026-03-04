@@ -22,6 +22,8 @@ import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class VisabelleUpdate extends SubsystemBase {
   /** Creates a new VisionUpdate. */
@@ -29,7 +31,8 @@ public class VisabelleUpdate extends SubsystemBase {
   // visibility dataType name;
   private SwerveOnTheseBows swerve;
 
-  private final StructPublisher<Pose2d> limelightPublisher;
+  private final StructPublisher<Pose2d> frontlightPublisher;
+  private final StructPublisher<Pose2d> backlightPublisher;
 
   private long odometryUpdates = 0;
   private long odometryDiscards = 0;
@@ -40,12 +43,17 @@ public class VisabelleUpdate extends SubsystemBase {
   DoublePublisher fpgaTimestamp;
   DoublePublisher LLtoFPGA;
 
-  public static Pose2d towerpose;
+  private static final double MAX_ANGULAR_VELOCITY = 720; // TODO: change
+  private static final double AREA_THRESHOLD = 0.1;
+
+  public static Pose2d towerPose;
+  public static LimelightHelpers.PoseEstimate chosenPoseEstimate;
 
   public VisabelleUpdate(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
 
-    limelightPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
+    frontlightPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Front Limelight Pose", Pose2d.struct).publish();
+    backlightPublisher = NetworkTableInstance.getDefault().getTable("limelight-back").getStructTopic("Back Limelight Pose", Pose2d.struct).publish();
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("odometryStats");
@@ -53,23 +61,47 @@ public class VisabelleUpdate extends SubsystemBase {
     updatePublisher = table.getIntegerTopic("acceptedUpdates").publish();
     discardPublisher = table.getIntegerTopic("rejectedUpdates").publish();
 
-
     LLtimestamp = table.getDoubleTopic("limelight timestamp").publish();
     fpgaTimestamp = table.getDoubleTopic("fpga timestamp").publish();
     LLtoFPGA = table.getDoubleTopic("LL converted to fpga").publish();
 
-    Pose2d towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-    DogLog.log("Tower Pose: ", towerPose);
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+      DogLog.log("Tower Pose: ", towerPose);
+    }
+    else {
+      towerPose = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
+      DogLog.log("Tower Pose: ", towerPose);
+    }
   }
 
+  public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
+    if (estimate == null)
+        return true;
+
+    if (estimate.tagCount == 0)
+        return true;
+
+    // Angular velocity is too high to have accurate vision
+    //if (Math.abs(angularVelocity) > MAX_ANGULAR_VELOCITY)
+    //    return true;
+
+    if (estimate.tagCount == 1 && estimate.avgTagArea < AREA_THRESHOLD)
+        return true;
+
+    return false;
+  }
+
+  // TODO: add conditional to add either front or back limelight
   public void setFirstVisionPose() {
-    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
 
     swerve.addVisionMeasurement(
-      mt2.pose,
-      Utils.fpgaToCurrentTime(mt2.timestampSeconds));
+      mt2_front.pose,
+      Utils.fpgaToCurrentTime(mt2_front.timestampSeconds));
   }
 
   private boolean disableVision = false;
@@ -115,29 +147,49 @@ public class VisabelleUpdate extends SubsystemBase {
 
   @Override
   public void periodic() {
-    boolean doRejectUpdate = false;
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-back", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
 
-    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
-    if(mt2.tagCount == 0) {
-      doRejectUpdate = true;
-    }
+    //double angularVelocity = swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
     
-    if(!doRejectUpdate){
+    if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
+      chosenPoseEstimate = mt2_front;
+      frontlightPublisher.set(mt2_front.pose);
+    }
+    else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
+      chosenPoseEstimate = mt2_back;
+      backlightPublisher.set(mt2_back.pose);
+    }
+    else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
+      if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
+        chosenPoseEstimate = mt2_back;
+      }
+      else {
+        chosenPoseEstimate = mt2_front;
+      }
+      frontlightPublisher.set(mt2_front.pose);
+      backlightPublisher.set(mt2_back.pose);
+    }
+
+    if (chosenPoseEstimate != null) {
       swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+      
       swerve.addVisionMeasurement(
-          mt2.pose,
-          mt2.timestampSeconds);
-      limelightPublisher.set(mt2.pose);
+          chosenPoseEstimate.pose,
+          chosenPoseEstimate.timestampSeconds);
+
       updatePublisher.set(++odometryUpdates);
+      chosenPoseEstimate = null;
     }
     else {
       discardPublisher.set(++odometryDiscards);
-    }
+    }  
 
-    LLtimestamp.set(mt2.timestampSeconds);
+    LLtimestamp.set(chosenPoseEstimate.timestampSeconds);
     fpgaTimestamp.set(Utils.getCurrentTimeSeconds());
-    LLtoFPGA.set(Utils.fpgaToCurrentTime(mt2.timestampSeconds));
+    LLtoFPGA.set(Utils.fpgaToCurrentTime(chosenPoseEstimate.timestampSeconds));
   }
 }
