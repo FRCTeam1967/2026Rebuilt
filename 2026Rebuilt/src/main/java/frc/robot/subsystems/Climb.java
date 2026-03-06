@@ -64,6 +64,7 @@ public class Climb extends SubsystemBase {
   private double rotations;
   private double appliedVoltage;
   private final CANBus canbus = RobotContainer.CANBus;
+  private boolean enabled;
 
   // SIM FIELDS
   // private ProfiledPIDController m_controller;
@@ -90,6 +91,7 @@ public class Climb extends SubsystemBase {
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
+    enabled = false;
 
     // SIM INITS
     motorSim = motor.getSimState();
@@ -208,10 +210,12 @@ public class Climb extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with rotations and feedforward
    */
   public void moveTo(double inches) {  
-    rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
-    appliedVoltage = Constants.Climb.FEED_FORWARD;
-    MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
-    motor.setControl(request);
+    if (enabled) {
+      rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
+      appliedVoltage = Constants.Climb.FEED_FORWARD;
+      MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
+      motor.setControl(request);
+    }
   }
 
   /**
@@ -257,6 +261,10 @@ public class Climb extends SubsystemBase {
    */
   public void stopMotor() {
     motor.stopMotor();
+  }
+  
+  public void changeStatus() {
+    enabled = !enabled;
   }
 
   public void configDashboard(ShuffleboardTab tab) {

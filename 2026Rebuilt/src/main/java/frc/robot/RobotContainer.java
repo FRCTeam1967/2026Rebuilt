@@ -282,10 +282,14 @@ public class RobotContainer {
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
         m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
 
+        m_operatorController.leftBumper().whileTrue(new JitterPivot(pivot));
+
         //CLIMB
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
+        m_operatorController.x().onTrue(new InstantCommand(() -> climb.changeStatus(), climb));
+
 
     }
 

@@ -48,6 +48,9 @@ public class Pivot extends SubsystemBase {
   private TalonFX motor;
   private CANcoder absEncoder;
   public double revsToMove;
+  private boolean isJittering = false;
+  private int periodicCount = 0;
+
 
   //simulation
   // private SingleJointedArmSim armSim;
@@ -67,6 +70,7 @@ public class Pivot extends SubsystemBase {
   /** Creates a new Pivot. */
   public Pivot() {
     motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
+
 
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
@@ -150,6 +154,17 @@ public class Pivot extends SubsystemBase {
     motor.setControl(request);
   }
 
+  public boolean getIsJittering(){
+    return isJittering;
+  }
+
+  public void stopJittering(){
+    isJittering = false;
+  }
+  
+  public void startJittering(){
+    isJittering = true;
+  }
   /**
    * creates and sets a MotionMagicVoltage request with all 0 values
    */
@@ -193,6 +208,7 @@ public class Pivot extends SubsystemBase {
     double currentPos = motor.getRotorPosition().getValueAsDouble();
     motor.setControl(new MotionMagicVoltage(currentPos));
   }
+
 /* 
   @Override
   public void simulationPeriodic() {
@@ -245,6 +261,30 @@ public class Pivot extends SubsystemBase {
 
   public void periodic() {
     // This method will be called once per scheduler run
-  }
+    if (isJittering){
+      periodicCount++;
+      if (periodicCount % 50 == 0) {
+        double armPosition = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+        if (Math.abs(armPosition-Constants.Pivot.UPPER_ARM_POS)<Constants.Pivot.JITTER_DEADBAND){
+          moveTo(Constants.Pivot.LOWER_ARM_POS);
+        }
+        else if (Math.abs(armPosition-Constants.Pivot.LOWER_ARM_POS)<Constants.Pivot.JITTER_DEADBAND){
+          moveTo(Constants.Pivot.UPPER_ARM_POS);
+        }
+      }
+    
+        
+    //  double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    // double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
+    // double diff = Math.abs(currentPos - targetPosition);
+    // return diff < 10;
+  
+    }
+      
+      
+
+
+    }
+  
 }
 

@@ -47,8 +47,8 @@ public final class Constants {
     }
 
     public static class Yeeter {
-        public static final int YEETER_MOTOR1_ID = 37; 
-        public static final int YEETER_MOTOR2_ID = 18; 
+        public static final int YEETER_MOTOR1_ID = 19; 
+        public static final int YEETER_MOTOR2_ID = 17; 
 
         public static final double kP = 1.1; // placeholder
         public static final double kI = 0.1; // placeholder
@@ -72,8 +72,12 @@ public final class Constants {
     }
 
     public static class Pivot{
-        public static final int MOTOR_ID = 10;
+        public static final int MOTOR_ID = 37;
         public static final int ENCODER_ID = 27;
+        public static final double JITTER_DEADBAND = 5.0;
+        public static final int LOWER_ARM_POS = 0; //change later
+        public static final int UPPER_ARM_POS =0;  // change later
+
 
         public static final double kS = 0.25;
         public static final double kV = 0.12;
@@ -85,7 +89,7 @@ public final class Constants {
         public static final int CRUISE_VELOCITY = 40;
         public static final int ACCELERATION = 100;
         public static final int JERK = 1000;
-        public static final double GEAR_RATIO = 36/1.0;
+        public static final double GEAR_RATIO = 1/1.0;
         public static final double FEED_FORWARD = 1;
         
 
