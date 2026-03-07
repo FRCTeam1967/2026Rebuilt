@@ -30,6 +30,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AlignTowerPose;
+import frc.robot.commands.MoveClimbHalfwayDown;
+import frc.robot.commands.MoveClimbUp;
 import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunYeeter;
@@ -130,7 +133,14 @@ public class Autoes {
               ).withTimeout(5.0)
       )
       .andThen(hubTowerShoot.cmd())
-      //TODO: add climb sequencing
+    );
+
+    hubTowerShoot.done().onTrue(
+      new SequentialCommandGroup(
+        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
+        new AlignTowerPose(m_robotContainer.swerve),
+        new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
+      )
     );
 
     // WITHOUT EVENT MARKER
@@ -151,7 +161,14 @@ public class Autoes {
     //       new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //     ).withTimeout(5.0)
     //   ).andThen(hubTowerShoot.cmd())
-    //   //TODO: add climb sequencing
+    // );
+
+    // hubTowerShoot.done().onTrue(
+    //   new SequentialCommandGroup(
+    //     new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
+    //     new AlignTowerPose(m_robotContainer.swerve),
+    //     new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
+    //   )
     // );
           
     return routine;
