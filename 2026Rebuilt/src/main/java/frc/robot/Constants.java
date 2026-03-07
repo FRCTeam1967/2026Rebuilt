@@ -26,10 +26,10 @@ public class Constants {
     
        public static final double THRESHOLD = 1;
        public static final double DEGREES_TO_REVS = 1.0/360.0;
-       public static final double MAGNET_OFFSET = 0.419921875;
+       public static final double MAGNET_OFFSET =   0.460693359375;//0.419921875
 
 
-       public static final double DOWN_POSITION = 140 * DEGREES_TO_REVS;
+       public static final double DOWN_POSITION = 135 * DEGREES_TO_REVS;
        public static final double SAFE = 5 * DEGREES_TO_REVS;
    }
 
