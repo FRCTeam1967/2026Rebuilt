@@ -43,6 +43,7 @@ import java.util.function.DoubleSupplier;
 public class Yeeter extends SubsystemBase {
   private TalonFX motor1;
   private TalonFX motor2; //private TalonFX flywheelMotor2;
+  private Visabelle visabelle;
 
   private final CANBus canbus = RobotContainer.CANBus;
 
@@ -78,7 +79,7 @@ public class Yeeter extends SubsystemBase {
   // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
-  public Yeeter() {
+  public Yeeter(Visabelle visabelle) {
     speedTable = new InterpolatingDoubleTreeMap();
     motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
     motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
@@ -103,6 +104,8 @@ public class Yeeter extends SubsystemBase {
 
     motor1.setNeutralMode(NeutralModeValue.Coast);
     motor2.setNeutralMode(NeutralModeValue.Coast);
+
+    visabelle = this.visabelle;
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -142,7 +145,7 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
-    return (getCurrentVelocity() >= Constants.Yeeter.YEETER_THRESHOLD_SPEED1);
+    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> visabelle.getDisFromHub())));
   }
 
   /**
@@ -184,8 +187,14 @@ public class Yeeter extends SubsystemBase {
    */
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
-    speedTable.put(3.3288, 68.0); //6 feet
-    speedTable.put(3.9384, 75.0); //8 feet
+    speedTable.put(0.6858+1.02235, 50.0); //2ft
+    speedTable.put(1.524+1.02235, 64.5); //5ft
+    speedTable.put(1.8288+1.02235, 66.7); //6ft
+    speedTable.put(2.4384+1.02235, 72.0); //8ft
+    speedTable.put(3.048+1.02235, 74.0); //10ft
+
+    // speedTable.put(3.3288, 68.0); //6 feet
+    // speedTable.put(3.9384, 75.0); //8 feet
   }
 
   /**
@@ -193,8 +202,8 @@ public class Yeeter extends SubsystemBase {
    * @return speed of the shooter based on distance in tree map
    */
   //TODO: call this in robot container when setting speed
-  public double getNecessarySpeed(double distanceToHub) {
-    double speed = speedTable.get(distanceToHub);
+  public double getNecessarySpeed(DoubleSupplier distanceToHub) {
+    double speed = speedTable.get(distanceToHub.getAsDouble());
     DogLog.log("target", speed);
     return speed;
   }
