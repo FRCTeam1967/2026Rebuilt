@@ -3,11 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 import java.util.Optional;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
-import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -28,9 +23,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
-import static edu.wpi.first.units.Units.Percent;
-import static edu.wpi.first.units.Units.Seconds;
-
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -38,23 +30,20 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
-import frc.robot.commands.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.Constants.OperatorConstants;
 import edu.wpi.first.wpilibj.Joystick;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.simulation.JoystickSim;
-
-
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;  
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -87,7 +76,7 @@ public class RobotContainer {
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
-    public final Yeeter yeeter = new Yeeter();
+    public final Yeeter yeeter = new Yeeter(visabelle);
     public final TheHood theHood = new TheHood();
     public final Climb climb = new Climb();
 
@@ -106,8 +95,8 @@ public class RobotContainer {
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
-    public DoubleSubscriber speedTunable = DogLog.tunable("Tunable Speed", Constants.Yeeter.YEETER_SPEED);
-    public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
+    //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
+    //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     public RobotContainer() {
         configureBindings();
@@ -235,49 +224,70 @@ public class RobotContainer {
         theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
+        // SHOOTER AND HOOD BUTTON BINDINGS
+        // m_operatorController.leftTrigger()
+        // .whileTrue(
+        //   //new SequentialCommandGroup(
+        //     // new ParallelCommandGroup(
+        //     //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        //     //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+        //     // ),
+        //     /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
+
+        //     //new SequentialCommandGroup(
+        //       //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+        //       new ParallelCommandGroup(
+        //         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+        //         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        //         new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
+        //       )
+        //     //)
+        //   //)
+        // );
+
         //SHOOTER AND HOOD BUTTON BINDINGS
-        m_operatorController.leftTrigger()
-        .whileTrue(
-          new SequentialCommandGroup(
-            // new ParallelCommandGroup(
-            //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-            //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-            // ),
-            /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
-            new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-            new ParallelRaceGroup(
-              new RunYeeter(yeeter, yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-              new WaitCommand(2.5)
-            ),
-            //new SequentialCommandGroup(
-              //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
-              new ParallelCommandGroup(
-                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunYeeter(yeeter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-              )
-            //)
-          )
+        m_operatorController.leftTrigger().whileTrue(
+            new ParallelCommandGroup(
+                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+                    new ParallelCommandGroup(
+                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+                    ) 
+                )
+            )
         );
 
-        m_driverController.y().whileTrue(new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE));
+        //SHUTTLING
+        m_operatorController.leftBumper().whileTrue(
+            new ParallelCommandGroup(
+                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+            )
+        );
 
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
         //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-        // eject button
+        
+        //EJECT
         m_operatorController.rightBumper().whileTrue(
             new RunFeeder(feeder, 5)
         );
 
+        //INTAKE
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
-            //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
+        
+        //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
         m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));

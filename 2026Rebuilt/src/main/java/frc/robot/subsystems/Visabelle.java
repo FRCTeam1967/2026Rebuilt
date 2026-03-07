@@ -12,6 +12,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.function.DoubleSupplier;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,6 +32,7 @@ public class Visabelle extends SubsystemBase {
   private SwerveOnTheseBows swerve;
 
   private DoublePublisher visionDist;
+  //private DoubleSupplier visionDist;
   private DoublePublisher visionBlueDist;
   private DoublePublisher visionRedDist;
   private BooleanPublisher allianceIsBlue;
@@ -77,7 +80,7 @@ public class Visabelle extends SubsystemBase {
     double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
     visionDist.set(eucDist);
     
-    //DogLog.log("alliance", alliance);
+    DogLog.log("dist", eucDist);
     
     return eucDist;
   }
