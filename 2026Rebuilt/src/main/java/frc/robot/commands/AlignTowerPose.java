@@ -38,12 +38,12 @@ public class AlignTowerPose extends Command {
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
       
-  Optional<Alliance> ally = DriverStation.getAlliance();
+  //Optional<Alliance> ally = DriverStation.getAlliance();
   final StructPublisher<Pose2d> towerPublisher = NetworkTableInstance.getDefault().getTable("alignment").getStructTopic("tower", Pose2d.struct).publish();  
   
   //tower pose - RED ALLIANCE
 
-  private static final double kP_translational = 0.85;
+  private static final double kP_translational = 1.00; //0.85
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
 
@@ -74,8 +74,9 @@ public class AlignTowerPose extends Command {
     Pose2d drivetrainPose = swerve.getPose();
     // 0.84, 4.8, 0
 
-    difference = VisabelleUpdate.towerpose.minus(drivetrainPose);
+    difference = VisabelleUpdate.towerPose.minus(drivetrainPose);
     // 1.092, 4.61, 3.14
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
         DogLog.log("Pose difference: ", difference);
         DogLog.log("pose diff x", difference.getX());
         DogLog.log("pose diff y", difference.getY());
@@ -96,59 +97,29 @@ public class AlignTowerPose extends Command {
         DogLog.log("x isFinished: ", Math.abs(difference.getX()) < 0.05);
         DogLog.log("y isFinished: ", Math.abs(difference.getY()) < 0.05);
         DogLog.log("rotation isFinished: ", Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2));
+    }
+    else {
+        DogLog.log("Pose difference: ", difference);
+        DogLog.log("pose diff x", difference.getX());
+        DogLog.log("pose diff y", difference.getY());
 
-    // if (ally.get() == Alliance.Red) {
-    //     DogLog.log("Pose difference: ", difference);
-    //     DogLog.log("pose diff x", difference.getX());
-    //     DogLog.log("pose diff y", difference.getY());
+        double xVelocity = MathUtil.clamp(difference.getX() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("xVelocity: ", xVelocity);
 
-    //     double xVelocity = MathUtil.clamp(difference.getX() * kP_translational, -MaxSpeed, MaxSpeed);
-    //     DogLog.log("xVelocity: ", xVelocity);
+        double yVelocity = MathUtil.clamp(difference.getY() * kP_translational, -MaxSpeed, MaxSpeed);
+        DogLog.log("yVelocity: ", yVelocity);
 
-    //     double yVelocity = MathUtil.clamp(difference.getY() * kP_translational, -MaxSpeed, MaxSpeed);
-    //     DogLog.log("yVelocity: ", yVelocity);
+        double rotationalVelocity = MathUtil.clamp(difference.getRotation().getRadians() * kP_rotational, -MaxAngularRate, MaxAngularRate);
+        DogLog.log("rotationalVelocity: ", rotationalVelocity);
 
-    //     double rotationalVelocity = MathUtil.clamp(difference.getRotation().getRadians() * kP_rotational, -MaxAngularRate, MaxAngularRate);
-    //     DogLog.log("rotationalVelocity: ", rotationalVelocity);
+        ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
+        DogLog.log("alignmentSpeed: ", alignmentSpeed);
 
-    //     ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
-    //     DogLog.log("alignmentSpeed: ", alignmentSpeed);
-
-    //     drivetrain.setControl(request.withSpeeds(alignmentSpeed));
-    //     DogLog.log("x isFinished: ", Math.abs(difference.getX()) < 0.05);
-    //     DogLog.log("y isFinished: ", Math.abs(difference.getY()) < 0.05);
-    //     DogLog.log("rotation isFinished: ", Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2));
-    // }
-    // else {
-    //       // Pose2d drivetrainPose = drivetrain.getPose();
-    //       // // 0.84, 4.8, 0
-
-    //       // difference = towerPose.minus(drivetrainPose);
-    //       // // 0.252, 0.19, -3.14
-
-    //     DogLog.log("Pose difference: ", difference); // // 0.252, 0.19, -3.14
-    //     DogLog.log("pose diff x", difference.getX());
-    //     DogLog.log("pose diff y", difference.getY());
-
-    //     double xVelocity = MathUtil.clamp(-difference.getX() * kP_translational, -MaxSpeed, MaxSpeed); //-0.189
-    //     DogLog.log("xVelocity: ", xVelocity);
-
-    //     double yVelocity = MathUtil.clamp(-difference.getY() * kP_translational, -MaxSpeed, MaxSpeed); //-0.1425
-    //     DogLog.log("yVelocity: ", yVelocity);
-
-    //     double rotationalVelocity = MathUtil.clamp(difference.getRotation().getRadians() * kP_rotational, -MaxAngularRate, MaxAngularRate); // -2.355
-    //     DogLog.log("rotationalVelocity: ", rotationalVelocity);
-
-    //     ChassisSpeeds alignmentSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, drivetrainPose.getRotation());
-    //     DogLog.log("alignmentSpeed: ", alignmentSpeed);
-
-    //     drivetrain.setControl(request.withSpeeds(alignmentSpeed));
-    //     DogLog.log("x isFinished: ", Math.abs(difference.getX()) < 0.05);
-    //     DogLog.log("y isFinished: ", Math.abs(difference.getY()) < 0.05);
-    //     DogLog.log("rotation isFinished: ", Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2));
-
-    // }
-    
+        swerve.setControl(request.withSpeeds(alignmentSpeed));
+        DogLog.log("x isFinished: ", Math.abs(difference.getX()) < 0.05);
+        DogLog.log("y isFinished: ", Math.abs(difference.getY()) < 0.05);
+        DogLog.log("rotation isFinished: ", Math.abs(difference.getRotation().getRadians()) < Units.degreesToRadians(2));
+    }    
   }
 
   // Called once the command ends or is interrupted.

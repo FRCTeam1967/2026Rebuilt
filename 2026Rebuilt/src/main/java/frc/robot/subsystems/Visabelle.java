@@ -34,6 +34,7 @@ public class Visabelle extends SubsystemBase {
   private DoublePublisher visionRedDist;
   private BooleanPublisher allianceIsBlue;
 
+  private Translation2d hubPose;
 
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
@@ -62,29 +63,38 @@ public class Visabelle extends SubsystemBase {
   }
 
   public double getDisFromHub() {
-    Translation2d hubPose;
-    
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
 
-    // if (alliance == Alliance.Blue) {
-    //   hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
-    // } else {
-    //   hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
-    // }
+    if (alliance == Alliance.Blue) {
+      hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+    } else {
+      hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    }
 
     Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
     visionDist.set(eucDist);
     
-    DogLog.log("alliance", alliance);
+    //DogLog.log("alliance", alliance);
     
     return eucDist;
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    if (DriverStation.getAlliance().isPresent()) {
+      if (DriverStation.getAlliance().get() == Alliance.Blue) {
+        hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+      } else {
+        hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+      }
+    }
+
+    Translation2d ourPose = swerve.getPose().getTranslation();
+
+    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
+    visionDist.set(eucDist);
   }
 }

@@ -205,7 +205,7 @@ public class RobotContainer {
             )
         );
 
-        //m_driverController.leftTrigger().whileTrue(new AlignTowerPose(drivetrain));
+        m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
         // yaw setter --> 0 faces hub 
         m_driverController.x().onTrue(new SequentialCommandGroup(
