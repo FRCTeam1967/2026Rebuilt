@@ -103,10 +103,11 @@ public class Autoes {
             new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
               m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
               0, 0, 0, 0, 0)), 
+            new PrintCommand("conditional command completed !!!! ****"),
             shootFromABitBack.cmd()
           ), 
           shootFromABitBack.cmd(),
-          () -> (LimelightHelpers.getTV("limelight-front"))
+          (() -> (LimelightHelpers.getTV("limelight-front")))
         )
       )
     ); 
@@ -117,8 +118,12 @@ public class Autoes {
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
-      ).withTimeout(3)
+      ) //.withTimeout(5)
     );
+
+    // shootFromABitBack.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
+    //   m_robotContainer.pivot.moveTo(Constants.Pivot.DOWN_POSITION)
+    //   ).withTimeout(3);
 
     shootFromABitBack.done().onTrue(
       Commands.sequence(
@@ -135,13 +140,13 @@ public class Autoes {
       .andThen(hubTowerShoot.cmd())
     );
 
-    hubTowerShoot.done().onTrue(
-      new SequentialCommandGroup(
-        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
-        new AlignTowerPose(m_robotContainer.swerve),
-        new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
-      )
-    );
+    // hubTowerShoot.done().onTrue(
+    //   new SequentialCommandGroup(
+    //     new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
+    //     new AlignTowerPose(m_robotContainer.swerve),
+    //     new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
+    //   )
+    // );
 
     // WITHOUT EVENT MARKER
     // shootFromABitBack.done().onTrue(
