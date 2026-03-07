@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
+// WELCOME TO DA HOOD
+
 public class TheHood extends SubsystemBase {
   private final TalonFX hoodMotor;
   private final CANcoder absEncoder;
