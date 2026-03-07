@@ -67,7 +67,6 @@ public class Climb extends SubsystemBase {
   private double appliedVoltage;
   private DifferentialDrivetrainSim swerve;
   private double speed;
-  final CANBus canbus = new CANBus("CANivore");
 
   // private ProfiledPIDController m_controller;
   // private EncoderSim encoderSim;
@@ -88,7 +87,7 @@ public class Climb extends SubsystemBase {
   private Rotation3d rotation;
 
   public Climb() {
-    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID);
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);

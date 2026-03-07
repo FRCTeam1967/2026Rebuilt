@@ -18,7 +18,7 @@ public final class Constants {
        public static final double FEED_FORWARD = 0.0;
 
 
-       public static final int MOTOR_ID = 9;
+       public static final int MOTOR_ID = 10;
        public static final int CRUISE_VELOCITY = 30;//10, 160
        public static final int ACCELERATION = 210;//240
        public static final int CURRENT_LIMIT = 40;
