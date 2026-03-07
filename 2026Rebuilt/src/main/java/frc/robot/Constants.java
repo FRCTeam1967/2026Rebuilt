@@ -7,14 +7,14 @@ public class Constants {
         public static final int kOperatorControllerPort = 1;
     }
     public static class Pivot{
-       public static final int MOTOR_ID = 10;
+       public static final int MOTOR_ID = 18;//10
        public static final int ENCODER_ID = 27;
 
 
-       public static final double kS = 0.25;
-       public static final double kV = 0.12;
-       public static final double kA = 0.01;
-       public static final double kP = 5;
+    //    public static final double kS = 0.25;
+    //    public static final double kV = 0.12;
+    //    public static final double kA = 0.01;
+       public static final double kP = 0.01; // 5
        public static final int kI = 0;
        public static final int kD = 0;
       
@@ -31,6 +31,9 @@ public class Constants {
 
        public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
        public static final double SAFE = 5 * DEGREES_TO_REVS;
+       public static final double UPPER_ARM_POS = 70 * DEGREES_TO_REVS;
+    public static final double LOWER_ARM_POS = 40 * DEGREES_TO_REVS;
+    public static final double JITTER_DEADBAND = 5 * DEGREES_TO_REVS;
    }
 
 

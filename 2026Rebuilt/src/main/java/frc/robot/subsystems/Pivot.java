@@ -5,16 +5,19 @@
 
 package frc.robot.subsystems;
 
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -35,6 +38,7 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -50,218 +54,271 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 
 public class Pivot extends SubsystemBase {
- final CANBus canbus = new CANBus("CANivore");
- private TalonFX motor;
- private CANcoder absEncoder;
- public double revsToMove;
+  //  final CANBus canbus = new CANBus("CANivore");
+  private TalonFX motor;
+  private CANcoder absEncoder;
+  public double revsToMove;
+  private boolean isJittering = false;
+  private int periodicCount = 0;
 
 
- //simulation
- // private SingleJointedArmSim armSim;
- // private Mechanism2d mech2d = new Mechanism2d(1, 1);
- // private MechanismLigament2d arm = mech2d.getRoot("pivot", 0.5, 0.5)
- //     .append(new MechanismLigament2d("arm", 0.5, 0));
- // private TalonFXSimState motorSim;
- // private double simRotorPosition = 0.0;
- // private PIDController controller;
- // private Field2d field;
- // private DifferentialDrivetrainSim swerve;
- // private double rotations;
- // private double appliedVoltage;
- // private Pose3d poses;
- // private Rotation3d rotation;
 
 
- /** Creates a new Pivot. */
- public Pivot() {
-   motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
-   absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
-   CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
+  //simulation
+  // private SingleJointedArmSim armSim;
+  // private Mechanism2d mech2d = new Mechanism2d(1, 1);
+  // private MechanismLigament2d arm = mech2d.getRoot("pivot", 0.5, 0.5)
+  //     .append(new MechanismLigament2d("arm", 0.5, 0));
+  // private TalonFXSimState motorSim;
+  // private double simRotorPosition = 0.0;
+  // private PIDController controller;
+  // private Field2d field;
+  // private DifferentialDrivetrainSim swerve;
+  // private double rotations;
+  // private double appliedVoltage;
+  // private Pose3d poses;
+  // private Rotation3d rotation;
 
 
-   ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-   //ccdConfigs.MagnetSensor.MagnetOffset = 0;
-   ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;
+  /** Creates a new Pivot. */
+  public Pivot() {
+    motor = new TalonFX (Constants.Pivot.MOTOR_ID);
+
+    // absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID,canbus);
+    // CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
+    // ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    //ccdConfigs.MagnetSensor.MagnetOffset = 0;
+    // ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
 
+    var talonFXconfigs = new TalonFXConfiguration();
+    
+
+
+    var slot0Configs = talonFXconfigs.Slot0;
+    slot0Configs.kP = Constants.Pivot.kP;
+    slot0Configs.kI = Constants.Pivot.kI;
+    slot0Configs.kD = Constants.Pivot.kD;
+
+    var talonFXConfigurator = motor.getConfigurator();
+    var motorConfigs = new MotorOutputConfigs();
+
+
+    motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+    talonFXConfigurator.apply(motorConfigs);
+
+    // absEncoder.getConfigurator().apply(ccdConfigs);
+    motor.getConfigurator().apply(talonFXconfigs);
+    motor.setNeutralMode(NeutralModeValue.Brake);
+
+
+
+
+    //simulation
+    // motorSim = motor.getSimState();
+    // field = new Field2d();
+    // swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+    // rotation = new Rotation3d();
+    // poses = new Pose3d(0.0,0.0,0.0,rotation);
+    // controller = new PIDController(20, 6, 6);
+
+
+    // armSim = new SingleJointedArmSim(
+    // DCMotor.getKrakenX60(1), // Motor
+    // Constants.Pivot.GEAR_RATIO,  // Gear ratio
+    // 5.0, // Moment of inertia (kg·m²)
+    // 0.5,  // Arm length (m)
+    // 0.0,  // Min angle (rad)
+    // Math.PI,  // Max angle (rad)
+    // true, // Simulate gravity
+    // 0.0 // Initial angle (rad)
+    // );  
+
+
+    // StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
+    //   .getStructTopic("MyPose", Pose3d.struct).publish();
+    // StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
+    //   .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
+    // setRelToAbs();
+  }
+
+
+  /**
+   * set existing position of motors to be 0
+   */
+  public void resetRelEncoder(){
+    motor.setPosition(0);
+  }
+
+
+  /**
+   * @return true if motor's current position is within error threshold of target position
+   */
+  public boolean isReached(){
+    double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
+    double diff = Math.abs(currentPos - targetPosition);
+    return diff < 10;
+    // double targetPosition = revsToMove/Constants.Pivot.GEAR_RATIO;
+    // double diff = Math.abs(currentPos - targetPosition);
+    // return diff < 0.1;
+  }
+
+
+  /**
+   * @param rotations - converted to revs </p>
+   * creates and sets a MotionMagicVoltage request with revs
+   */
+  public void moveTo(double rotations){
+    // revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
+    // MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
+    // motor.setControl(request);
+    PositionVoltage request = new PositionVoltage(rotations); 
   
+    motor.setControl(request);
+  }
 
 
-   var talonFXconfigs = new TalonFXConfiguration();
+  public boolean getIsJittering(){
+    return isJittering;
+  }
 
 
-   var slot0Configs = talonFXconfigs.Slot0;
-   slot0Configs.kS = Constants.Pivot.kS;
-   slot0Configs.kV = Constants.Pivot.kV;
-   slot0Configs.kA = Constants.Pivot.kA;
-   slot0Configs.kP = Constants.Pivot.kP;
-   slot0Configs.kI = Constants.Pivot.kI;
-   slot0Configs.kD = Constants.Pivot.kD;
-  
-   var motionMagicConfigs = talonFXconfigs.MotionMagic;
-   motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
-   motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
-   motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
+  public void stopJittering(){
+    isJittering = false;
+  }
+ 
+  public void startJittering(){
+    isJittering = true;
+  }
+  /**
+   * creates and sets a MotionMagicVoltage request with all 0 values
+   */
+  public void stop(){
+    // MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0.0).withFeedForward(0.0);
+    // motor.setControl(request.withVelocity(0));
+    motor.stopMotor();
+  }
 
 
-   motor.getConfigurator().apply(talonFXconfigs);
-   absEncoder.getConfigurator().apply(ccdConfigs);
-   motor.setNeutralMode(NeutralModeValue.Brake);
+  /**
+   * sets the current position of the absolute encoder to 0
+   */
+  public void resetAbsEncoder(){
+    absEncoder.setPosition(0);
+  }
 
 
+  public void simulationInit(){
+    // motorSim = motor.getSimState();
+    // motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
+  }
 
 
-   //simulation
-   // motorSim = motor.getSimState();
-   // field = new Field2d();
-   // swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
-   // rotation = new Rotation3d();
-   // poses = new Pose3d(0.0,0.0,0.0,rotation);
-   // controller = new PIDController(20, 6, 6);
+  // public void setRelToSafe() {
+  //   if (
+  //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 > Constants.Pivot.SAFE - Constants.Pivot.THRESHOLD &&
+  //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 < Constants.Pivot.SAFE + Constants.Pivot.THRESHOLD
+  //     ) {
+  //     motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
+  //   }
+  // }
 
 
-   // armSim = new SingleJointedArmSim(
-   // DCMotor.getKrakenX60(1), // Motor
-   // Constants.Pivot.GEAR_RATIO,  // Gear ratio
-   // 5.0, // Moment of inertia (kg·m²)
-   // 0.5,  // Arm length (m)
-   // 0.0,  // Min angle (rad)
-   // Math.PI,  // Max angle (rad)
-   // true, // Simulate gravity
-   // 0.0 // Initial angle (rad)
-   // ); 
+  /**
+   * sets current position of motor to current position of encoder
+   */
+  // public void setRelToAbs() {
+  //   motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
+  // }
 
 
-   // StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
-   //   .getStructTopic("MyPose", Pose3d.struct).publish();
-   // StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
-   //   .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
-   setRelToAbs();
- }
+  /**
+   * creates and sets a MotionMagicVoltage request with current position of motor
+   */
+  public void maintainPosition() {
+    double currentPos = motor.getRotorPosition().getValueAsDouble();
+    motor.setControl(new MotionMagicVoltage(currentPos));
+  }
+
+  public double getPosition(){
+    return motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+  }
 
 
-  
- public void resetRelEncoder(){
-   motor.setPosition(0);
- }
-
-
- public boolean isReached(){
-   double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
-   double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
-   double diff = Math.abs(currentPos - targetPosition);
-   return diff < 10;
-   // double targetPosition = revsToMove/Constants.Pivot.GEAR_RATIO;
-   // double diff = Math.abs(currentPos - targetPosition);
-   // return diff < 0.1;
- }
-
-
- public void moveTo(double rotations){
-   revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-   MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
-   motor.setControl(request);
- }
-
-
- public void stop(){
-   MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(0.0).withFeedForward(0.0);
-   motor.setControl(request.withVelocity(0));
- }
-
-
- public void resetAbsEncoder(){
-   absEncoder.setPosition(0);
- }
-
-
- public void simulationInit(){
-   // motorSim = motor.getSimState();
-   // motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
- }
-
-
- // public void setRelToSafe() {
- //   if (
- //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 > Constants.Pivot.SAFE - Constants.Pivot.THRESHOLD &&
- //       absEncoder.getAbsolutePosition().getValueAsDouble()*360 < Constants.Pivot.SAFE + Constants.Pivot.THRESHOLD
- //     ) {
- //     motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
- //   }
- // }
-
-
- public void setRelToAbs() {
-   motor.setPosition(absEncoder.getAbsolutePosition().getValueAsDouble()*Constants.Pivot.GEAR_RATIO);
- }
-
-
- public void maintainPosition() {
-   double currentPos = motor.getRotorPosition().getValueAsDouble();
-   motor.setControl(new MotionMagicVoltage(currentPos));
- }
 /*
- @Override
- public void simulationPeriodic() {
-   double voltage = controller.calculate(simRotorPosition, revsToMove);
-   voltage = Math.max(Math.min(voltage, 12.0), -12.0);
+  @Override
+  public void simulationPeriodic() {
+    double voltage = controller.calculate(simRotorPosition, revsToMove);
+    voltage = Math.max(Math.min(voltage, 12.0), -12.0);
 
 
-   armSim.setInputVoltage(voltage);
-   armSim.update(0.02);
+    armSim.setInputVoltage(voltage);
+    armSim.update(0.02);
 
 
-   double armAngleRad = armSim.getAngleRads();
-   double armVelocityRadPerSec = armSim.getVelocityRadPerSec();
+    double armAngleRad = armSim.getAngleRads();
+    double armVelocityRadPerSec = armSim.getVelocityRadPerSec();
 
 
-   simRotorPosition =
-       Units.radiansToRotations(armAngleRad) * Constants.Pivot.GEAR_RATIO;
+    simRotorPosition =
+        Units.radiansToRotations(armAngleRad) * Constants.Pivot.GEAR_RATIO;
 
 
-   double rotorVelocityRPS =
-       Units.radiansToRotations(armVelocityRadPerSec) * Constants.Pivot.GEAR_RATIO;
+    double rotorVelocityRPS =
+        Units.radiansToRotations(armVelocityRadPerSec) * Constants.Pivot.GEAR_RATIO;
 
 
-   motorSim.setRawRotorPosition(simRotorPosition);
-   motorSim.setRotorVelocity(rotorVelocityRPS);
-   motorSim.setSupplyVoltage(voltage);
+    motorSim.setRawRotorPosition(simRotorPosition);
+    motorSim.setRotorVelocity(rotorVelocityRPS);
+    motorSim.setSupplyVoltage(voltage);
 
 
-   arm.setAngle(Units.radiansToDegrees(armAngleRad));
-   field.setRobotPose(swerve.getPose());
+    arm.setAngle(Units.radiansToDegrees(armAngleRad));
+    field.setRobotPose(swerve.getPose());
 
 
-   SmartDashboard.putData("pivot mechanism", mech2d);
-   SmartDashboard.putNumber("Motor Voltage", voltage);
-   SmartDashboard.putNumber("Rotor Pos", simRotorPosition);
+    SmartDashboard.putData("pivot mechanism", mech2d);
+    SmartDashboard.putNumber("Motor Voltage", voltage);
+    SmartDashboard.putNumber("Rotor Pos", simRotorPosition);
 
 
-   SmartDashboard.putNumberArray("robotPose", new double[] {
-     poses.getX(),
-     poses.getY(),
-     poses.getZ(),
-     poses.getRotation().getX(),
-     poses.getRotation().getY(),
-     poses.getRotation().getZ()
-   });
-   SmartDashboard.putData("field", field);
- }
- */
+    SmartDashboard.putNumberArray("robotPose", new double[] {
+      poses.getX(),
+      poses.getY(),
+      poses.getZ(),
+      poses.getRotation().getX(),
+      poses.getRotation().getY(),
+      poses.getRotation().getZ()
+    });
+    SmartDashboard.putData("field", field);
+  }
+  */
 
 
- public void configDashboard(ShuffleboardTab tab) {
-   tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
-   tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-   tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
-   tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
-   tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
-   tab.addBoolean("pivot reached?", () -> isReached());
- }
+  public void configDashboard(ShuffleboardTab tab) {
+    // tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
+    tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
+    // tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
+    tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+    tab.addBoolean("pivot reached?", () -> isReached());
+  }
 
 
- public void periodic() {
-   // This method will be called once per scheduler run
- }
+  public void periodic() {
+    // This method will be called once per scheduler run
+   
+       
+    //  double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    // double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
+    // double diff = Math.abs(currentPos - targetPosition);
+    // return diff < 10;
+ 
+     
+    
+    }
+ 
 }
+
 
