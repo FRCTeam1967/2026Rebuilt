@@ -10,11 +10,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
-import choreo.Choreo.TrajectoryLogger;
-import choreo.auto.AutoFactory;
-import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,7 +23,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.math.controller.PIDController;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -42,10 +37,6 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-    
-    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -53,8 +44,6 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
-    private double headingMin = -Math.PI;
-    private double headingMax = Math.PI;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -140,10 +129,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         super(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax);
-        
     }
 
     /**
@@ -167,9 +153,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax); 
     }
 
     /**
@@ -201,9 +185,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax);
     }
 
     /**
@@ -237,40 +219,10 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.dynamic(direction);
     }
-
-    /**
-     * @return Pose2d from current state of the robot
-     */
+    
     public Pose2d getPose() {
         return getState().Pose;
         
-    }
-
-    /**
-     * trajectory follower for choreo AutoFactory </p>
-     * gets the current pose of the robot </p>
-     * generates and applies the next speeds for the robot
-     * @param sample
-     */
-    public void followTrajectory(SwerveSample sample) {
-        // Get the current pose of the robot
-        Pose2d pose = getPose();
-        // Generate and apply the next speeds for the robot
-        setControl(new SwerveRequest.FieldCentric()
-            .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
-            .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
-            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
-
-
-       //ChassisSpeeds speeds = new ChassisSpeeds(
-            //,sample.vx + xController.calculate(pose.getX(), sample.x)
-            //sample.vy + yController.calculate(pose.getY(), sample.y),
-            //sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
-        //);
-
-        // Apply the generated speeds
-        // driveFieldRelative(speeds);
     }
 
     @Override
