@@ -100,7 +100,7 @@ public final class Constants {
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 9;
-        public static final double EATER_MOTOR_SPEED = 70.0;
+        public static final double EATER_MOTOR_SPEED = -70.0;
     }
 
     public static class Indexer{
@@ -113,7 +113,7 @@ public final class Constants {
         public static final int FEEDER_MOTOR_ID = 13;
         public static final double FEEDER_SPEED = -13.0; //-10
 
-        public static final double PREP_FEEDER = 30.0; 
+        public static final double PREP_FEEDER = 13.0; 
     }
   
     public static class Climb {
@@ -121,7 +121,7 @@ public final class Constants {
         public static final double JERK = 600.0;
         public static final double FEED_FORWARD = 0.0;
 
-        public static final int MOTOR_ID = 9;
+        public static final int MOTOR_ID = 10;
         public static final int CRUISE_VELOCITY = 30;//10, 160
         public static final int ACCELERATION = 210;//240
         public static final int CURRENT_LIMIT = 40;

@@ -9,9 +9,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
-import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,10 +34,6 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-
-    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
-    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -222,39 +216,9 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.dynamic(direction);
     }
-
-    /**
-     * @return Pose2d from current state of the robot
-     */
+    
     public Pose2d getPose() {
         return getState().Pose;
-    }
-
-    /**
-     * trajectory follower for choreo AutoFactory </p>
-     * gets the current pose of the robot </p>
-     * generates and applies the next speeds for the robot
-     * @param sample
-     */
-    public void followTrajectory(SwerveSample sample) {
-        // Get the current pose of the robot
-        Pose2d pose = getPose();
-        // Generate and apply the next speeds for the robot
-        setControl(new SwerveRequest.FieldCentric()
-            .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
-            .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
-            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
-
-
-       //ChassisSpeeds speeds = new ChassisSpeeds(
-            //,sample.vx + xController.calculate(pose.getX(), sample.x)
-            //sample.vy + yController.calculate(pose.getY(), sample.y),
-            //sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
-        //);
-
-        // Apply the generated speeds
-        // driveFieldRelative(speeds);
     }
 
     @Override
@@ -325,5 +289,16 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         Matrix<N3, N1> visionMeasurementStdDevs
     ) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+    }
+
+    /**
+     * Return the pose at a given timestamp, if the buffer is not empty.
+     *
+     * @param timestampSeconds The timestamp of the pose in seconds.
+     * @return The pose at the given timestamp (or Optional.empty() if the buffer is empty).
+     */
+    @Override
+    public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
+        return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
 }
