@@ -15,7 +15,7 @@ public final class Constants {
 
     public static class Hood {
         public static final int HOOD_MOTOR_ID = 19;        
-        public static final int HOOD_CANCODER_ID = 21;     
+        public static final int HOOD_CANCODER_ID = 14;     
 
         public static final double CRUISE_VELOCITY = 500;  // placeholder
         public static final double ACCELERATION = 300;     // placeholder
@@ -47,10 +47,10 @@ public final class Constants {
     }
 
     public static class Yeeter {
-        public static final int YEETER_MOTOR1_ID = 37; 
-        public static final int YEETER_MOTOR2_ID = 18; 
+        public static final int YEETER_MOTOR1_ID = 30; 
+        public static final int YEETER_MOTOR2_ID = 28; 
 
-        public static final double kP = 0.7; // placeholder //0.8 5ft
+        public static final double kP = 0.6; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
         public static final double kD = 0.0; // placeholder
         public static final double kS = 0.0; // placeholder
@@ -73,8 +73,8 @@ public final class Constants {
     }
 
     public static class Pivot{
-        public static final int MOTOR_ID = 10;
-        public static final int ENCODER_ID = 27;
+        public static final int MOTOR_ID = 11;
+        public static final int ENCODER_ID = 25;
 
         public static final double kS = 0.25;
         public static final double kV = 0.12;
@@ -99,7 +99,7 @@ public final class Constants {
     }
 
     public static class Eater{
-        public static final int EATER_MOTOR_ID = 11;
+        public static final int EATER_MOTOR_ID = 9;
         public static final double EATER_MOTOR_SPEED = 70.0;
     }
 
@@ -110,7 +110,7 @@ public final class Constants {
     }
 
     public static class Feeder{
-        public static final int FEEDER_MOTOR_ID = 36;
+        public static final int FEEDER_MOTOR_ID = 13;
         public static final double FEEDER_SPEED = -13.0; //-10
 
         public static final double PREP_FEEDER = 30.0; 
