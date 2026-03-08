@@ -315,12 +315,12 @@ public class RobotContainer {
     }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
-        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/
+        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
         CameraServer.addCamera(httpCamera1);
         tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
         .withSize(3, 2);
 
-        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.11:5801/"); //http://10.19.67.202:5801/
+        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
         CameraServer.addCamera(httpCamera2);
         tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
         .withSize(3, 2);
