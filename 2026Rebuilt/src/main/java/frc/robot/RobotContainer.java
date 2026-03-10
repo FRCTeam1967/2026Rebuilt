@@ -57,6 +57,7 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private final Telemetry logger = new Telemetry(MaxSpeed);
+    public Autoes autoes = new Autoes(this);
   
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -70,15 +71,14 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("rio");
+    public static final CANBus CANBus = new CANBus("CANivore");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
-    public final Yeeter yeeter = new Yeeter(this);
+    public final Yeeter yeeter = new Yeeter(visabelle);
     public final TheHood theHood = new TheHood();
     public final Climb climb = new Climb();
-    //public Autoes autoes = new Autoes(this);
 
     //control
     private final CommandXboxController m_driverController = new CommandXboxController(0);
@@ -100,7 +100,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        //autoes.configDashboard(matchTab);
+        autoes.configDashboard(matchTab);
         theHood.configDashboard(matchTab);
         yeeter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
@@ -196,34 +196,32 @@ public class RobotContainer {
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
-        m_driverController.start().onTrue(swerve.runOnce(swerve::seedFieldCentric));
-
         // yaw setter --> 0 faces hub 
-        // m_driverController.x().onTrue(new SequentialCommandGroup(
-        //     // ROTATION2D IS IN **RADIANS!!!!**
-        //     // SET YAW IS IN **DEGREES!!!!**
-        //     new ConditionalCommand(
-        //         new SequentialCommandGroup(
-        //             new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
-        //             new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
-        //             new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-        //             new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
-        //         ),
-        //         new SequentialCommandGroup(
-        //             new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
-        //             new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
-        //             new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-        //             new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
-        //         ),
-        //         () -> ally.get() == Alliance.Blue
-        //     )
-        // ));
+        m_driverController.x().onTrue(new SequentialCommandGroup(
+            // ROTATION2D IS IN **RADIANS!!!!**
+            // SET YAW IS IN **DEGREES!!!!**
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
+                ),
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
+                ),
+                () -> ally.get() == Alliance.Blue
+            )
+        ));
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         // SHOOTER AND HOOD BUTTON BINDINGS

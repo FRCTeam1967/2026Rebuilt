@@ -42,11 +42,8 @@ import java.util.function.DoubleSupplier;
 
 public class Yeeter extends SubsystemBase {
   private TalonFX motor1;
-  private TalonFX motor2;
-  private final RobotContainer m_robotContainer; 
-
-   //private TalonFX flywheelMotor2;
-  //private Visabelle visabelle;
+  private TalonFX motor2; //private TalonFX flywheelMotor2;
+  private Visabelle visabelle;
 
   private final CANBus canbus = RobotContainer.CANBus;
 
@@ -82,11 +79,10 @@ public class Yeeter extends SubsystemBase {
   // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
-  public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
+  public Yeeter(Visabelle visabelle) {
     speedTable = new InterpolatingDoubleTreeMap();
     motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
     motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
-    m_robotContainer = robotContainer; 
     // flywheelMotor2 = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -109,7 +105,7 @@ public class Yeeter extends SubsystemBase {
     motor1.setNeutralMode(NeutralModeValue.Coast);
     motor2.setNeutralMode(NeutralModeValue.Coast);
 
-    //visabelle = this.visabelle;
+    visabelle = this.visabelle;
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -149,7 +145,7 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
-    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
+    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> visabelle.getDisFromHub())));
   }
 
   /**
@@ -276,8 +272,11 @@ public class Yeeter extends SubsystemBase {
     // sim2.setRawRotorPosition(simRotorPosRot);
 
 
-    
+    // spokeAngleDeg = (spokeAngleDeg + rotorRps * 360.0 * kSimDt) % 360.0;
+    // flywheelSpoke.setAngle(spokeAngleDeg);
 
-    
+    // SmartDashboard.putNumber(“Flywheel/RotorRPS”, rotorRps);
+    // SmartDashboard.putNumber(“Flywheel/MotorVolts”, motorVolts);
+    // SmartDashboard.putNumber(“Flywheel/SpokeAngleDeg”, spokeAngleDeg);
   }
 }
