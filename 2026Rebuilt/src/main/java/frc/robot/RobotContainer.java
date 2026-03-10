@@ -249,6 +249,7 @@ public class RobotContainer {
 
         //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger().whileTrue(
+           new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
 
@@ -259,10 +260,16 @@ public class RobotContainer {
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
-                )
-            )
+                ),
+                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+            ),
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+           )
         );
-
+        //EJECT SHOOTER
+        m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
+                new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+        );
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
@@ -276,7 +283,7 @@ public class RobotContainer {
         //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
         
-        //EJECT
+        //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
             new RunFeeder(feeder, 5)
         );
@@ -288,7 +295,10 @@ public class RobotContainer {
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
-        
+        //EJECT INTAKE
+        m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+            new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
+          );
         //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));

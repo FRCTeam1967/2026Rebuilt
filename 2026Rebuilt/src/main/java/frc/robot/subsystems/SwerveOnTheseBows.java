@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -9,7 +10,9 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +37,11 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -219,6 +227,16 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     
     public Pose2d getPose() {
         return getState().Pose;
+    }
+
+    public void followTrajectory(SwerveSample sample){
+        Pose2d pose = getPose();
+        setControl(new SwerveRequest.FieldCentric()
+            .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
+            .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
+            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance)
+        );
     }
 
     @Override
