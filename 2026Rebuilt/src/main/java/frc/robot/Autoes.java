@@ -39,6 +39,7 @@ import frc.robot.commands.RunYeeter;
 import frc.robot.commands.RunIndexer;
 import frc.robot.commands.RunEater;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Visabelle;
 
 /** Add your docs here. */
 public class Autoes {
@@ -71,8 +72,10 @@ public class Autoes {
     );
 
     autoChooserLOL.addRoutine("Hub to Tower Preload", this::htw);
-    autoChooserLOL.addRoutine("OTrench to Neutral Eater Climb", this::otntw);    
-
+    autoChooserLOL.addRoutine("intake", this::intake);
+    //autoChooserLOL.addRoutine("OTrench to Neutral Eater Climb", this::otntw);    
+    //autoChooserLOL.addRoutine("OT Score Climb", this::ot_tw); 
+    //autoChooserLOL.addRoutine("DT Score Climb", this::dt_tw); 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
 
@@ -80,90 +83,101 @@ public class Autoes {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
+  private AutoRoutine intake(){
+    AutoRoutine routine = autoFactory.newRoutine("intake");
+    routine.active().onTrue(
+      Commands.sequence(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        Commands.parallel(
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
+        new RunIndexer(m_robotContainer.indexer, 10.0))
+      ).withTimeout(3)
+      );
+    return routine;
+
+    
+  }
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-      AutoTrajectory shootFromABitBack = routine.trajectory("ShootFromABitBack");
+      AutoTrajectory shootFromABitBack = routine.trajectory("H_Score");
     AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
-    double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
+    //double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
 
     routine.active().onTrue(
       Commands.sequence(
         new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
         //step one: set gyro to starting heading (flips for alliance)
-        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+        //new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         shootFromABitBack.resetOdometry(),
 
         //step three: set LL heading to gyro (aka starting) heading
         //if we can see a tag then run step 3 & path else just run path
-        new ConditionalCommand(
-          Commands.sequence(
-            new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-              m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-              0, 0, 0, 0, 0)), 
-            new PrintCommand("conditional command completed !!!! ****"),
-            shootFromABitBack.cmd()
-          ), 
-          shootFromABitBack.cmd(),
-          (() -> (LimelightHelpers.getTV("limelight-front")))
-        )
+        shootFromABitBack.cmd()
+        // new ConditionalCommand(
+        //    Commands.sequence(
+        //      new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //        m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //        0, 0, 0, 0, 0)), 
+        //      shootFromABitBack.cmd()
+        //    ), 
+        //    shootFromABitBack.cmd(),
+        //    () -> (LimelightHelpers.getTV("limelight-front"))
+        //  )
       )
     ); 
 
     // WITH EVENT MARKER
-    shootFromABitBack.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
-      Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+    shootFromABitBack.atPose("Deploy Eater", 1.0, Math.PI/4).onTrue(
+      Commands.sequence(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION).withTimeout(3),
+        Commands.parallel(
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0)
-      ) //.withTimeout(5)
+        new RunIndexer(m_robotContainer.indexer, 10.0))
+      ).withTimeout(3)
     );
-
-    // shootFromABitBack.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
-    //   m_robotContainer.pivot.moveTo(Constants.Pivot.DOWN_POSITION)
-    //   ).withTimeout(3);
 
     shootFromABitBack.done().onTrue(
-      Commands.sequence(
-        new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
-          new WaitCommand(2.5)
-        ),
-        new ParallelCommandGroup(
+      Commands.parallel(
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+
+          Commands.sequence(
+              new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+              Commands.parallel(
                 new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-              ).withTimeout(5.0)
-      )
+                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED) 
+              )
+          ).withTimeout(3)
       .andThen(hubTowerShoot.cmd())
+    ));
+
+    hubTowerShoot.done().onTrue(
+      new SequentialCommandGroup(
+        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
+        new AlignTowerPose(m_robotContainer.swerve),
+        new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
+      )
     );
 
-    // hubTowerShoot.done().onTrue(
-    //   new SequentialCommandGroup(
-    //     new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
-    //     new AlignTowerPose(m_robotContainer.swerve),
-    //     new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
-    //   )
-    // );
-
     // WITHOUT EVENT MARKER
-    // shootFromABitBack.done().onTrue(
+    // shootFromABitBack.active().onTrue(
     //   Commands.sequence(
     //     Commands.parallel(
     //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
-    //       new RunEater(m_robotContainer.intake, Constants.Eater.EATER_MOTOR_SPEED), 
+    //       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
     //       new RunIndexer(m_robotContainer.indexer, 10.0)
     //     ).withTimeout(3),
     //     new ParallelRaceGroup(
-    //       new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //       new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
     //       new WaitCommand(2.5)
     //     ),
     //     new ParallelCommandGroup(
     //       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //       new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //       new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //       new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
     //     ).withTimeout(5.0)
     //   ).andThen(hubTowerShoot.cmd())
     // );
@@ -178,7 +192,98 @@ public class Autoes {
           
     return routine;
   }
+  private AutoRoutine ot_tw() {
+    AutoRoutine routine = autoFactory.newRoutine("OT Score Climb");
+    AutoTrajectory driveBack = routine.trajectory("OT_Score");
+    AutoTrajectory scoreClimb = routine.trajectory("OT_TW");
+    double initialOrientation = driveBack.getInitialPose().get().getRotation().getDegrees();
 
+    routine.active().onTrue(
+      Commands.sequence(
+        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+        //step one: set gyro to starting heading (flips for alliance)
+        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+        new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+        driveBack.resetOdometry(),
+
+        //step three: set LL heading to gyro (aka starting) heading
+        //if we can see a tag then run step 3 & path else just run path
+        new ConditionalCommand(
+          Commands.sequence(
+            new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+              m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+              0, 0, 0, 0, 0)), 
+            driveBack.cmd()
+          ), 
+          driveBack.cmd(),
+          () -> (LimelightHelpers.getTV("limelight-front"))
+        )
+      )
+    ); 
+
+
+    driveBack.done().onTrue(
+      Commands.parallel(
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+
+          Commands.sequence(
+              new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+              Commands.parallel(
+                new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED) 
+              )
+          )
+      .andThen(scoreClimb.cmd())));
+    return routine;
+  }
+private AutoRoutine dt_tw() {
+    AutoRoutine routine = autoFactory.newRoutine("DT Score Climb");
+    AutoTrajectory driveBack = routine.trajectory("DT_Score");
+    AutoTrajectory scoreClimb = routine.trajectory("DT_TW");
+    double initialOrientation = driveBack.getInitialPose().get().getRotation().getDegrees();
+
+    routine.active().onTrue(
+      Commands.sequence(
+        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+        //step one: set gyro to starting heading (flips for alliance)
+        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+        new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+        driveBack.resetOdometry(),
+
+        //step three: set LL heading to gyro (aka starting) heading
+        //if we can see a tag then run step 3 & path else just run path
+        new ConditionalCommand(
+          Commands.sequence(
+            new InstantCommand(() -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+              m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+              0, 0, 0, 0, 0)), 
+            driveBack.cmd()
+          ), 
+          driveBack.cmd(),
+          () -> (LimelightHelpers.getTV("limelight-front"))
+        )
+      )
+    ); 
+
+
+    driveBack.done().onTrue(
+      Commands.parallel(
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+
+          Commands.sequence(
+              new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+              Commands.parallel(
+                new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED) 
+              )
+          )
+      .andThen(scoreClimb.cmd()))); 
+    return routine;
+  }
   private AutoRoutine otntw() {
     AutoRoutine routine = autoFactory.newRoutine("OTNTW");
 
@@ -232,14 +337,17 @@ public class Autoes {
     shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(
+            m_robotContainer.yeeter, 
+            () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), 
+            Constants.Yeeter.YEETER_ACCELERATION),
           new WaitCommand(2.5)
         ),
         new ParallelCommandGroup(
           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-        ).withTimeout(5.0)
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION))
+        .withTimeout(5.0)
       )
     );
 
@@ -271,13 +379,13 @@ public class Autoes {
     //   Commands.parallel(
     //     Commands.sequence(
     //       new ParallelRaceGroup(
-    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
     //         new WaitCommand(2.5)
     //       ),
     //       new ParallelCommandGroup(
     //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //       ).withTimeout(5.0)
     //     ),
     //     shootClimb.cmd()
@@ -347,13 +455,13 @@ public class Autoes {
     shootClimbEM.atPose("Start Score", 0.2, Math.PI/4).onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
-          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
           new WaitCommand(2.5)
         ),
         new ParallelCommandGroup(
           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
         ).withTimeout(5.0)
       )
     );
@@ -386,13 +494,13 @@ public class Autoes {
     //   Commands.parallel(
     //     Commands.sequence(
     //       new ParallelRaceGroup(
-    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
     //         new WaitCommand(2.5)
     //       ),
     //       new ParallelCommandGroup(
     //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
     //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-    //         new RunYeeter(m_robotContainer.flywheelShooter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+    //         new RunYeeter(m_robotContainer.flywheelShooter, Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
     //       ).withTimeout(5.0)
     //     ),
     //     shootClimb.cmd()
@@ -438,7 +546,7 @@ public class Autoes {
     );
     depotToShoot.atPose("Start Shoot", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -460,6 +568,7 @@ public class Autoes {
   // public double getDisSensor() {
   //   return disSensor.getDistance().refresh().getValueAsDouble();
   // }
+  
 
   private AutoRoutine left_depotScore() {
     AutoRoutine routine = autoFactory.newRoutine("left_depotScore");
@@ -487,7 +596,7 @@ public class Autoes {
 
     goToScore.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -521,7 +630,7 @@ public class Autoes {
     Eater.done().onTrue(Score.cmd());
     Score.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -558,7 +667,7 @@ public class Autoes {
     );
     neutralScore.done().onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -581,7 +690,7 @@ public class Autoes {
     );
      neutralScore.done().onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -615,7 +724,7 @@ public class Autoes {
     );
     scoreClimb.atPose("Start Score", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
@@ -627,7 +736,7 @@ public class Autoes {
     );
     scoreClimb.atPose("Climb", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new RunYeeter(m_robotContainer.yeeter, () -> Constants.Yeeter.PRELOAD_YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
         Commands.sequence(
           new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
           Commands.parallel(
