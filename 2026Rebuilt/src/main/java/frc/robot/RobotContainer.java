@@ -247,18 +247,26 @@ public class RobotContainer {
 
         //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger().whileTrue(
-            new ParallelCommandGroup(
-                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-
-                new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
-                    new ParallelCommandGroup(
-                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                        new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                    ) 
-                )
+            new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+                    new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                        new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+                        new ParallelCommandGroup(
+                            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+                        ) 
+                    ),
+                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+                ),
+                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
             )
+        );
+
+        // EJECT SHOOTER
+        m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
+            new RunYeeter(yeeter, () -> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
         );
 
         //SHUTTLING
@@ -274,7 +282,7 @@ public class RobotContainer {
         //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
         
-        //EJECT
+        //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
             new RunFeeder(feeder, 5)
         );
@@ -284,6 +292,13 @@ public class RobotContainer {
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+          )
+        );
+
+        // EJECT INTAKE
+        m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+          new ParallelCommandGroup( //wasnt there before
+            new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
         
