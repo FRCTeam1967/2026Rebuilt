@@ -26,6 +26,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 public class Visabelle extends SubsystemBase {
   private double maxAngularRate;
@@ -65,15 +66,27 @@ public class Visabelle extends SubsystemBase {
       return targetingAngularVelocity;
   }
 
-  public double getDisFromHub() {
+  //public double getDisFromHub() {
+  public FieldCentricFacingAngle servoToHub() {
+    FieldCentricFacingAngle visionRequest = new FieldCentricFacingAngle();
+    return visionRequest.withTargetDirection(new Rotation2d(getAngleToHub()));
+  }
+
+  private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
-    hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
 
     if (alliance == Alliance.Blue) {
       hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
     } else {
       hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
     }
+
+    return hubPose;
+  }
+
+  public double getDisFromHub() {
+    hubPose = getHubPose();
 
     Translation2d ourPose = swerve.getPose().getTranslation();
 
@@ -84,6 +97,20 @@ public class Visabelle extends SubsystemBase {
     
     return eucDist;
   }
+
+  public double getAngleToHub() {
+    hubPose = getHubPose();
+    DogLog.log("hub pose", hubPose);
+    Translation2d ourPose = swerve.getPose().getTranslation();
+
+    double xDist = Math.abs(hubPose.getX() - ourPose.getX());
+    double yDist = Math.abs(hubPose.getY() - ourPose.getY());
+
+    //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
+    double angle = Math.atan2(yDist, xDist);
+    return -(90-angle);
+  }
+
 
   @Override
   public void periodic() {

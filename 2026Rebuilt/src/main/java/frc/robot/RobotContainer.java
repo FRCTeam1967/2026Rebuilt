@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import dev.doglog.DogLog;
@@ -57,6 +58,13 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private final Telemetry logger = new Telemetry(MaxSpeed);
+
+
+    //hub vision align
+    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
+        .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
     public Autoes autoes = new Autoes(this);
   
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -76,7 +84,7 @@ public class RobotContainer {
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
     public final Feeder feeder = new Feeder();
-    public final Yeeter yeeter = new Yeeter(visabelle);
+    public final Yeeter yeeter = new Yeeter(this);
     public final TheHood theHood = new TheHood();
     public final Climb climb = new Climb();
 
@@ -110,6 +118,10 @@ public class RobotContainer {
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
         ally = DriverStation.getAlliance(); 
+
+        //for vision servoing
+        driveAtAngle.HeadingController.setPID(100.0, 0.0, 0.5); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
     private void configureBindings() {
@@ -187,12 +199,15 @@ public class RobotContainer {
 
         // hub alignment
         m_driverController.rightTrigger().whileTrue(
-            swerve.applyRequest(() ->
-                drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
-            )
-        );
+             swerve.applyRequest(() ->
+        //         drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+        //             .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        //             .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
+                        driveAtAngle.withTargetDirection(
+                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
+                )
+             )
+         );
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
@@ -221,7 +236,7 @@ public class RobotContainer {
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         // SHOOTER AND HOOD BUTTON BINDINGS
@@ -314,20 +329,20 @@ public class RobotContainer {
 
     }
 
-    private double limelight_aim_proportional() {        
-        double kP = 0.02; //0.035
-        double targetingAngularVelocity = 0.0; 
-        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
-        // your limelight 3 feed, tx should return roughly 31 degrees.
+    // private double limelight_aim_proportional() {        
+    //     double kP = 0.02; //0.035
+    //     double targetingAngularVelocity = 0.0; 
+    //     // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
+    //     // your limelight 3 feed, tx should return roughly 31 degrees.
 
-        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
+    //     targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
 
-        // convert to radians per second for our drive method
-        targetingAngularVelocity *= MaxAngularRate;
-        //invert since tx is positive when the target is to the right of the crosshair
-        targetingAngularVelocity *= -1.0;
-        return targetingAngularVelocity;
-    }
+    //     // convert to radians per second for our drive method
+    //     targetingAngularVelocity *= MaxAngularRate;
+    //     //invert since tx is positive when the target is to the right of the crosshair
+    //     targetingAngularVelocity *= -1.0;
+    //     return targetingAngularVelocity;
+    // }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
         HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/

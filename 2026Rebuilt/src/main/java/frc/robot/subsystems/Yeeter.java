@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 
 import static edu.wpi.first.units.Units.Volts;
@@ -43,6 +44,7 @@ import java.util.function.DoubleSupplier;
 public class Yeeter extends SubsystemBase {
   private TalonFX motor1;
   private TalonFX motor2; //private TalonFX flywheelMotor2;
+  private RobotContainer m_robotContainer;
   private Visabelle visabelle;
 
   private final CANBus canbus = RobotContainer.CANBus;
@@ -79,7 +81,7 @@ public class Yeeter extends SubsystemBase {
   // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
-  public Yeeter(Visabelle visabelle) {
+  public Yeeter(RobotContainer robotContainer) {
     speedTable = new InterpolatingDoubleTreeMap();
     motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
     motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
@@ -105,7 +107,8 @@ public class Yeeter extends SubsystemBase {
     motor1.setNeutralMode(NeutralModeValue.Coast);
     motor2.setNeutralMode(NeutralModeValue.Coast);
 
-    visabelle = this.visabelle;
+    m_robotContainer = robotContainer;
+    visabelle = m_robotContainer.visabelle;
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
