@@ -118,7 +118,7 @@ public class RobotContainer {
         ally = DriverStation.getAlliance(); 
     
         //for vision servoing
-        driveAtAngle.HeadingController.setPID(100.0, 0.0, 0.5); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
@@ -207,9 +207,9 @@ public class RobotContainer {
         // hub alignment but with localization
         m_driverController.rightTrigger().whileTrue(
             swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(
-                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
-                )
+                driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+                    .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             )
         );
 

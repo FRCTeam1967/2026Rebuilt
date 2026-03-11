@@ -67,11 +67,6 @@ public class Visabelle extends SubsystemBase {
       return targetingAngularVelocity;
   }
 
-  public FieldCentricFacingAngle servoToHub() {
-    FieldCentricFacingAngle visionRequest = new FieldCentricFacingAngle();
-    return visionRequest.withTargetDirection(new Rotation2d(getAngleToHub()));
-  }
-
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
@@ -90,7 +85,7 @@ public class Visabelle extends SubsystemBase {
 
     Translation2d ourPose = swerve.getPose().getTranslation();
 
-    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
+    double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     visionDist.set(eucDist);
     
     DogLog.log("dist", eucDist);
@@ -107,6 +102,10 @@ public class Visabelle extends SubsystemBase {
 
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
+
+    DogLog.log("target angle to hub", angle);
+    DogLog.log("our current angle", ourPose.getAngle().getRadians());
+
     return angle;
   }
 
