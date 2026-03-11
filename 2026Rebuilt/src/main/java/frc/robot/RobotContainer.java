@@ -103,7 +103,7 @@ public class RobotContainer {
         //autoes.configDashboard(matchTab);
         theHood.configDashboard(matchTab);
         yeeter.configDashboard(matchTab);
-        pivot.configDashboard(fieldTab);
+        pivot.configDashboard(matchTab);
         configLLTab(limelightTab, fieldTab);
         climb.configDashboard(fieldTab);
         
@@ -255,7 +255,7 @@ public class RobotContainer {
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                     new ParallelCommandGroup(
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)

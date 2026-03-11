@@ -50,7 +50,7 @@ public final class Constants {
         public static final int YEETER_MOTOR1_ID = 30; 
         public static final int YEETER_MOTOR2_ID = 28; 
 
-        public static final double kP = 0.6; // placeholder //0.8 5ft
+        public static final double kP = 0.7; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
         public static final double kD = 0.0; // placeholder
         public static final double kS = 0.0; // placeholder
@@ -63,7 +63,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 70.0; //75; //rotations per second
+        public static final double YEETER_SPEED = 78.0; //75; //rotations per second
         public static final double YEETER_ACCELERATION = 500.0; //500
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
@@ -96,7 +96,7 @@ public final class Constants {
 
         public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
-        public static final double SAFE = 5 * DEGREES_TO_REVS;
+        public static final double SAFE = 40 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
@@ -112,9 +112,9 @@ public final class Constants {
 
     public static class Feeder{
         public static final int FEEDER_MOTOR_ID = 13;
-        public static final double FEEDER_SPEED = -13.0; //-10
+        public static final double FEEDER_SPEED = -20.0; //-10
 
-        public static final double PREP_FEEDER = 13.0; 
+        public static final double PREP_FEEDER = 30.0; 
     }
   
     public static class Climb {
