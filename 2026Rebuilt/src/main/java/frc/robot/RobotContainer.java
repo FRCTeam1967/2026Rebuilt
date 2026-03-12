@@ -235,7 +235,7 @@ public class RobotContainer {
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+        theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
 
         // SHOOTER AND HOOD BUTTON BINDINGS
@@ -286,9 +286,11 @@ public class RobotContainer {
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
-                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
-
+                new SequentialCommandGroup(   
+                    new PrintCommand("arrived at hood command"), 
+                    new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                    new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                ),
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> theHood.isReached()),
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
@@ -296,9 +298,9 @@ public class RobotContainer {
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
-                ),
+                )
 
-                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                //new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
             )      
         );
 

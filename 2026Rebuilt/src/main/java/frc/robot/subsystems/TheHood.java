@@ -40,7 +40,7 @@ public class TheHood extends SubsystemBase {
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.3056640625;
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.3110351625;
     ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -108,7 +108,8 @@ public class TheHood extends SubsystemBase {
    * @return position of absolute encoder in degrees
    */
   public double getAbsDeg() {
-    return getAbsPos() * 360.0;
+    // return (getAbsPos() * 360 >= 359.0 ? 0 : getAbsPos() * 360);
+    return getAbsPos() * 360;
   }
 
   /**
