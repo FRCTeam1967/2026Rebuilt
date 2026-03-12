@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -224,7 +225,7 @@ public class RobotContainer {
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
+        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
 
         // SHOOTER AND HOOD BUTTON BINDINGS
         // m_operatorController.leftTrigger()
@@ -252,9 +253,12 @@ public class RobotContainer {
            new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                    new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                     new ParallelCommandGroup(
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
@@ -274,7 +278,9 @@ public class RobotContainer {
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+
+                new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
             )
         );
 
@@ -295,6 +301,7 @@ public class RobotContainer {
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
+
         //EJECT INTAKE
         m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
             new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
@@ -307,7 +314,10 @@ public class RobotContainer {
         //CLIMB
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
-        m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
+        m_operatorController.povDown().onTrue(new SequentialCommandGroup(
+            new MoveClimbtoZero(climb, 15),
+            new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kViolet)).withName("Climbed")) //TODO: update color
+        )); 
 
     }
 
