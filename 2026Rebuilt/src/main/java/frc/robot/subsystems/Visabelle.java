@@ -7,6 +7,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;  
 import frc.robot.generated.TunerConstants;
+import frc.robot.Constants;
+
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -38,7 +40,7 @@ public class Visabelle extends SubsystemBase {
   private BooleanPublisher allianceIsBlue;
 
   private Translation2d hubPose;
-
+  
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
@@ -67,12 +69,12 @@ public class Visabelle extends SubsystemBase {
 
   public double getDisFromHub() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
-    hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    hubPose = Constants.Visabelle.RED_HUB_POSE;
 
     if (alliance == Alliance.Blue) {
-      hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+      hubPose = Constants.Visabelle.BLUE_HUB_POSE;
     } else {
-      hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+      hubPose = Constants.Visabelle.RED_HUB_POSE;
     }
 
     Translation2d ourPose = swerve.getPose().getTranslation();
@@ -89,9 +91,9 @@ public class Visabelle extends SubsystemBase {
   public void periodic() {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+        hubPose = Constants.Visabelle.BLUE_HUB_POSE;
       } else {
-        hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+        hubPose = Constants.Visabelle.RED_HUB_POSE;
       }
     }
 

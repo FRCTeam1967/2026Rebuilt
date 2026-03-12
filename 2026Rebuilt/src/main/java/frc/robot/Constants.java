@@ -171,5 +171,8 @@ public final class Constants {
 
         public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
         public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
+
+        public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
+        public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
      }
 }

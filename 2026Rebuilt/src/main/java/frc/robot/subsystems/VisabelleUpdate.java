@@ -15,10 +15,13 @@ import com.ctre.phoenix6.Utils;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -51,6 +54,11 @@ public class VisabelleUpdate extends SubsystemBase {
   public static Pose2d towerPose;
   public static LimelightHelpers.PoseEstimate chosenPoseEstimate;
 
+  private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+  private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
+  private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
+
+
   public VisabelleUpdate(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
 
@@ -68,18 +76,20 @@ public class VisabelleUpdate extends SubsystemBase {
     LLtoFPGA = table.getDoubleTopic("LL converted to fpga").publish();
 
     Optional<Alliance> ally = DriverStation.getAlliance();
+    DogLog.log("Tower Pose: ", towerPose);
+
 
     if (ally.isPresent()) {
         if (ally.get() == Alliance.Red) {
-            towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-            DogLog.log("Tower Pose: ", towerPose);
+            towerPose = RED_TOWER;
+            //DogLog.log("Tower Pose: ", towerPose);
         } else {
-            towerPose = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
-            DogLog.log("Tower Pose: ", towerPose);
+            towerPose = BLUE_TOWER;
+            //DogLog.log("Tower Pose: ", towerPose);
         }
     } else {
-        towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-        DogLog.log("Default Red: ", towerPose);
+        towerPose = RED_TOWER;
+        //DogLog.log("Default Red: ", towerPose);
     }
   }
 
@@ -179,11 +189,11 @@ public class VisabelleUpdate extends SubsystemBase {
   public void periodic() {
     if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-            DogLog.log("Tower Pose: ", towerPose);
+            towerPose = RED_TOWER;
+            //DogLog.log("Tower Pose: ", towerPose);
         } else {
-            towerPose = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
-            DogLog.log("Tower Pose: ", towerPose);
+            towerPose = BLUE_TOWER;
+            //DogLog.log("Tower Pose: ", towerPose);
         }
     }
     
@@ -215,7 +225,7 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     if (chosenPoseEstimate != null) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+      swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
       
       swerve.addVisionMeasurement(
           chosenPoseEstimate.pose,
