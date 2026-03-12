@@ -120,7 +120,7 @@ public class RobotContainer {
         ally = DriverStation.getAlliance(); 
 
         //for vision servoing
-        driveAtAngle.HeadingController.setPID(100.0, 0.0, 0.5); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
@@ -200,12 +200,11 @@ public class RobotContainer {
         // hub alignment
         m_driverController.rightTrigger().whileTrue(
              swerve.applyRequest(() ->
-        //         drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-        //             .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-        //             .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
-                        driveAtAngle.withTargetDirection(
+                driveAtAngle.withTargetDirection(
                     new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
                 )
+                .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
              )
          );
 
@@ -288,8 +287,19 @@ public class RobotContainer {
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> theHood.isReached()),
+                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.25),
+                    new ParallelCommandGroup(
+                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+                    ) 
+                ),
+
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-            )
+            )      
         );
 
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));

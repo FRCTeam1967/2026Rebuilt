@@ -309,7 +309,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     swerve.addVisionMeasurement(
       mt2.pose,
-      Utils.fpgaToCurrentTime(mt2.timestampSeconds));
+      mt2.timestampSeconds);
   }
 
   private boolean disableVision = false;

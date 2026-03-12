@@ -100,15 +100,22 @@ public class Visabelle extends SubsystemBase {
 
   public double getAngleToHub() {
     hubPose = getHubPose();
-    DogLog.log("hub pose", hubPose);
     Translation2d ourPose = swerve.getPose().getTranslation();
 
-    double xDist = Math.abs(hubPose.getX() - ourPose.getX());
-    double yDist = Math.abs(hubPose.getY() - ourPose.getY());
+    double xDist = (hubPose.getX() - ourPose.getX());
+    double yDist = (hubPose.getY() - ourPose.getY());
 
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
-    return -(90-angle);
+
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      return (angle+Math.PI);
+    }
+    else {
+      return (angle);
+    }
+
+    //return (angle + Math.PI);
   }
 
 

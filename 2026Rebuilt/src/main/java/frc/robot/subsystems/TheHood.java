@@ -115,7 +115,7 @@ public class TheHood extends SubsystemBase {
    * @return true if the motor's position is within error threshold of the end goal
    */
   public boolean isReached() {
-    return getAbsDeg() >= Constants.Hood.HOOD_MAX * 360;///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+    return getAbsDeg() >= (Constants.Hood.HOOD_MAX * 360);///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
   }
 
   /**

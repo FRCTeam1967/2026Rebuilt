@@ -381,7 +381,7 @@ private AutoRoutine dt_tw() {
       new ParallelCommandGroup(
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
-      ).withTimeout(2.7)
+      ).withTimeout(5.0)
     );
     intakeMore.done().onTrue(toZone.cmd());
     toZone.done().onTrue(shoot.cmd());
