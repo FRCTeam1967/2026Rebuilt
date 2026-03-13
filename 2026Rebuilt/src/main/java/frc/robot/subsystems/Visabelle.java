@@ -9,12 +9,16 @@ import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants;
 
+import frc.robot.Constants;
+
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
@@ -43,6 +47,7 @@ public class Visabelle extends SubsystemBase {
 
   private Translation2d hubPose;
   
+  
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
@@ -70,12 +75,16 @@ public class Visabelle extends SubsystemBase {
   }
 
   private Translation2d getHubPose() {
+  private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
+    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
     //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
 
     if (alliance == Alliance.Blue) {
       hubPose = Constants.Visabelle.BLUE_HUB_POSE;
+      hubPose = Constants.Visabelle.BLUE_HUB_POSE;
     } else {
+      hubPose = Constants.Visabelle.RED_HUB_POSE;
       hubPose = Constants.Visabelle.RED_HUB_POSE;
     }
 
@@ -85,8 +94,15 @@ public class Visabelle extends SubsystemBase {
   public double getDisFromHub() {
     hubPose = getHubPose();
 
+    return hubPose;
+  }
+
+  public double getDisFromHub() {
+    hubPose = getHubPose();
+
     Translation2d ourPose = swerve.getPose().getTranslation();
 
+    double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     visionDist.set(eucDist);
     
@@ -111,12 +127,18 @@ public class Visabelle extends SubsystemBase {
     return angle;
   }
 
+  public boolean isAligned() {
+    return (getAngleToHub() <= 0.0872665); //5 degrees to radians
+  }
+
   @Override
   public void periodic() {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
         hubPose = Constants.Visabelle.BLUE_HUB_POSE;
+        hubPose = Constants.Visabelle.BLUE_HUB_POSE;
       } else {
+        hubPose = Constants.Visabelle.RED_HUB_POSE;
         hubPose = Constants.Visabelle.RED_HUB_POSE;
       }
     }

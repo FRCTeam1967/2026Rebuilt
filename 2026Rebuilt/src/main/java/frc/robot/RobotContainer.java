@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -90,10 +91,11 @@ public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
   
-    public LED ledSubsystem = new LED();
-    LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
-    LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
-    Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
+    //public LED ledSubsystem = new LED();
+    public LED candle = new LED();
+    //LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
+    //LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
+    //Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
     private Optional<Alliance> ally; 
   
@@ -131,6 +133,14 @@ public class RobotContainer {
                 drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
+
+        candle.setDefaultCommand(
+            new ConditionalCommand(
+                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)), //green - when aligned
+                new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
+                () -> visabelle.isAligned()
             )
         );
 
@@ -243,7 +253,7 @@ public class RobotContainer {
        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
+        //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
 
         // SHOOTER AND HOOD BUTTON BINDINGS
         // m_operatorController.leftTrigger()
@@ -271,9 +281,15 @@ public class RobotContainer {
            new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
+                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)),
+                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                    new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)),
+
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
                     new ParallelCommandGroup(
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
@@ -294,6 +310,8 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
             )
         );
 
@@ -314,6 +332,7 @@ public class RobotContainer {
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
+
         //EJECT INTAKE
         m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
             new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)

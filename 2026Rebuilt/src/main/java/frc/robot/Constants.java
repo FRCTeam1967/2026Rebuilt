@@ -46,6 +46,10 @@ public final class Constants {
 
     }
 
+    public static class LED {
+        public static final int CANDLE_ID = 23;
+    }
+
     public static class Yeeter {
         public static final int YEETER_MOTOR1_ID = 30; 
         public static final int YEETER_MOTOR2_ID = 28; 
@@ -152,7 +156,6 @@ public final class Constants {
 
     public static class Visabelle {
         public static final double DEGREE_ERROR = 4.0;
-
         public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
         public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify
         public static final double TARGET_HEIGHT_INCHES = 54; //need to verify
