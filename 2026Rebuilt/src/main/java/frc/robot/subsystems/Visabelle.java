@@ -14,6 +14,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -65,9 +67,9 @@ public class Visabelle extends SubsystemBase {
       return targetingAngularVelocity;
   }
 
-  public double getDisFromHub() {
+  private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
-    hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
 
     if (alliance == Alliance.Blue) {
       hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
@@ -75,14 +77,36 @@ public class Visabelle extends SubsystemBase {
       hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
     }
 
+    return hubPose;
+  }
+
+  public double getDisFromHub() {
+    hubPose = getHubPose();
+
     Translation2d ourPose = swerve.getPose().getTranslation();
 
-    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
+    double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     visionDist.set(eucDist);
     
     DogLog.log("dist", eucDist);
     
     return eucDist;
+  }
+
+  public double getAngleToHub() {
+    hubPose = getHubPose();
+    Translation2d ourPose = swerve.getPose().getTranslation();
+
+    double xDist = Math.abs(hubPose.getX() - ourPose.getX());
+    double yDist = Math.abs(hubPose.getY() - ourPose.getY());
+
+    //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
+    double angle = Math.atan2(yDist, xDist);
+
+    DogLog.log("target angle to hub", angle);
+    DogLog.log("our current angle", ourPose.getAngle().getRadians());
+
+    return angle;
   }
 
   @Override

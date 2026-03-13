@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import dev.doglog.DogLog;
@@ -57,6 +58,11 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private final Telemetry logger = new Telemetry(MaxSpeed);
+
+    //hub vision align
+    private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
+        .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -110,6 +116,10 @@ public class RobotContainer {
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
         ally = DriverStation.getAlliance(); 
+    
+        //for vision servoing
+        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
     private void configureBindings() {
@@ -186,11 +196,20 @@ public class RobotContainer {
         m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
 
         // hub alignment
+        // m_driverController.rightTrigger().whileTrue(
+        //     swerve.applyRequest(() ->
+        //         drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+        //             .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        //             .withRotationalRate(visabelle.limelight_aim_proportional()) // Drive with targetAngularVelocity
+        //     )
+        // );
+
+        // hub alignment but with localization
         m_driverController.rightTrigger().whileTrue(
             swerve.applyRequest(() ->
-                drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+                    .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(limelight_aim_proportional()) // Drive with targetAngularVelocity
             )
         );
 
@@ -309,21 +328,6 @@ public class RobotContainer {
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
 
-    }
-
-    private double limelight_aim_proportional() {        
-        double kP = 0.02; //0.035
-        double targetingAngularVelocity = 0.0; 
-        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
-        // your limelight 3 feed, tx should return roughly 31 degrees.
-
-        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
-
-        // convert to radians per second for our drive method
-        targetingAngularVelocity *= MaxAngularRate;
-        //invert since tx is positive when the target is to the right of the crosshair
-        targetingAngularVelocity *= -1.0;
-        return targetingAngularVelocity;
     }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
