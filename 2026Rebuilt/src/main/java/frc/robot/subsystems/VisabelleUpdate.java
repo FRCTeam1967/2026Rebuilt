@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -249,17 +250,13 @@ import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 import com.ctre.phoenix6.Utils;
 
-import dev.doglog.DogLog;
-import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.IntegerPublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.subsystems.*;
 
 public class VisabelleUpdate extends SubsystemBase {
@@ -279,6 +276,10 @@ public class VisabelleUpdate extends SubsystemBase {
   DoublePublisher LLtimestamp;
   DoublePublisher fpgaTimestamp;
   DoublePublisher LLtoFPGA;
+
+  private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+  private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
+  private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
   //public static Pose2d towerpose;
 
@@ -357,10 +358,10 @@ public class VisabelleUpdate extends SubsystemBase {
   public void periodic() {
     if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+            towerPose = RED_TOWER;
             DogLog.log("Tower Pose: ", towerPose);
         } else {
-            towerPose = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
+            towerPose = BLUE_TOWER;
             DogLog.log("Tower Pose: ", towerPose);
         }
     }
@@ -375,7 +376,7 @@ public class VisabelleUpdate extends SubsystemBase {
     }
     
     if(!doRejectUpdate){
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+      swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
       swerve.addVisionMeasurement(
           mt2.pose,
           mt2.timestampSeconds);

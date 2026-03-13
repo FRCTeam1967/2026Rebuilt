@@ -63,6 +63,7 @@ public class Climb extends SubsystemBase {
   private DigitalInput topSensor;
   private double rotations;
   private double appliedVoltage;
+  private MotionMagicVoltage request;
   private final CANBus canbus = RobotContainer.CANBus;
 
   // SIM FIELDS
@@ -90,6 +91,7 @@ public class Climb extends SubsystemBase {
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
+    request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
 
     // SIM INITS
     motorSim = motor.getSimState();
@@ -209,8 +211,6 @@ public class Climb extends SubsystemBase {
    */
   public void moveTo(double inches) {  
     rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
-    appliedVoltage = Constants.Climb.FEED_FORWARD;
-    MotionMagicVoltage request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
     motor.setControl(request);
   }
 

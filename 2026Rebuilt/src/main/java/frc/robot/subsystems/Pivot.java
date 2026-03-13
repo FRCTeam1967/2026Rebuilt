@@ -46,8 +46,9 @@ import com.ctre.phoenix6.hardware.CANcoder;
 public class Pivot extends SubsystemBase {
   private final CANBus canbus = RobotContainer.CANBus;
   private TalonFX motor;
+  private MotionMagicVoltage request;
   private CANcoder absEncoder;
-  public double revsToMove;
+  private double revsToMove;
 
   //simulation
   // private SingleJointedArmSim armSim;
@@ -67,6 +68,7 @@ public class Pivot extends SubsystemBase {
   /** Creates a new Pivot. */
   public Pivot() {
     motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
+    request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
 
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();

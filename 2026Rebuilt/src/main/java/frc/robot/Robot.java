@@ -81,15 +81,14 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SignalLogger.stop();
-  }
-
-  @Override
-  public void disabledPeriodic() {
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
     LimelightHelpers.SetIMUMode("limelight-back", 0);
     LimelightHelpers.SetThrottle("limelight-back", 200);
   }
+
+  @Override
+  public void disabledPeriodic() {}
 
   @Override
   public void disabledExit() {}
@@ -105,10 +104,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {
-    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
-    LimelightHelpers.SetIMUMode("limelight-back", 0);
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void autonomousExit() {}
@@ -125,8 +121,8 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
     m_robotContainer.yeeter.logYeeterSpeeds();
-    LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
-    LimelightHelpers.SetIMUMode("limelight-back", 0);
+    // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
+    // LimelightHelpers.SetIMUMode("limelight-back", 0);
   }
 
   @Override

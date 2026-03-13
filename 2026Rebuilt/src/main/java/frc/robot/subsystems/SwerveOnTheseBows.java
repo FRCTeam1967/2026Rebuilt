@@ -47,6 +47,9 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
 
+    private final SwerveRequest.FieldCentric m_followRequest = new SwerveRequest.FieldCentric()
+    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
+
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -256,7 +259,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         // Get the current pose of the robot
         Pose2d pose = getPose();
         // Generate and apply the next speeds for the robot
-        setControl(new SwerveRequest.FieldCentric()
+        setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
             .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
