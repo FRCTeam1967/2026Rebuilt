@@ -96,11 +96,13 @@ public class Climb extends SubsystemBase {
 
 
     // SIM INITS
-    motorSim = motor.getSimState();
-    field = new Field2d();
-    swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
-    rotation = new Rotation3d();
-    poses = new Pose3d(0.0,0.0,0.0,rotation);
+    if (RobotBase.isSimulation()){
+      motorSim = motor.getSimState();
+      field = new Field2d();
+      swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+      rotation = new Rotation3d();
+      poses = new Pose3d(0.0,0.0,0.0,rotation);
+    }
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
@@ -215,7 +217,7 @@ public class Climb extends SubsystemBase {
   public void moveTo(double inches) {  
     rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
     appliedVoltage = Constants.Climb.FEED_FORWARD;
-    motor.setControl(request);
+    motor.setControl(request.withPosition(rotations));
   }
 
   /**

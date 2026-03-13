@@ -82,7 +82,7 @@ public class TheHood extends SubsystemBase {
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
     //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
-    hoodMotor.setControl(request);
+    hoodMotor.setControl(request.withPosition(revsToMove));
   }
 
   /**
@@ -152,7 +152,7 @@ public class TheHood extends SubsystemBase {
    */
   public void maintainPosition() {
     currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
-    hoodMotor.setControl(maintainRequest);
+    hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees

@@ -72,7 +72,7 @@ public class Pivot extends SubsystemBase {
 
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
-    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
     ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
@@ -148,7 +148,7 @@ public class Pivot extends SubsystemBase {
    */
   public void moveTo(double rotations){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-    motor.setControl(request);
+    motor.setControl(request.withPosition(revsToMove));
   }
 
   /**
@@ -192,7 +192,7 @@ public class Pivot extends SubsystemBase {
    */
   public void maintainPosition() {
     double currentPos = motor.getRotorPosition().getValueAsDouble();
-    motor.setControl(new MotionMagicVoltage(currentPos));
+    motor.setControl(request.withPosition(currentPos));
   }
 /* 
   @Override

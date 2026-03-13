@@ -221,7 +221,7 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-       //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
@@ -260,12 +260,12 @@ public class RobotContainer {
                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
-                )
-                //new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
-            )
-            //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                ),
+                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+            ),
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
            )
-        );
+        ); //TODO: add defense mode while the robot is shooting
         //EJECT SHOOTER
         m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
                 new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
