@@ -28,10 +28,13 @@ public class TheHood extends SubsystemBase {
   private final CANcoder absEncoder;
 
   public double revsToMove;
+  public double currentPos;
 
   private final CANBus canbus = RobotContainer.CANBus;
 
   private InterpolatingDoubleTreeMap angleTable;
+  private MotionMagicVoltage request;
+  private MotionMagicVoltage maintainRequest;
 
   public TheHood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
@@ -39,8 +42,11 @@ public class TheHood extends SubsystemBase {
     angleTable = new InterpolatingDoubleTreeMap();
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
+    request = (new MotionMagicVoltage(revsToMove));
+    maintainRequest = (new MotionMagicVoltage(currentPos));
+
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.3056640625;
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.408935546875;
     ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -75,9 +81,8 @@ public class TheHood extends SubsystemBase {
    */
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
-    MotionMagicVoltage request = (new MotionMagicVoltage(revsToMove));
     //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
-    hoodMotor.setControl(request);
+    hoodMotor.setControl(request.withPosition(revsToMove));
   }
 
   /**
@@ -146,8 +151,8 @@ public class TheHood extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with current position of motor
    */
   public void maintainPosition() {
-    double currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
-    hoodMotor.setControl(new MotionMagicVoltage(currentPos));
+    currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
+    hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees

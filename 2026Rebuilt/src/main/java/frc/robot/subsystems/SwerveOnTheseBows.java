@@ -42,6 +42,9 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
 
+    private final SwerveRequest.FieldCentric m_followRequest = new SwerveRequest.FieldCentric()
+    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
+
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -231,11 +234,10 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
 
     public void followTrajectory(SwerveSample sample){
         Pose2d pose = getPose();
-        setControl(new SwerveRequest.FieldCentric()
+        setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
             .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
-            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance)
         );
     }
 
