@@ -80,9 +80,9 @@ public void setLarson() {
       .withFrameRate(120));
   }
 
-  public Command runColorFlowPattern(int r, int g, int b) {
+  public void runColorFlowPattern(int r, int g, int b) {
     RGBWColor color = new RGBWColor(r, g, b);
-    return new RunCommand(() -> candle.setControl(new ColorFlowAnimation(LED_START, LED_COUNT).withColor(color)));
+    candle.setControl(new ColorFlowAnimation(LED_START, LED_COUNT).withColor(color));
   }
 
   public Command runRainbow() {

@@ -156,7 +156,6 @@ public final class Constants {
 
     public static class Visabelle {
         public static final double DEGREE_ERROR = 4.0;
-
         public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
         public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify
         public static final double TARGET_HEIGHT_INCHES = 54; //need to verify
@@ -175,5 +174,8 @@ public final class Constants {
 
         public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
         public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
-     }
+
+        public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
+        public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
+    }
 }

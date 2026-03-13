@@ -7,12 +7,16 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;  
 import frc.robot.generated.TunerConstants;
+import frc.robot.Constants;
+
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -38,7 +42,7 @@ public class Visabelle extends SubsystemBase {
   private BooleanPublisher allianceIsBlue;
 
   private Translation2d hubPose;
-
+  
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
@@ -65,19 +69,25 @@ public class Visabelle extends SubsystemBase {
       return targetingAngularVelocity;
   }
 
-  public double getDisFromHub() {
+  private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
-    hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
 
     if (alliance == Alliance.Blue) {
-      hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+      hubPose = Constants.Visabelle.BLUE_HUB_POSE;
     } else {
-      hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+      hubPose = Constants.Visabelle.RED_HUB_POSE;
     }
+
+    return hubPose;
+  }
+
+  public double getDisFromHub() {
+    hubPose = getHubPose();
 
     Translation2d ourPose = swerve.getPose().getTranslation();
 
-    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
+    double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     visionDist.set(eucDist);
     
     DogLog.log("dist", eucDist);
@@ -85,13 +95,33 @@ public class Visabelle extends SubsystemBase {
     return eucDist;
   }
 
+  public double getAngleToHub() {
+    hubPose = getHubPose();
+    Translation2d ourPose = swerve.getPose().getTranslation();
+
+    double xDist = Math.abs(hubPose.getX() - ourPose.getX());
+    double yDist = Math.abs(hubPose.getY() - ourPose.getY());
+
+    //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
+    double angle = Math.atan2(yDist, xDist);
+
+    DogLog.log("target angle to hub", angle);
+    DogLog.log("our current angle", ourPose.getAngle().getRadians());
+
+    return angle;
+  }
+
+  public boolean isAligned() {
+    return (getAngleToHub() <= 0.0872665); //5 degrees to radians
+  }
+
   @Override
   public void periodic() {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        hubPose = new Translation2d(4.622838497161865, 4.033950328826904);
+        hubPose = Constants.Visabelle.BLUE_HUB_POSE;
       } else {
-        hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+        hubPose = Constants.Visabelle.RED_HUB_POSE;
       }
     }
 

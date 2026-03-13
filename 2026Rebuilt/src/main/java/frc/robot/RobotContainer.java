@@ -87,8 +87,8 @@ public class RobotContainer {
   
     //public LED ledSubsystem = new LED();
     public LED candle = new LED();
-    LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
-    LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
+    //LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
+    //LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
     //Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
     private Optional<Alliance> ally; 
@@ -123,6 +123,14 @@ public class RobotContainer {
                 drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
+
+        candle.setDefaultCommand(
+            new ConditionalCommand(
+                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)), //green - when aligned
+                new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
+                () -> visabelle.isAligned()
             )
         );
 
