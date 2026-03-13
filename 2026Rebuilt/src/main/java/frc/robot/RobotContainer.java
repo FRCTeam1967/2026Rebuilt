@@ -282,13 +282,13 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
-                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)),
+                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)), //cyan
                 
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                    new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)),
+                    new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
                     new ParallelCommandGroup(
@@ -301,6 +301,7 @@ public class RobotContainer {
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
            )
         ); //TODO: add defense mode while the robot is shooting
+        
         //EJECT SHOOTER
         m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
                 new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
