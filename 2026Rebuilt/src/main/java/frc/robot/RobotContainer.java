@@ -92,7 +92,7 @@ public class RobotContainer {
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
   
     //public LED ledSubsystem = new LED();
-    public LED candle = new LED();
+    //public LED candle = new LED();
     //LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
     //LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
     //Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
@@ -120,7 +120,7 @@ public class RobotContainer {
         ally = DriverStation.getAlliance(); 
     
         //for vision servoing
-        driveAtAngle.HeadingController.setPID(7.5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.setPID(8, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
@@ -136,13 +136,12 @@ public class RobotContainer {
             )
         );
 
-        candle.setDefaultCommand(
-            new ConditionalCommand(
-                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)), //green - when aligned
-                new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
-                () -> visabelle.isAligned()
-            )
-        );
+        // candle.setDefaultCommand(
+        //     //new ConditionalCommand(
+        //         new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)) //green - when aligned
+        //         // new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
+        //         // () -> visabelle.isAligned()
+        //     );
 
         /* reset gyro */
         m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
@@ -228,25 +227,25 @@ public class RobotContainer {
         m_driverController.start().onTrue(swerve.runOnce(swerve::seedFieldCentric));
 
         // yaw setter --> 0 faces hub 
-        // m_driverController.x().onTrue(new SequentialCommandGroup(
-        //     // ROTATION2D IS IN **RADIANS!!!!**
-        //     // SET YAW IS IN **DEGREES!!!!**
-        //     new ConditionalCommand(
-        //         new SequentialCommandGroup(
-        //             new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
-        //             new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
-        //             new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-        //             new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
-        //         ),
-        //         new SequentialCommandGroup(
-        //             new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
-        //             new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
-        //             new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-        //             new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
-        //         ),
-        //         () -> ally.get() == Alliance.Blue
-        //     )
-        // ));
+        m_driverController.x().onTrue(new SequentialCommandGroup(
+            // ROTATION2D IS IN **RADIANS!!!!**
+            // SET YAW IS IN **DEGREES!!!!**
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
+                ),
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
+                ),
+                () -> ally.get() == Alliance.Blue
+            )
+        ));
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
@@ -282,13 +281,13 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
-                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)), //cyan
+                //new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)), //cyan
                 
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                    new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                    //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
                     new ParallelCommandGroup(

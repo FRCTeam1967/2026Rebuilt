@@ -115,34 +115,52 @@ public class VisabelleUpdate extends SubsystemBase {
     LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
-    if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      chosenPoseEstimate = mt2_front;
-      frontlightPublisher.set(mt2_front.pose);
-    }
-    else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
-      chosenPoseEstimate = mt2_back;
-      backlightPublisher.set(mt2_back.pose);
-    }
-    else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
-      if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
-        chosenPoseEstimate = mt2_back;
+    // if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
+    //   chosenPoseEstimate = mt2_front;
+    //   frontlightPublisher.set(mt2_front.pose);
+    // }
+    // else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
+    //   chosenPoseEstimate = mt2_back;
+    //   backlightPublisher.set(mt2_back.pose);
+    // }
+    // else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
+    //   if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
+    //     chosenPoseEstimate = mt2_back;
+    //   }
+    //   else {
+    //     chosenPoseEstimate = mt2_front;
+    //   }
+    //   frontlightPublisher.set(mt2_front.pose);
+    //   backlightPublisher.set(mt2_back.pose);
+    // }
+    // else {
+    //     chosenPoseEstimate = null;
+    //     return;
+    // }
+
+    if (mt2_front.tagCount > 0 || mt2_back.tagCount > 0) {
+      if (mt2_front.tagCount > 0) {
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
+
+        swerve.addVisionMeasurement(
+          mt2_front.pose,
+          (mt2_front.timestampSeconds));
       }
-      else {
-        chosenPoseEstimate = mt2_front;
+
+      if (mt2_back.tagCount > 0) {
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
+
+        swerve.addVisionMeasurement(
+          mt2_back.pose,
+          (mt2_back.timestampSeconds));
       }
-      frontlightPublisher.set(mt2_front.pose);
-      backlightPublisher.set(mt2_back.pose);
-    }
-    else {
-        chosenPoseEstimate = null;
-        return;
     }
 
-    swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
+    // swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
 
-    swerve.addVisionMeasurement(
-      chosenPoseEstimate.pose,
-      Utils.fpgaToCurrentTime(chosenPoseEstimate.timestampSeconds));
+    // swerve.addVisionMeasurement(
+    //   chosenPoseEstimate.pose,
+    //   Utils.fpgaToCurrentTime(chosenPoseEstimate.timestampSeconds));
   }
 
   private boolean disableVision = false;
@@ -203,48 +221,100 @@ public class VisabelleUpdate extends SubsystemBase {
     LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
+    //frontlightPublisher.set(mt2_front.pose);
+    //backlightPublisher.set(mt2_back.pose);
+
     //double angularVelocity = swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
     
+    // if (mt2_front.tagCount > 0 || mt2_back.tagCount > 0) {
+    //   if (mt2_front.tagCount > 0) {
+    //     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+
+    //     swerve.addVisionMeasurement(
+    //       mt2_front.pose,
+    //       (mt2_front.timestampSeconds));
+    //   }
+
+    //   if (mt2_back.tagCount > 0) {
+    //     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+
+    //     swerve.addVisionMeasurement(
+    //       mt2_back.pose,
+    //       (mt2_back.timestampSeconds));
+
+    //   }
+
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      chosenPoseEstimate = mt2_front;
-      frontlightPublisher.set(mt2_front.pose);
-    }
-    else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
-      chosenPoseEstimate = mt2_back;
-      backlightPublisher.set(mt2_back.pose);
-    }
-    else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
-      if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
-        chosenPoseEstimate = mt2_back;
-      }
-      else {
-        chosenPoseEstimate = mt2_front;
-      }
-      frontlightPublisher.set(mt2_front.pose);
-      backlightPublisher.set(mt2_back.pose);
-    }
+          chosenPoseEstimate = mt2_front;
+        }
+        else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
+          chosenPoseEstimate = mt2_back;
+        }
+        else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
+          if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
+            chosenPoseEstimate = mt2_back;
+          }
+          else {
+            chosenPoseEstimate = mt2_front;
+          }
+        }
 
-    if (chosenPoseEstimate != null) {
-      swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
+        if (chosenPoseEstimate != null) {
+          swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
+          
+          swerve.addVisionMeasurement(
+              chosenPoseEstimate.pose,
+              chosenPoseEstimate.timestampSeconds);
+
+          //updatePublisher.set(++odometryUpdates);
+          //chosenPoseEstimate = null;
+        }
+        else {
+          //discardPublisher.set(++odometryDiscards);
+        }  
       
-      swerve.addVisionMeasurement(
-          chosenPoseEstimate.pose,
-          chosenPoseEstimate.timestampSeconds);
-
-      updatePublisher.set(++odometryUpdates);
-      //chosenPoseEstimate = null;
-    }
-    else {
-      discardPublisher.set(++odometryDiscards);
-    }  
-    
-    if (chosenPoseEstimate != null) {
-      LLtimestamp.set(chosenPoseEstimate.timestampSeconds);
-      fpgaTimestamp.set(Utils.getCurrentTimeSeconds());
-      LLtoFPGA.set(Utils.fpgaToCurrentTime(chosenPoseEstimate.timestampSeconds));
-    }
-  }
+      }
 }
+
+    // if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
+    //   chosenPoseEstimate = mt2_front;
+    //   frontlightPublisher.set(mt2_front.pose);
+    // }
+    // else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
+    //   chosenPoseEstimate = mt2_back;
+    //   backlightPublisher.set(mt2_back.pose);
+    // }
+    // else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
+    //   if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
+    //     chosenPoseEstimate = mt2_back;
+    //   }
+    //   else {
+    //     chosenPoseEstimate = mt2_front;
+    //   }
+    //   frontlightPublisher.set(mt2_front.pose);
+    //   backlightPublisher.set(mt2_back.pose);
+    // }
+
+    // if (chosenPoseEstimate != null) {
+    //   swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
+      
+    //   swerve.addVisionMeasurement(
+    //       chosenPoseEstimate.pose,
+    //       chosenPoseEstimate.timestampSeconds);
+
+    //   updatePublisher.set(++odometryUpdates);
+    //   //chosenPoseEstimate = null;
+    // }
+    // else {
+    //   discardPublisher.set(++odometryDiscards);
+    // }  
+    
+    // if (chosenPoseEstimate != null) {
+    //   LLtimestamp.set(chosenPoseEstimate.timestampSeconds);
+    //   fpgaTimestamp.set(Utils.getCurrentTimeSeconds());
+    //   LLtoFPGA.set(Utils.fpgaToCurrentTime(chosenPoseEstimate.timestampSeconds));
+    // }
+
 
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of

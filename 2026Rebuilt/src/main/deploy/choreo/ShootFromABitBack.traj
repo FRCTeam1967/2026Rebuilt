@@ -1,5 +1,5 @@
 {
- "name":"H_Score",
+ "name":"ShootFromABitBack",
  "version":3,
  "snapshot":{
   "waypoints":[
@@ -63,5 +63,5 @@
   "splits":[0]
  },
  "events":[
-   {"name":"Deploy Eater", "from":{"target":1, "targetTimestamp":0.2057, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"wait", "data":{"waitTime":{"exp":"3 s", "val":3.0}}}}]
+   {"name":"Deploy Eater", "from":{"target":1, "targetTimestamp":0.2057, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
 }
