@@ -63,7 +63,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 87.0; //81; //rotations per second
+        public static final double YEETER_SPEED = 67.5; //81; //rotations per second
         public static final double YEETER_ACCELERATION = 500.0; //500
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
@@ -86,15 +86,15 @@ public final class Constants {
         public static final int CRUISE_VELOCITY = 40;
         public static final int ACCELERATION = 100;
         public static final int JERK = 1000;
-        public static final double GEAR_RATIO = 36/1.0;
+        public static final double GEAR_RATIO = 20.25/1.0;
         public static final double FEED_FORWARD = 1;
         
 
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 1.0/360.0;
-        public static final double MAGNET_OFFSET = -0.3349609375;
+        public static final double MAGNET_OFFSET = -0.456787109375;
 
-        public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 165 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
         public static final double SAFE = 40 * DEGREES_TO_REVS;
     }
@@ -114,7 +114,7 @@ public final class Constants {
         public static final int FEEDER_MOTOR_ID = 13;
         public static final double FEEDER_SPEED = -20.0; //-10
 
-        public static final double PREP_FEEDER = 30.0; 
+        public static final double PREP_FEEDER = 50.0; 
     }
   
     public static class Climb {
