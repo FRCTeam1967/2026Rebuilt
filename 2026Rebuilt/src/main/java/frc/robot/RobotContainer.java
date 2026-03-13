@@ -85,10 +85,11 @@ public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
   
-    public LED ledSubsystem = new LED();
+    //public LED ledSubsystem = new LED();
+    public LED candle = new LED();
     LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
     LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
-    Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
+    //Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
     private Optional<Alliance> ally; 
   
@@ -225,7 +226,7 @@ public class RobotContainer {
         pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
+        //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
 
         // SHOOTER AND HOOD BUTTON BINDINGS
         // m_operatorController.leftTrigger()
@@ -253,11 +254,14 @@ public class RobotContainer {
            new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
+                new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)),
+                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                    new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                    new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)),
 
                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                     new ParallelCommandGroup(
@@ -278,9 +282,9 @@ public class RobotContainer {
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
 
-                new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
             )
         );
 
@@ -315,8 +319,8 @@ public class RobotContainer {
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
         m_operatorController.povDown().onTrue(new SequentialCommandGroup(
-            new MoveClimbtoZero(climb, 15),
-            new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kViolet)).withName("Climbed")) //TODO: update color
+            new MoveClimbtoZero(climb, 15)
+            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kViolet)).withName("Climbed")) //TODO: update color
         )); 
 
     }

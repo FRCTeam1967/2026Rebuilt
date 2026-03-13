@@ -46,6 +46,10 @@ public final class Constants {
 
     }
 
+    public static class LED {
+        public static final int CANDLE_ID = 23;
+    }
+
     public static class Yeeter {
         public static final int YEETER_MOTOR1_ID = 30; 
         public static final int YEETER_MOTOR2_ID = 28; 
