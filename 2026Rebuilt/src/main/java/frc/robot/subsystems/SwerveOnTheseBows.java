@@ -13,6 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 import choreo.trajectory.SwerveSample;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -138,6 +139,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -234,10 +236,17 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
 
     public void followTrajectory(SwerveSample sample){
         Pose2d pose = getPose();
+        double rotationalRate = sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading);
+        /*
+        DogLog.log("Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
+        DogLog.log("Trajectory/pose", pose);
+        DogLog.log("Trajectory/sample.omega", sample.omega);
+        DogLog.log("Trajectory/commandedRotRate", rotationalRate);
+        */
         setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
+            .withRotationalRate(rotationalRate)
         );
     }
 
