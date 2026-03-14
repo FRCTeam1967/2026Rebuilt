@@ -99,13 +99,13 @@ public final class Constants {
         public static final double MAGNET_OFFSET = -0.456787109375;
 
         public static final double DOWN_POSITION = 165 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 65 * DEGREES_TO_REVS;
         public static final double SAFE = 40 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 9;
-        public static final double EATER_MOTOR_SPEED = -70.0;
+        public static final double EATER_MOTOR_SPEED = -100.0;
     }
 
     public static class Indexer{

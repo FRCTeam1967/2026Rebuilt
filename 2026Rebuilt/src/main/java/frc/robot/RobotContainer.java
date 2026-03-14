@@ -338,7 +338,10 @@ public class RobotContainer {
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
                 ),
-                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+                new SequentialCommandGroup(
+                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN),
+                new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(3)
+                )
             ),
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
            )
