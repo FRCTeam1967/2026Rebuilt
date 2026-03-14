@@ -193,7 +193,7 @@ public class Autoes {
     AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
     AutoTrajectory intakeMore1  = routine.trajectory("DT_N_fuelBranch1");
     AutoTrajectory goBack1 = routine.trajectory("N_DT1");
-    AutoTrajectory shoot = routine.trajectory("DT_Shoot");
+    AutoTrajectory shoot = routine.trajectory("DT_Shoot1");
     AutoTrajectory shootToCenter = routine.trajectory("Shoot_DT_N2");
     AutoTrajectory intakeMore2 = routine.trajectory("DT_N_fuelBranch2");
     AutoTrajectory goBack2 = routine.trajectory("N_DT2");
@@ -239,7 +239,7 @@ public class Autoes {
       Commands.sequence(
           new ParallelRaceGroup(
             new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-            new WaitCommand(2.5)
+            new WaitCommand(1.5)
           ),
           new ParallelCommandGroup(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
@@ -273,7 +273,7 @@ public class Autoes {
       Commands.sequence(
           new ParallelRaceGroup(
             new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-            new WaitCommand(2.5)
+            new WaitCommand(1.5)
           ),
           new ParallelCommandGroup(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
