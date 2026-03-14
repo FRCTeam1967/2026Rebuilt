@@ -74,6 +74,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("OT to Outpost", this::oto);
     autoChooserLOL.addRoutine("OT Neutral 2 Cycle", this::otn2x);
     autoChooserLOL.addRoutine("DT Neutral 2 Cycle", this::dtn2x);
+    autoChooserLOL.addRoutine("Hub Preload", this::hubScore);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -82,7 +83,54 @@ public class Autoes {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
+    private AutoRoutine hubScore() {
+    AutoRoutine routine = autoFactory.newRoutine("HUBSCORE");
+    AutoTrajectory goBack = routine.trajectory("ShootFromABitBack");
+    AutoTrajectory score  = routine.trajectory("H_Shoot");
+    double initialOrientation = goBack.getInitialPose().get().getRotation().getDegrees();
 
+    // WITHOUT EVENT MARKER
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          goBack.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          goBack.cmd()
+      )
+    );
+
+    goBack.done().onTrue(
+        new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION) //wasnt there before
+        ).andThen(score.cmd())
+    );
+    score.done().onTrue(
+       Commands.sequence(
+          new ParallelRaceGroup(
+            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+            new WaitCommand(2.5)
+          ),
+          new ParallelCommandGroup(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
+          ).withTimeout(5.0)
+      )
+    );
+    return routine;
+  }
   private AutoRoutine oto() {
     AutoRoutine routine = autoFactory.newRoutine("OT_O");
     AutoTrajectory otToO = routine.trajectory("OT_O");
@@ -143,10 +191,13 @@ public class Autoes {
 
 
     AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
-    AutoTrajectory intakeMore  = routine.trajectory("DT_N_fuelBranch");
-    AutoTrajectory toZone = routine.trajectory("N_DT");
+    AutoTrajectory intakeMore1  = routine.trajectory("DT_N_fuelBranch1");
+    AutoTrajectory goBack1 = routine.trajectory("N_DT1");
     AutoTrajectory shoot = routine.trajectory("DT_Shoot");
-    AutoTrajectory shootToCenter = routine.trajectory("Shoot_DT_N");
+    AutoTrajectory shootToCenter = routine.trajectory("Shoot_DT_N2");
+    AutoTrajectory intakeMore2 = routine.trajectory("DT_N_fuelBranch2");
+    AutoTrajectory goBack2 = routine.trajectory("N_DT2");
+    AutoTrajectory shoot2 = routine.trajectory("DT_Shoot2");
     double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
 
     // WITHOUT EVENT MARKER
@@ -177,12 +228,12 @@ public class Autoes {
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
-    trenchToCenter.done().onTrue(intakeMore.cmd());
-    intakeMore.active().onTrue(
+    trenchToCenter.done().onTrue(intakeMore1.cmd());
+    intakeMore1.active().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
     );
-    intakeMore.done().onTrue(toZone.cmd());
-    toZone.done().onTrue(shoot.cmd());
+    intakeMore1.done().onTrue(goBack1.cmd());
+    goBack1.done().onTrue(shoot.cmd());
 
     shoot.done().onTrue(
       Commands.sequence(
@@ -212,7 +263,25 @@ public class Autoes {
     //   ).andThen(shootToCenter.cmd())
     // );
 
-    shootToCenter.done().onTrue(intakeMore.cmd());
+    shootToCenter.done().onTrue(intakeMore2.cmd());
+    intakeMore2.active().onTrue(
+      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+    );
+    intakeMore2.done().onTrue(goBack2.cmd());
+    goBack2.done().onTrue(shoot2.cmd());
+    shoot2.done().onTrue(
+      Commands.sequence(
+          new ParallelRaceGroup(
+            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+            new WaitCommand(2.5)
+          ),
+          new ParallelCommandGroup(
+            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
+          ).withTimeout(5.0)
+      )
+    );
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot

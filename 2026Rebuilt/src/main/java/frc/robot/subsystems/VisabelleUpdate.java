@@ -52,7 +52,6 @@ public class VisabelleUpdate extends SubsystemBase {
   private static final double AREA_THRESHOLD = 0.1;
 
   public static Pose2d towerPose;
-  public static LimelightHelpers.PoseEstimate chosenPoseEstimate;
 
   private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
   private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
@@ -220,12 +219,14 @@ public class VisabelleUpdate extends SubsystemBase {
 
     LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
+    LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
 
     // frontlightPublisher.set(mt2_front.pose);
     // backlightPublisher.set(mt2_back.pose);
 
     DogLog.log("front limelight pose", mt2_front.pose);
     DogLog.log("back limelight pose", mt2_back.pose);
+
 
     //double angularVelocity = swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
     
