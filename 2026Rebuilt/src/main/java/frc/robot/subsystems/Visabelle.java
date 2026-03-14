@@ -129,6 +129,7 @@ public class Visabelle extends SubsystemBase {
 
   @Override
   public void periodic() {
+    hubPose = Constants.Visabelle.BLUE_HUB_POSE; // In case we're not connected yet
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
         hubPose = Constants.Visabelle.BLUE_HUB_POSE;
