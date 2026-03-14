@@ -113,7 +113,7 @@ public class Visabelle extends SubsystemBase {
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
 
-    if (DriverStation.getAlliance().get() == Alliance.Red) {
+    if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
       return (angle+Math.PI);
     }
     else {
