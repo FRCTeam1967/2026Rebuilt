@@ -21,14 +21,14 @@ public final class Constants {
         public static final double ACCELERATION = 300;     // placeholder
         public static final double JERK = 300;            // placeholder
 
-        public static final double kP = 1.5;  // placeholder
+        public static final double kP = 2.5;  // placeholder
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
-        public static final double kS = 0.12;  // placeholder
+        public static final double kS = 0.3;  // placeholder
         public static final double kV = 0.3;  // placeholder
         public static final double kA = 0.0;  // placeholder
 
-        public static final double GEAR_RATIO = 1.5;      // motor_rot / hood_rot
+        public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot
 
         //public static final double MIN_DEG = 30.0;
         //public static final double MAX_DEG = 86.0;

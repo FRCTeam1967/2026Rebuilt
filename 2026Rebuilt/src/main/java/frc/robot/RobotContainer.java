@@ -224,7 +224,7 @@ public class RobotContainer {
         m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
+        //m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
 
         // hub alignment
         // m_driverController.rightTrigger().whileTrue(
@@ -239,6 +239,15 @@ public class RobotContainer {
         m_driverController.rightTrigger().whileTrue(
             swerve.applyRequest(() ->
                 driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+                    .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            )
+        );
+
+        //snap to hub
+        m_driverController.leftBumper().whileTrue(
+            swerve.applyRequest(() ->
+                driveAtAngle.withTargetDirection(new Rotation2d(Math.PI))
                     .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             )
@@ -345,7 +354,7 @@ public class RobotContainer {
 
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
-            new ParallelCommandGroup(
+            new SequentialCommandGroup(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
 
