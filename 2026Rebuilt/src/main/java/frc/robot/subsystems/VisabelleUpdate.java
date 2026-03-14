@@ -221,8 +221,11 @@ public class VisabelleUpdate extends SubsystemBase {
     LimelightHelpers.PoseEstimate mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     LimelightHelpers.PoseEstimate mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
-    frontlightPublisher.set(mt2_front.pose);
-    backlightPublisher.set(mt2_back.pose);
+    // frontlightPublisher.set(mt2_front.pose);
+    // backlightPublisher.set(mt2_back.pose);
+
+    DogLog.log("front limelight pose", mt2_front.pose);
+    DogLog.log("back limelight pose", mt2_back.pose);
 
     //double angularVelocity = swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble();
     
