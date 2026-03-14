@@ -184,20 +184,6 @@ public class Autoes {
     intakeMore.done().onTrue(toZone.cmd());
     toZone.done().onTrue(shoot.cmd());
 
-    shoot.active().onTrue(
-      Commands.sequence(
-          new ParallelRaceGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-            new WaitCommand(2.5)
-          ),
-          new ParallelCommandGroup(
-            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
-          ).withTimeout(5.0)
-      )
-    );
-
     shoot.done().onTrue(
       Commands.sequence(
           new ParallelRaceGroup(
@@ -211,6 +197,20 @@ public class Autoes {
           ).withTimeout(5.0)
       ).andThen(shootToCenter.cmd())
     );
+
+    // shoot.done().onTrue(
+    //   Commands.sequence(
+    //       new ParallelRaceGroup(
+    //         new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
+    //         new WaitCommand(2.5)
+    //       ),
+    //       new ParallelCommandGroup(
+    //         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+    //         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+    //         new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
+    //       ).withTimeout(5.0)
+    //   ).andThen(shootToCenter.cmd())
+    // );
 
     shootToCenter.done().onTrue(intakeMore.cmd());
 
