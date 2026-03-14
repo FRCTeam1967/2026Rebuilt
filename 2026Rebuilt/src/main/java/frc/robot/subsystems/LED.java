@@ -85,12 +85,12 @@ public void setLarson() {
     candle.setControl(new ColorFlowAnimation(LED_START, LED_COUNT).withColor(color));
   }
 
-  public Command runRainbow() {
-    return new InstantCommand(() -> candle.setControl(new RainbowAnimation(LED_START, LED_COUNT)));
+  public void runRainbow() {
+    candle.setControl(new RainbowAnimation(LED_START, LED_COUNT));
   }
 
-  public Command runTwinkle(int r, int g, int b, int w) {
-    return new InstantCommand(() -> candle.setControl(new TwinkleAnimation(LED_START, LED_COUNT)));
+  public void runTwinkle(int r, int g, int b, int w) {
+    candle.setControl(new TwinkleAnimation(LED_START, LED_COUNT));
   }
 
   public Command runFire() {

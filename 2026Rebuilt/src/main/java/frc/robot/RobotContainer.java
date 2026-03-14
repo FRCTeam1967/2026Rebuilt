@@ -5,6 +5,11 @@ package frc.robot;
 import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.hardware.CANdle;
+import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -85,7 +90,7 @@ public class RobotContainer {
     public final Yeeter yeeter = new Yeeter(this);
     public final TheHood theHood = new TheHood();
     public final Climb climb = new Climb();
-    //public Autoes autoes = new Autoes(this);
+    public Autoes autoes = new Autoes(this);
 
     //control
     private final CommandXboxController m_driverController = new CommandXboxController(0);
@@ -103,12 +108,25 @@ public class RobotContainer {
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
+    //leds\
+    private final CANdle candle = new CANdle(23);
+    private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
+    // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
+    // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
+    
+    private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
+
+    private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
+    private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0));
+    private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0));
+    private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
+
     //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
     //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     public RobotContainer() {
         configureBindings();
-        //autoes.configDashboard(matchTab);
+        autoes.configDashboard(matchTab);
         theHood.configDashboard(matchTab);
         yeeter.configDashboard(matchTab);
         pivot.configDashboard(matchTab);
@@ -142,6 +160,10 @@ public class RobotContainer {
         //         // new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
         //         // () -> visabelle.isAligned()
         //     );
+
+        // candle.setDefaultCommand (
+        //     new RunCommand (() -> candle.setControl(janksterRed))
+        // );
 
         /* reset gyro */
         m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
@@ -222,6 +244,10 @@ public class RobotContainer {
             )
         );
 
+        if (visabelle.isAligned()) {
+            new RunCommand (() -> candle.setControl(greenSolid));
+        }
+
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
         m_driverController.start().onTrue(swerve.runOnce(swerve::seedFieldCentric));
@@ -275,17 +301,25 @@ public class RobotContainer {
         //   //)
         // );
 
-        //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger().whileTrue(
-           new SequentialCommandGroup( 
+            new SequentialCommandGroup( 
             new ParallelCommandGroup(
-                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color
-                //new RunCommand (() -> candle.runColorFlowPattern(0, 255, 255)), //cyan
-                
+                new ParallelCommandGroup(
+                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    new RunCommand (() -> candle.setControl(yellowBlink))
+                ),
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                    
+                    new ParallelCommandGroup( //green
+                        new SequentialCommandGroup(
+                            new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                            new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                        )
+                    ),
+
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                     //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
@@ -300,11 +334,15 @@ public class RobotContainer {
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
            )
         ); //TODO: add defense mode while the robot is shooting
-        
+
         //EJECT SHOOTER
         m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
-                new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+            new ParallelCommandGroup(
+                new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+                new RunCommand (() -> candle.setControl(magentaBlink))
+            )
         );
+
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
             new ParallelCommandGroup(
@@ -322,7 +360,10 @@ public class RobotContainer {
         
         //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
-            new RunFeeder(feeder, 5)
+            new ParallelCommandGroup(
+                new RunFeeder(feeder, 5),
+                new RunCommand (() -> candle.setControl(magentaBlink))
+            )
         );
 
         //INTAKE
@@ -335,8 +376,11 @@ public class RobotContainer {
 
         //EJECT INTAKE
         m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
-            new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
-          );
+            new ParallelCommandGroup(  
+                new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
+                new RunCommand (() -> candle.setControl(magentaBlink))
+            )  
+        );
         //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
