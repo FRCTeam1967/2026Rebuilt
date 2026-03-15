@@ -112,11 +112,11 @@ public class Autoes {
     );
 
     goBack.done().onTrue(
-      score.cmd()
+      score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION))
     );
-    score.active().onTrue(
-      new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
-    );
+    // score.active().onTrue(
+    //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
+    // );
     score.done().onTrue(
        Commands.sequence(
           new ParallelRaceGroup(
