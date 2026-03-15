@@ -338,22 +338,19 @@ public class RobotContainer {
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
                 ),
-                new SequentialCommandGroup(
-                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN),
-                new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(3)
-                )
+                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
             ),
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
            )
         ); //TODO: add defense mode while the robot is shooting
 
         //EJECT SHOOTER
-        m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
-            new ParallelCommandGroup(
-                new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
-                new RunCommand (() -> candle.setControl(magentaBlink))
-            )
-        );
+        // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
+        //     new ParallelCommandGroup(
+        //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+        //         new RunCommand (() -> candle.setControl(magentaBlink))
+        //     )
+        // );
 
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
@@ -363,6 +360,14 @@ public class RobotContainer {
 
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
             )
+        );
+
+        //hood back down
+        m_operatorController.y().whileTrue(
+            //new SequentialCommandGroup(
+                new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
+            //)
         );
 
         //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
@@ -387,7 +392,14 @@ public class RobotContainer {
         );
 
         //EJECT INTAKE
-        m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+        // m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+        //     new ParallelCommandGroup(  
+        //         new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
+        //         new RunCommand (() -> candle.setControl(magentaBlink))
+        //     )  
+        // );
+
+        m_operatorController.x().whileTrue(
             new ParallelCommandGroup(  
                 new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
                 new RunCommand (() -> candle.setControl(magentaBlink))

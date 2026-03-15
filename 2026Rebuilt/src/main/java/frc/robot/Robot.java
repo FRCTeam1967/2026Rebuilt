@@ -126,6 +126,11 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
     m_robotContainer.yeeter.logYeeterSpeeds();
+    m_robotContainer.eater.logVoltage();
+    m_robotContainer.indexer.logVoltage();
+    m_robotContainer.pivot.logVoltage();
+
+
     // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0);
   }

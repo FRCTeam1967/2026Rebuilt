@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -66,7 +67,14 @@ public class TheHood extends SubsystemBase {
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
 
+    //current limits
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 120;
+    limitConfigs.StatorCurrentLimitEnable = true;
+
     hoodMotor.getConfigurator().apply(talonFXConfigs);
+    hoodMotor.getConfigurator().apply(limitConfigs);
+
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
     absEncoder.getConfigurator().apply(ccdConfigs);

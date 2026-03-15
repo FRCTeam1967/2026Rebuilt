@@ -108,6 +108,10 @@ public class Climb extends SubsystemBase {
 
 
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+
+    // var limitConfigs = new CurrentLimitsConfigs();
+    // limitConfigs.StatorCurrentLimit = 1;
+    // limitConfigs.StatorCurrentLimitEnable = true;
     
     config.Slot0.kP = Constants.Climb.kP;
     config.Slot0.kI = Constants.Climb.kI;
@@ -120,6 +124,7 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
+    
   }
     /* 
     if (RobotBase.isSimulation()) {
@@ -283,7 +288,7 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    setSafe();
+    //setSafe();
   }
   /*
    * @Override

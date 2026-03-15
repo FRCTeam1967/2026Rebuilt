@@ -48,6 +48,9 @@ public class VisabelleUpdate extends SubsystemBase {
   DoublePublisher fpgaTimestamp;
   DoublePublisher LLtoFPGA;
 
+  private int frontLLcount = 0;
+  private int backLLcount = 0;
+
   private static final double MAX_ANGULAR_VELOCITY = 720; // TODO: change
   private static final double AREA_THRESHOLD = 0.1;
 
@@ -250,16 +253,20 @@ public class VisabelleUpdate extends SubsystemBase {
 
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
           chosenPoseEstimate = mt2_front;
+          DogLog.log("front count", frontLLcount++);
         }
         else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
           chosenPoseEstimate = mt2_back;
+          DogLog.log("back count", backLLcount++);
         }
         else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
           if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
             chosenPoseEstimate = mt2_back;
+            DogLog.log("back count", backLLcount++);
           }
           else {
             chosenPoseEstimate = mt2_front;
+            DogLog.log("front count", frontLLcount++);
           }
         }
 

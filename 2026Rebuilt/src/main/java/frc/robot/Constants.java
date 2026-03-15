@@ -21,10 +21,10 @@ public final class Constants {
         public static final double ACCELERATION = 300;     // placeholder
         public static final double JERK = 300;            // placeholder
 
-        public static final double kP = 2.5;  // placeholder
+        public static final double kP = 5.0;  // placeholder
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
-        public static final double kS = 0.3;  // placeholder
+        public static final double kS = 0.5;  // placeholder
         public static final double kV = 0.3;  // placeholder
         public static final double kA = 0.0;  // placeholder
 
@@ -34,8 +34,8 @@ public final class Constants {
         //public static final double MAX_DEG = 86.0;
 
         public static final double HOOD_HOLD_DEG = 30.0;
-        public static final double HOOD_MAX = 390.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
-        public static final double HOOD_MIN = 50.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+        public static final double HOOD_MAX = 680.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+        public static final double HOOD_MIN = 330.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_TOLERANCE_DEG = 5.00;
         public static final double HOOD_ANGLE = 390.0 * Constants.Hood.DEGREES_TO_REVS;
 
@@ -105,7 +105,7 @@ public final class Constants {
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 9;
-        public static final double EATER_MOTOR_SPEED = -100.0;
+        public static final double EATER_MOTOR_SPEED = -120.0;
     }
 
     public static class Indexer{
