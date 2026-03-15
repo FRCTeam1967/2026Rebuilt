@@ -229,12 +229,12 @@ public class Autoes {
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
-    trenchToCenter.done().onTrue(intakeMore1.cmd());
-    intakeMore1.active().onTrue(
+    trenchToCenter.done().onTrue(intakeMore2.cmd());
+    intakeMore2.active().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
     );
-    intakeMore1.done().onTrue(goBack1.cmd());
-    goBack1.done().onTrue(shoot.cmd());
+    intakeMore2.done().onTrue(goBack2.cmd());
+    goBack2.done().onTrue(shoot.cmd());
 
     shoot.done().onTrue(
       Commands.sequence(
@@ -264,12 +264,12 @@ public class Autoes {
     //   ).andThen(shootToCenter.cmd())
     // );
 
-    shootToCenter.done().onTrue(intakeMore2.cmd());
-    intakeMore2.active().onTrue(
+    shootToCenter.done().onTrue(intakeMore1.cmd());
+    intakeMore1.active().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
     );
-    intakeMore2.done().onTrue(goBack2.cmd());
-    goBack2.done().onTrue(shoot2.cmd());
+    intakeMore1.done().onTrue(goBack1.cmd());
+    goBack1.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       Commands.sequence(
           new ParallelRaceGroup(
