@@ -112,15 +112,16 @@ public class Autoes {
     );
 
     goBack.done().onTrue(
-        new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION) //wasnt there before
-        ).andThen(score.cmd())
+      score.cmd()
+    );
+    score.active().onTrue(
+      new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
     );
     score.done().onTrue(
        Commands.sequence(
           new ParallelRaceGroup(
             new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
-            new WaitCommand(2.5)
+            new WaitCommand(1.5)
           ),
           new ParallelCommandGroup(
             new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
