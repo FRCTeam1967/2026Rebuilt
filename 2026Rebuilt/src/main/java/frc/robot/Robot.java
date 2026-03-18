@@ -60,6 +60,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    DogLog.setEnabled(true);
     m_robotContainer = new RobotContainer();
   }
 

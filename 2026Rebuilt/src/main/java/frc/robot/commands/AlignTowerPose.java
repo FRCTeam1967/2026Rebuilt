@@ -38,11 +38,8 @@ public class AlignTowerPose extends Command {
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
       
-  //Optional<Alliance> ally = DriverStation.getAlliance();
   final StructPublisher<Pose2d> towerPublisher = NetworkTableInstance.getDefault().getTable("alignment").getStructTopic("tower", Pose2d.struct).publish();  
   
-  //tower pose - RED ALLIANCE
-
   private static final double kP_translational = 1.00; //0.85
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
@@ -56,16 +53,6 @@ public class AlignTowerPose extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    // if (ally.isPresent()) {
-        // if (DriverStation.getAlliance().get() == Alliance.Red) {
-        //     towerPose = new Pose2d(15.421048, 3.432656, new Rotation2d(0));
-        //     //DogLog.log("Tower Pose: ", towerPose);
-        // }
-        // if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        //     towerPose = new Pose2d(1.092, 4.61, new Rotation2d(Math.PI));
-        //     //DogLog.log("Tower Pose: ", towerPose);
-        // }
-    // }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

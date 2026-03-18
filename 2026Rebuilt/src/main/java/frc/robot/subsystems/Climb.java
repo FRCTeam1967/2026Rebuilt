@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
@@ -35,6 +34,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
@@ -50,9 +50,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 
 
@@ -270,14 +267,6 @@ public class Climb extends SubsystemBase {
     motor.stopMotor();
   }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    tab.addBoolean("at height", ()-> (Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble())) < Constants.Climb.ERROR_THRESHOLD);
-    tab.addNumber("rotations", () -> motor.getRotorPosition().getValueAsDouble());
-    tab.addNumber("inches", () -> motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
-    tab.addBoolean("bottom sensor", () -> getBottomSensor());
-    tab.addBoolean("top sensor", () -> getTopSensor());
-  }
-
   // public void reachGoal(double goal) {
   //   m_controller.setGoal(goal);
   //   // With the setpoint value we run PID control like normal
@@ -288,6 +277,11 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
+    DogLog.log("at height", Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble()) < Constants.Climb.ERROR_THRESHOLD);
+    DogLog.log("rotations", motor.getRotorPosition().getValueAsDouble());
+    DogLog.log("inches", motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    DogLog.log("bottom sensor", getBottomSensor());
+    DogLog.log("top sensor", getTopSensor());
     //setSafe();
   }
   /*

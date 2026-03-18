@@ -40,6 +40,7 @@ public class Eater extends SubsystemBase {
    */
   public void setMotor(double speed) {
     motor.set(speed);
+    DogLog.log("intake desired speed", speed);
   }
   
   /**
@@ -50,7 +51,7 @@ public class Eater extends SubsystemBase {
   }
 
   public void logVoltage() {
-    DogLog.log("Eater Voltage", motor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("shooter voltage", motor.getStatorCurrent().getValueAsDouble());
   }
 
   @Override

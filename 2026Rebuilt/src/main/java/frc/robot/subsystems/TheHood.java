@@ -190,13 +190,13 @@ public class TheHood extends SubsystemBase {
   //   return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
   // }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
-    tab.addDouble("Hood AbsEnc (deg)", () -> getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
-    //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
-    tab.addBoolean("Hood at Target?", () -> isReached());
-    tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
+  //   tab.addDouble("Hood AbsEnc (deg)", () -> getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
+  //   //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
+  //   tab.addBoolean("Hood at Target?", () -> isReached());
+  //   tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
+  // }
 
   // public void maintainPosition() {
   //     moveTo(Constants.Hood.HOOD_HOLD_DEG);
@@ -205,5 +205,10 @@ public class TheHood extends SubsystemBase {
   @Override
   public void periodic() {
     //resetEncoder();
+    DogLog.log("Hood Position (deg)", ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
+    DogLog.log("Hood AbsEnc (deg)", getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
+    //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
+    DogLog.log("Hood at Target?", isReached());
+    DogLog.log("Hood Rotor Rotations", hoodMotor.getRotorPosition().getValueAsDouble());
   }
 }

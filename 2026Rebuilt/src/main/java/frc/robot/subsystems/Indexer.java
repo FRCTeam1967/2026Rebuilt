@@ -38,6 +38,7 @@ public class Indexer extends SubsystemBase {
    */
   public void setMotor(double speed){
     motor.set(speed);
+    DogLog.log("indexer desired speed", speed);
   }
 
   /**
@@ -48,7 +49,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public void logVoltage() {
-    DogLog.log("Inde Voltage", motor.getStatorCurrent().getValueAsDouble());
+    DogLog.log("indexer voltage", motor.getStatorCurrent().getValueAsDouble());
   }
   
   @Override

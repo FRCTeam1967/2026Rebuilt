@@ -179,12 +179,12 @@ public class Yeeter extends SubsystemBase {
     return (motor.getVelocity().getValueAsDouble());
   }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
-    tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
-    tab.addDouble("YeeterSpeed2", () -> getMotorVelocity(motor2));
-    //tab.addDouble("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
+  //   // tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
+  //   // tab.addDouble("YeeterSpeed2", () -> getMotorVelocity(motor2));
+  //   //tab.addDouble("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
+  // }
 
   //TODO: fill in these values
   /**
@@ -222,12 +222,11 @@ public class Yeeter extends SubsystemBase {
 
   @Override
   public void periodic() {
+    this.logYeeterSpeeds();
   }
 
   @Override
   public void simulationPeriodic() {
-
-
     // if (RobotState.isDisabled()) {
     //   stopMotor();
 
@@ -277,10 +276,5 @@ public class Yeeter extends SubsystemBase {
 
     // sim1.setRawRotorPosition(simRotorPosRot);
     // sim2.setRawRotorPosition(simRotorPosRot);
-
-
-    
-
-    
   }
 }

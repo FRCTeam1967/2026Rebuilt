@@ -127,11 +127,12 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        theHood.configDashboard(matchTab);
-        yeeter.configDashboard(matchTab);
-        pivot.configDashboard(matchTab);
-        configLLTab(limelightTab, fieldTab);
-        climb.configDashboard(fieldTab);
+        visabelle.configDashboard(matchTab);
+        //theHood.configDashboard(matchTab);
+        //yeeter.configDashboard(matchTab);
+        //pivot.configDashboard(matchTab);
+        //configLLTab(limelightTab, fieldTab);
+        //climb.configDashboard(fieldTab);
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
@@ -284,7 +285,7 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color

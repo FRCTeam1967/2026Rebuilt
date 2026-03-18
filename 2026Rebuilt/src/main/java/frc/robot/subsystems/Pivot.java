@@ -27,8 +27,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
@@ -250,17 +248,23 @@ public class Pivot extends SubsystemBase {
   }
   */
 
-  public void configDashboard(ShuffleboardTab tab) {
-    tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
-    tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-    tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
-    tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
-    tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
-    tab.addBoolean("pivot reached?", () -> isReached());
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   // tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
+  //   // tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+  //   // tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
+  //   // tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
+  //   // tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+  //   // tab.addBoolean("pivot reached?", () -> isReached());
+  // }
 
   public void periodic() {
     // This method will be called once per scheduler run
+    DogLog.log("abs encoder pos", absEncoder.getAbsolutePosition().getValueAsDouble()*360);
+    DogLog.log("current pivot pos degrees", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    DogLog.log("current pivot pos revs", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
+    DogLog.log("abs encoder pos revs", absEncoder.getAbsolutePosition().getValueAsDouble());
+    DogLog.log("target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+    DogLog.log("pivot reached?", isReached());
   }
 }
 
