@@ -277,11 +277,17 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    DogLog.log("at height", Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble()) < Constants.Climb.ERROR_THRESHOLD);
-    DogLog.log("rotations", motor.getRotorPosition().getValueAsDouble());
-    DogLog.log("inches", motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
-    DogLog.log("bottom sensor", getBottomSensor());
-    DogLog.log("top sensor", getTopSensor());
+    DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble()) < Constants.Climb.ERROR_THRESHOLD);
+    DogLog.log("Climb/target rotations", rotations);
+    DogLog.log("Climb/rotations", motor.getRotorPosition().getValueAsDouble());
+    DogLog.log("Climb/inches", motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    DogLog.log("Climb/bottom sensor", getBottomSensor());
+    DogLog.log("Climb/top sensor", getTopSensor());
+
+    if (Constants.Climb.verboseLogging) {
+      DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
+
     //setSafe();
   }
   /*

@@ -4,6 +4,7 @@
 
 package frc.robot;               
 
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -60,7 +62,22 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    DogLog.setEnabled(true);
+    DogLog.setEnabled(Constants.Logging.enabled);
+    DogLogOptions options = new DogLogOptions()
+      .withCaptureConsole(Constants.Logging.captureConsole)
+      .withCaptureDs(Constants.Logging.captureDS)
+      .withCaptureNt(Constants.Logging.captureNT)
+      .withLogExtras(Constants.Logging.enableExtras);
+    DogLog.setOptions(options);
+    if (Constants.Logging.capturePDH) {
+      DogLog.setPdh(new PowerDistribution());
+    }
+
+    // Start the CTRE signal logger
+    if (Constants.Logging.enableCTRELogging) {
+      SignalLogger.start();
+    }
+
     m_robotContainer = new RobotContainer();
   }
 
@@ -103,8 +120,6 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 50);
     LimelightHelpers.SetIMUMode("limelight-back", 0);
     LimelightHelpers.SetThrottle("limelight-back", 50);
-
-    SignalLogger.start();
   }
 
   @Override
@@ -120,17 +135,11 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
-    SignalLogger.start();
   }
 
   @Override
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
-    m_robotContainer.yeeter.logYeeterSpeeds();
-    m_robotContainer.eater.logVoltage();
-    m_robotContainer.indexer.logVoltage();
-    m_robotContainer.pivot.logVoltage();
-
 
     // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0);

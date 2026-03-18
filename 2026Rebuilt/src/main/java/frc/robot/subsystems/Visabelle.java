@@ -65,7 +65,10 @@ public class Visabelle extends SubsystemBase {
 
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
     
-    DogLog.log("dist from hub", eucDist);
+    DogLog.log("Visabelle/dist from hub", eucDist);
+    if (Constants.Visabelle.verboseLogging) {
+      DogLog.log("Visabelle/target hub", hubPose);
+    }
     
     return eucDist;
   }
@@ -80,12 +83,16 @@ public class Visabelle extends SubsystemBase {
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
 
+    if (Constants.Visabelle.verboseLogging) {
+      DogLog.log("Visabelle/raw angle to hub", angle);
+    }
+
     if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
-      return (angle+Math.PI);
+      angle += Math.PI;
     }
-    else {
-      return (angle);
-    }
+
+    DogLog.log("Visabelle/angle to hub", angle);
+    return (angle);
   }
 
   public boolean isAligned() {
