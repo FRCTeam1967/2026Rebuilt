@@ -12,10 +12,12 @@ public class MovePivot extends Command {
   /** Creates a new MovePivot. */
   private Pivot pivot;
   private double targetPosition;
+  private double speed;
   
-   public MovePivot(Pivot pivot, double targetPosition ) {
+   public MovePivot(Pivot pivot, double targetPosition, double speed) {
       this.pivot = pivot;
       this.targetPosition = targetPosition;
+      this.speed = speed;
       addRequirements(this.pivot);
    }
     // Use addRequirements() here to declare subsystem dependencies.
@@ -28,12 +30,13 @@ public class MovePivot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    pivot.moveTo(targetPosition);
+    pivot.moveTo(targetPosition, speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override

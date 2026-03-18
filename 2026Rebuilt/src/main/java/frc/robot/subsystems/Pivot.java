@@ -146,8 +146,9 @@ public class Pivot extends SubsystemBase {
    * @param rotations - converted to revs </p>
    * creates and sets a MotionMagicVoltage request with revs
    */
-  public void moveTo(double rotations){
+  public void moveTo(double rotations, double speed){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
+    motor.set(speed);
     MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
     motor.setControl(request);
   }
