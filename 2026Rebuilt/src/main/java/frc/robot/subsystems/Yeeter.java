@@ -129,8 +129,12 @@ public class Yeeter extends SubsystemBase {
    * @param velocity
    * @param acceleration
    */
-  public void setVelocity(DoubleSupplier velocity, double acceleration) {
-    MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity.getAsDouble())
+  public void setVelocity(DoubleSupplier velocitySupplier, double acceleration) {
+    // velocitySupplier should probably stored as a member field and then used in reachedYeeterSpeed() rather than 
+    // having reachedYeeterSpeed() reach into robot container to get the Visabelle. You'd probably want to have
+    // stopMotor() then set velocitySupplier to NULL or set it to a DoubleSupplier that returns a constant value of 0.
+    double velocity = velocitySupplier.getAsDouble();
+    MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
       .withAcceleration(acceleration);
       //.withFeedForward(5.0);
 
@@ -141,6 +145,8 @@ public class Yeeter extends SubsystemBase {
     //   .withAcceleration(acceleration);
     // //   //.withFeedForward(5.0);
 
+    DogLog.log("Yeeter/target speed (set)", -velocity);
+
     motor1.setControl(requestOne);
     motor2.setControl(followerRequest); //TODO: this is what was in Sunday's code. should we be setting two different control requests on the same motor?
   }
@@ -149,7 +155,10 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
-    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()));
+    // Since we're using a double supplier, the value we get here may be different than the value we got in setVelocity().
+    double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
+    DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
+    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= necessarySpeed);
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
 
@@ -167,6 +176,7 @@ public class Yeeter extends SubsystemBase {
    * stops both motors, obviously :)
    */
   public void stopMotor() {
+    DogLog.log("Yeeter/target speed", 0);
     motor1.stopMotor();
     motor2.setControl(followerRequest);
   }
@@ -210,19 +220,23 @@ public class Yeeter extends SubsystemBase {
    */
   //TODO: call this in robot container when setting speed
   public double getNecessarySpeed(DoubleSupplier distanceToHub) {
-    double speed = speedTable.get(distanceToHub.getAsDouble());
-    DogLog.log("target", speed);
+    double distance = distanceToHub.getAsDouble();
+    double speed = speedTable.get(distance);
+    DogLog.log("Yeeter/distance", distance);
+    DogLog.log("Yeeter/target", speed);
     return speed;
-  }
-
-  public void logYeeterSpeeds(){
-    DogLog.log("YeeterSpeed1", getMotorVelocity(motor1));
-    DogLog.log("YeeterSpeed2", getMotorVelocity(motor2));
   }
 
   @Override
   public void periodic() {
-    this.logYeeterSpeeds();
+    DogLog.log("Yeeter/Speed1", getMotorVelocity(motor1));
+    DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
+
+    if (Constants.Yeeter.verboseLogging) {
+      DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed());
+    }
   }
 
   @Override

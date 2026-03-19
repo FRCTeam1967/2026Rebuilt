@@ -35,6 +35,9 @@ public class Feeder extends SubsystemBase {
    * @param speed - sets motor to speed
    */
   public void setMotor(double speed){
+    if (Constants.Feeder.verboseLogging) {
+      DogLog.log("Feeder/speed", speed);
+    }
     motor.set(speed);
   }
 
@@ -48,5 +51,8 @@ public class Feeder extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (Constants.Feeder.verboseLogging) {
+      DogLog.log("Feeder/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
   }
 }

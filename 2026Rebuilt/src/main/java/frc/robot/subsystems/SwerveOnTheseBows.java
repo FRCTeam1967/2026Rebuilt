@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.Constants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -237,12 +237,12 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     public void followTrajectory(SwerveSample sample){
         Pose2d pose = getPose();
         double rotationalRate = sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading);
-        /*
-        DogLog.log("Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
-        DogLog.log("Trajectory/pose", pose);
-        DogLog.log("Trajectory/sample.omega", sample.omega);
-        DogLog.log("Trajectory/commandedRotRate", rotationalRate);
-        */
+
+        if (Constants.Drivetrain.verboseLogging) {
+            DogLog.log("Drivetrain/Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
+            DogLog.log("Drivetrain/Trajectory/commanded rot rate", rotationalRate);
+        }
+
         setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
@@ -269,6 +269,8 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        DogLog.log("Drivetrain/pose", getPose());
     }
 
     private void startSimThread() {

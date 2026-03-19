@@ -48,12 +48,11 @@ public class Indexer extends SubsystemBase {
     motor.stopMotor();
   }
 
-  public void logVoltage() {
-    DogLog.log("indexer voltage", motor.getStatorCurrent().getValueAsDouble());
-  }
-  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (Constants.Indexer.verboseLogging) {
+      DogLog.log("Indexer/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
   }
 }

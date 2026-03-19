@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
 
@@ -32,59 +33,19 @@ public class VisabelleUpdate extends SubsystemBase {
   // visibility dataType name;
   private SwerveOnTheseBows swerve;
 
-  private final StructPublisher<Pose2d> frontlightPublisher;
-  private final StructPublisher<Pose2d> backlightPublisher;
-
-  private long odometryUpdates = 0;
-  private long odometryDiscards = 0;
-  IntegerPublisher updatePublisher;
-  IntegerPublisher discardPublisher;
-
-  DoublePublisher LLtimestamp;
-  DoublePublisher fpgaTimestamp;
-  DoublePublisher LLtoFPGA;
-
   private int frontLLcount = 0;
   private int backLLcount = 0;
 
   private static final double AREA_THRESHOLD = 0.1;
 
-  public static Pose2d towerPose;
-
   private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
   private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
   private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
+  public static Pose2d towerPose = RED_TOWER; // Initialize to something
 
   public VisabelleUpdate(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
-
-    frontlightPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Front Limelight Pose", Pose2d.struct).publish();
-    backlightPublisher = NetworkTableInstance.getDefault().getTable("limelight-back").getStructTopic("Back Limelight Pose", Pose2d.struct).publish();
-
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable table = inst.getTable("odometryStats");
-
-    updatePublisher = table.getIntegerTopic("acceptedUpdates").publish();
-    discardPublisher = table.getIntegerTopic("rejectedUpdates").publish();
-
-    LLtimestamp = table.getDoubleTopic("limelight timestamp").publish();
-    fpgaTimestamp = table.getDoubleTopic("fpga timestamp").publish();
-    LLtoFPGA = table.getDoubleTopic("LL converted to fpga").publish();
-
-    Optional<Alliance> ally = DriverStation.getAlliance();
-    DogLog.log("Tower Pose: ", towerPose);
-
-
-    if (ally.isPresent()) {
-        if (ally.get() == Alliance.Red) {
-            towerPose = RED_TOWER;
-        } else {
-            towerPose = BLUE_TOWER;
-        }
-    } else {
-        towerPose = RED_TOWER;
-    }
   }
 
   public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
@@ -150,6 +111,10 @@ public class VisabelleUpdate extends SubsystemBase {
             towerPose = BLUE_TOWER;
         }
     }
+
+    if (Constants.Visabelle.verboseLogging) {
+      DogLog.log("VisabelleUpdate/isInRange", isInRange);
+    }
     
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation("limelight-back", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
@@ -159,8 +124,8 @@ public class VisabelleUpdate extends SubsystemBase {
     LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
 
 
-    DogLog.log("front limelight pose", mt2_front.pose);
-    DogLog.log("back limelight pose", mt2_back.pose);
+    DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
+    DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
 
 
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
@@ -183,17 +148,18 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     if (chosenPoseEstimate != null) {
+      DogLog.log("VisabelleUpdate/chosen update", chosenPoseEstimate.pose);
+      DogLog.log("VisabelleUpdate/vision update accepted", true);
       swerve.setVisionMeasurementStdDevs(VISION_STD_DEVS);
           
       swerve.addVisionMeasurement(
         chosenPoseEstimate.pose,
         chosenPoseEstimate.timestampSeconds);
 
-        updatePublisher.set(++odometryUpdates);
         //chosenPoseEstimate = null;
       }
     else {
-      discardPublisher.set(++odometryDiscards);
+      DogLog.log("VisabelleUpdate/vision update accepted", false);
     } 
   }
 }

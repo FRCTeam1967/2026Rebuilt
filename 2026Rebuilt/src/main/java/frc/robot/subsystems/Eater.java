@@ -40,7 +40,7 @@ public class Eater extends SubsystemBase {
    */
   public void setMotor(double speed) {
     motor.set(speed);
-    DogLog.log("intake desired speed", speed);
+    DogLog.log("Shooter/intake desired speed", speed);
   }
   
   /**
@@ -50,13 +50,10 @@ public class Eater extends SubsystemBase {
     motor.stopMotor();
   }
 
-  public void logVoltage() {
-    DogLog.log("shooter voltage", motor.getStatorCurrent().getValueAsDouble());
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    DogLog.log("Shooter/stator current", motor.getStatorCurrent().getValueAsDouble());
   }
 }
 
