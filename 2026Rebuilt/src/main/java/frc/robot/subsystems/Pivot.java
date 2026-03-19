@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -49,7 +50,6 @@ public class Pivot extends SubsystemBase {
   private MotionMagicVoltage request;
   private CANcoder absEncoder;
   private double revsToMove;
-
   //simulation
   // private SingleJointedArmSim armSim;
   // private Mechanism2d mech2d = new Mechanism2d(1, 1);
@@ -78,18 +78,31 @@ public class Pivot extends SubsystemBase {
 
     var talonFXconfigs = new TalonFXConfiguration();
 
-    var slot0Configs = talonFXconfigs.Slot0;
-    slot0Configs.kS = Constants.Pivot.kS; 
-    slot0Configs.kV = Constants.Pivot.kV;
-    slot0Configs.kA = Constants.Pivot.kA;
-    slot0Configs.kP = Constants.Pivot.kP;
-    slot0Configs.kI = Constants.Pivot.kI;
-    slot0Configs.kD = Constants.Pivot.kD; 
+    var fastConfigs = talonFXconfigs.Slot0;
+    fastConfigs.kS = Constants.Pivot.kS_FAST; 
+    fastConfigs.kV = Constants.Pivot.kV_FAST;
+    fastConfigs.kA = Constants.Pivot.kA_FAST;
+    fastConfigs.kP = Constants.Pivot.kP_FAST;
+    fastConfigs.kI = Constants.Pivot.kI_FAST;
+    fastConfigs.kD = Constants.Pivot.kD_FAST; 
 
-    var motionMagicConfigs = talonFXconfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
-    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
+    var fastMotionMagicConfigs = talonFXconfigs.MotionMagic;
+    fastMotionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_FAST;
+    fastMotionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_FAST;
+    fastMotionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK_FAST;
+
+    var slowConfigs = talonFXconfigs.Slot1;
+    slowConfigs.kS = Constants.Pivot.kS_SLOW; 
+    slowConfigs.kV = Constants.Pivot.kV_SLOW;
+    slowConfigs.kA = Constants.Pivot.kA_SLOW;
+    slowConfigs.kP = Constants.Pivot.kP_SLOW;
+    slowConfigs.kI = Constants.Pivot.kI_SLOW;
+    slowConfigs.kD = Constants.Pivot.kD_SLOW; 
+
+    var slowMotionMagicConfigs = talonFXconfigs.MotionMagic;
+    slowMotionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_SLOW;
+    slowMotionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_SLOW;
+    slowMotionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK_SLOW;
 
     absEncoder.getConfigurator().apply(ccdConfigs);
     motor.getConfigurator().apply(talonFXconfigs);
@@ -146,12 +159,19 @@ public class Pivot extends SubsystemBase {
    * @param rotations - converted to revs </p>
    * creates and sets a MotionMagicVoltage request with revs
    */
-  public void moveTo(double rotations, double speed){
+  public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-    motor.set(speed);
-    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
-    motor.setControl(request);
+
+    if(isSlow) {
+      MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0).withSlot(1);
+      motor.setControl(request);
+    } else {
+      MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0).withSlot(0);
+      motor.setControl(request);
+    }
   }
+
+
 
   /**
    * creates and sets a MotionMagicVoltage request with all 0 values

@@ -76,18 +76,33 @@ public final class Constants {
         public static final int MOTOR_ID = 10;
         public static final int ENCODER_ID = 27;
 
-        public static final double kS = 0.25;
-        public static final double kV = 0.12;
-        public static final double kA = 0.01;
-        public static final double kP = 5;
-        public static final int kI = 0;
-        public static final int kD = 0;
+        public static final double kS_FAST = 0.25;
+        public static final double kV_FAST = 0.12;
+        public static final double kA_FAST = 0.01;
+        public static final double kP_FAST = 5;
+        public static final int kI_FAST = 0;
+        public static final int kD_FAST = 0;
+
+        public static final double kS_SLOW = 0.0;
+        public static final double kV_SLOW = 0.12;  
+        public static final double kA_SLOW = 0.01;
+        public static final double kP_SLOW = 0.00;
+        public static final int kI_SLOW = 0;
+        public static final int kD_SLOW = 0;
+
         
-        public static final int CRUISE_VELOCITY = 40;
-        public static final int ACCELERATION = 100;
-        public static final int JERK = 1000;
+        public static final int CRUISE_VELOCITY_FAST = 40;
+        public static final int ACCELERATION_FAST = 100;
+        public static final int JERK_FAST = 1000;
         public static final double GEAR_RATIO = 36/1.0;
         public static final double FEED_FORWARD = 1;
+
+        public static final int CRUISE_VELOCITY_SLOW = 5;
+        public static final int ACCELERATION_SLOW = 1;
+        public static final int JERK_SLOW = 10;
+
+        public static final double PIVOT_SPEED = 10.0; //change later WHEN TESTING
+        public static final double PIVOT_SLOW_SPEED = 5.0;//change later WHEN TESTING
         
 
         public static final double THRESHOLD = 1;

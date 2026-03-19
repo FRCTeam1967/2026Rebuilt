@@ -65,7 +65,7 @@ public class RobotContainer {
         .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    public Autoes autoes = new Autoes(this);
+    //public Autoes autoes = new Autoes(this);
   
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -108,7 +108,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        autoes.configDashboard(matchTab);
+        //autoes.configDashboard(matchTab);
         theHood.configDashboard(matchTab);
         yeeter.configDashboard(matchTab);
         pivot.configDashboard(fieldTab);
@@ -272,9 +272,9 @@ public class RobotContainer {
                             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                         ) 
                     ),
-                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                 ),
-                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
             )
         );
 
@@ -317,7 +317,7 @@ public class RobotContainer {
         //INTAKE
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
@@ -331,8 +331,8 @@ public class RobotContainer {
         
         //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
-        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
-        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
+        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
         //CLIMB
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
