@@ -147,6 +147,7 @@ public class Yeeter extends SubsystemBase {
     // velocitySupplier should probably stored as a member field and then used in reachedYeeterSpeed() rather than 
     // having reachedYeeterSpeed() reach into robot container to get the Visabelle. You'd probably want to have
     // stopMotor() then set velocitySupplier to NULL or set it to a DoubleSupplier that returns a constant value of 0.
+
     double velocity = velocitySupplier.getAsDouble();
 
     MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
