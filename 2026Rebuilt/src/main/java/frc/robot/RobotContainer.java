@@ -82,7 +82,7 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("rio");
+    public static final CANBus CANBus = new CANBus("CANivore");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
