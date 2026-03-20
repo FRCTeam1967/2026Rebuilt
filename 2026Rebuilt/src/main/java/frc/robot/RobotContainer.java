@@ -311,9 +311,9 @@ public class RobotContainer {
         //   )
         // ));
 
-        m_operatorController.leftTrigger().whileTrue(
-            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-        );
+        // m_operatorController.leftTrigger().whileTrue(
+        //     new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+        // );
             m_operatorController.leftTrigger().whileTrue(
             new SequentialCommandGroup( 
             new ParallelCommandGroup(
@@ -322,9 +322,7 @@ public class RobotContainer {
                     //new RunCommand (() -> candle.setControl(yellowBlink))
                 ),
                 //
-                
-                ]new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
+            
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     
