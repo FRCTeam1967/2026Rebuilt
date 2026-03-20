@@ -519,14 +519,16 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           ),
           new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
-          trenchToCenter.cmd()
+          trenchToCenter.cmd(),
+          new PrintCommand("auto start")
       )
     );
 
-    trenchToCenter.done().onTrue(
+    trenchToCenter.active().onTrue(
       new ParallelCommandGroup(
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new PrintCommand("intake started running")
       )
     );
     trenchToCenter.done().onTrue(intakeMore1.cmd());
