@@ -523,7 +523,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       )
     );
 
-    trenchToCenter.active().onTrue(
+    trenchToCenter.done().onTrue(
       new ParallelCommandGroup(
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
@@ -611,7 +611,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       )
     );
 
-    trenchNeutral.active().onTrue(
+    trenchNeutral.done().onTrue(
       new ParallelCommandGroup(
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
       )
