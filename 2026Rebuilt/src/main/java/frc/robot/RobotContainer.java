@@ -82,7 +82,7 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("rio");
+    public static final CANBus CANBus = new CANBus("CANivore");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
@@ -293,42 +293,47 @@ public class RobotContainer {
         // SHOOTER AND HOOD BUTTON BINDINGS
         // m_operatorController.leftTrigger()
         // .whileTrue(
-        //   //new SequentialCommandGroup(
-        //     // new ParallelCommandGroup(
-        //     //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-        //     //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-        //     // ),
+        //   new SequentialCommandGroup(
+        //      new ParallelCommandGroup(
+        //       new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        //        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
+        //      ),
         //     /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
 
-        //     //new SequentialCommandGroup(
-        //       //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
+        //     new SequentialCommandGroup(
+        //       new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
         //       new ParallelCommandGroup(
         //         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
         //         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
         //         new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
         //       )
-        //     //)
-        //   //)
-        // );
+        //     )
+        //   )
+        // ));
 
         m_operatorController.leftTrigger().whileTrue(
+            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+        );
+            m_operatorController.leftTrigger().whileTrue(
             new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new ParallelCommandGroup(
-                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                    new RunCommand (() -> candle.setControl(yellowBlink))
+                    new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)//() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    //new RunCommand (() -> candle.setControl(yellowBlink))
                 ),
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                //
+                
+                ]new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     
-                    new ParallelCommandGroup( //green
-                        new SequentialCommandGroup(
-                            new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                            new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        )
-                    ),
+                    // new ParallelCommandGroup( //green
+                    //     new SequentialCommandGroup(
+                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                    //     )
+                    // ),
 
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                     //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue

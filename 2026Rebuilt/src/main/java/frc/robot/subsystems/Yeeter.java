@@ -112,6 +112,8 @@ public class Yeeter extends SubsystemBase {
       }
     );
 
+    DogLog.tunable("Yeeter Speed", Constants.Yeeter.YEETER_SPEED);
+
     slot0Configs.kA = Constants.Yeeter.kA;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
@@ -150,13 +152,14 @@ public class Yeeter extends SubsystemBase {
 
     double velocity = velocitySupplier.getAsDouble();
 
-    MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
-      .withAcceleration(yeeterAcceleration.get());
+    // MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
+    //   .withAcceleration(yeeterAcceleration.get());
       //.withFeedForward(5.0);
       //.withFeedFoward(feedForward.get());
 
-    // MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
-    //   .withFeedForward(0.12); //kS value ?
+    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(-velocity)
+    .withAcceleration(yeeterAcceleration.get()) ; 
+    //.withFeedForward(0.12); //kS value ?
 
     // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
     //   .withAcceleration(acceleration);
@@ -164,7 +167,7 @@ public class Yeeter extends SubsystemBase {
 
     DogLog.log("Yeeter/target speed (set)", -velocity);
 
-    motor1.setControl(requestOne);
+    motor1.setControl(torqueRequest);
     motor2.setControl(followerRequest); //TODO: this is what was in Sunday's code. should we be setting two different control requests on the same motor?
   }
 
