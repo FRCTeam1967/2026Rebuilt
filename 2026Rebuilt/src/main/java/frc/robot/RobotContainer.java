@@ -283,10 +283,10 @@ public class RobotContainer {
                     new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kPi)))        
                 ),
                 new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kZero)),
                     new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
                 ),
                 () -> ally.get() == Alliance.Blue
             )
