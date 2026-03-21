@@ -175,11 +175,16 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
+    double motorSpeed = motor1.getVelocity().getValueAsDouble();
+    return reachedYeeterSpeed(motorSpeed);
+  }
+
+  private boolean reachedYeeterSpeed(double currentMotorSpeed) {
     // Since we're using a double supplier, the value we get here may be different than the value we got in setVelocity().
     double necessarySpeed = Constants.Yeeter.YEETER_SPEED;
     //double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
     DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
-    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= necessarySpeed);
+    return (Math.abs(currentMotorSpeed) >= necessarySpeed);
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
 
@@ -250,13 +255,14 @@ public class Yeeter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    DogLog.log("Yeeter/Speed1", getMotorVelocity(motor1));
+    double motor1Speed = getMotorVelocity(motor1);
+    DogLog.log("Yeeter/Speed1", motor1Speed);
     DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
 
     if (Constants.Yeeter.verboseLogging) {
       DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
       DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed());
+      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed));
     }
   }
 

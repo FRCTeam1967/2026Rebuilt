@@ -56,7 +56,9 @@ public class Eater extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
+    if (Constants.Eater.verboseLogging) {
+      DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
   }
 }
 

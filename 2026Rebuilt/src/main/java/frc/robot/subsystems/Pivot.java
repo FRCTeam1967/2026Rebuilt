@@ -142,8 +142,18 @@ public class Pivot extends SubsystemBase {
   /**
    * @return true if motor's current position is within error threshold of target position
    */
-  public boolean isReached(){
+  public boolean isReached() {
     double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    return isReached(currentPos);
+  }
+  
+  /**
+   * Determine if the position is within error threshold of target position. This version is used
+   * when the rotor position is already known to avoid fetching it again.
+   * @param currentPos Current rotor position
+   * @return whether the position has reached the 
+   */
+  private boolean isReached(double currentPos) {
     double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
     double diff = Math.abs(currentPos - targetPosition);
     return diff < 10; 
@@ -151,6 +161,7 @@ public class Pivot extends SubsystemBase {
     // double diff = Math.abs(currentPos - targetPosition);
     // return diff < 0.1;
   }
+
 
   /**
    * @param rotations - converted to revs </p>
@@ -265,13 +276,15 @@ public class Pivot extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     //tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-    DogLog.log("Pivot/abs encoder pos", absEncoder.getAbsolutePosition().getValueAsDouble()*360);
-    DogLog.log("Pivot/current pos degrees", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-    DogLog.log("Pivot/current pos revs", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
-    DogLog.log("Pivot/abs encoder pos revs", absEncoder.getAbsolutePosition().getValueAsDouble());
-    DogLog.log("Pivot/pivot reached?", isReached());
+    double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
+    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
+    DogLog.log("Pivot/abs encoder pos", encoderPosition*360);
+    DogLog.log("Pivot/current pos degrees", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
+    DogLog.log("Pivot/current pos revs", (rotorPosition/Constants.Pivot.GEAR_RATIO));
+    DogLog.log("Pivot/abs encoder pos revs", encoderPosition);
+    DogLog.log("Pivot/pivot reached?", isReached(rotorPosition));
     DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
-    
+
     if (Constants.Pivot.verboseLogging) {
       DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
