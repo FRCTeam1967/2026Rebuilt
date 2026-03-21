@@ -84,19 +84,12 @@ public final class Constants {
         public static final int MOTOR_ID = 10;
         public static final int ENCODER_ID = 27;
 
-        public static final double kS_FAST = 0.25;
-        public static final double kV_FAST = 0.12;
-        public static final double kA_FAST = 0.01;
-        public static final double kP_FAST = 5;
-        public static final int kI_FAST = 0;
-        public static final int kD_FAST = 0;
-
-        public static final double kS_SLOW = 0.0;
-        public static final double kV_SLOW = 0.12;  
-        public static final double kA_SLOW = 0.01;
-        public static final double kP_SLOW = 0.00;
-        public static final int kI_SLOW = 0;
-        public static final int kD_SLOW = 0;
+        public static final double kS = 0.25;
+        public static final double kV = 0.12;
+        public static final double kA = 0.01;
+        public static final double kP = 5;
+        public static final int kI = 0;
+        public static final int kD = 0;
 
         
         public static final int CRUISE_VELOCITY_FAST = 40;

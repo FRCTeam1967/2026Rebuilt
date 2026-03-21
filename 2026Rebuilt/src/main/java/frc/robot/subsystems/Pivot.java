@@ -82,12 +82,12 @@ public class Pivot extends SubsystemBase {
     var talonFXconfigs = new TalonFXConfiguration();
 
     var slotConfigs = talonFXconfigs.Slot0;
-    slotConfigs.kS = Constants.Pivot.kS_FAST; 
-    slotConfigs.kV = Constants.Pivot.kV_FAST;
-    slotConfigs.kA = Constants.Pivot.kA_FAST;
-    slotConfigs.kP = Constants.Pivot.kP_FAST;
-    slotConfigs.kI = Constants.Pivot.kI_FAST;
-    slotConfigs.kD = Constants.Pivot.kD_FAST; 
+    slotConfigs.kS = Constants.Pivot.kS; 
+    slotConfigs.kV = Constants.Pivot.kV;
+    slotConfigs.kA = Constants.Pivot.kA;
+    slotConfigs.kP = Constants.Pivot.kP;
+    slotConfigs.kI = Constants.Pivot.kI;
+    slotConfigs.kD = Constants.Pivot.kD; 
 
     var motionMagicConfigs = talonFXconfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_FAST;
