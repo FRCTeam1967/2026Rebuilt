@@ -260,14 +260,6 @@ public class RobotContainer {
         if (visabelle.isAligned()) {
             new RunCommand (() -> candle.setControl(greenSolid));
         }
-             swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(
-                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
-                )
-                .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-             )
-         );
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
