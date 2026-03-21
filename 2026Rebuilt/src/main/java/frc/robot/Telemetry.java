@@ -30,8 +30,12 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
-        SignalLogger.setPath("/logs");
-        SignalLogger.start();
+        // No need to override the default path, which for RIO is the logs folder on the first USB drive, or 
+        // /home/lvuser/logs if no USB drives are present.
+        // SignalLogger.setPath("/logs");
+        if (Constants.Logging.enableCTRELogging) {
+            SignalLogger.start();
+        }
 
         /* Set up the module state Mechanism2d telemetry */
         for (int i = 0; i < 4; ++i) {
