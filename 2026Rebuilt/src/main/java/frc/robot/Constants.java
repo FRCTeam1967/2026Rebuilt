@@ -109,7 +109,7 @@ public final class Constants {
         public static final double DEGREES_TO_REVS = 1.0/360.0;
         public static final double MAGNET_OFFSET = -0.3349609375;
 
-        public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
     }

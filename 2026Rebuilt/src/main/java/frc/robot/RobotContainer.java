@@ -318,7 +318,8 @@ public class RobotContainer {
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
           )
         );
 

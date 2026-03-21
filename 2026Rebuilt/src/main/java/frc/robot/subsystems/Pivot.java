@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -86,19 +87,6 @@ public class Pivot extends SubsystemBase {
     fastConfigs.kI = Constants.Pivot.kI_FAST;
     fastConfigs.kD = Constants.Pivot.kD_FAST; 
 
-    var fastMotionMagicConfigs = talonFXconfigs.MotionMagic;
-    fastMotionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_FAST;
-    fastMotionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_FAST;
-    fastMotionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK_FAST;
-
-    var slowConfigs = talonFXconfigs.Slot1;
-    slowConfigs.kS = Constants.Pivot.kS_SLOW; 
-    slowConfigs.kV = Constants.Pivot.kV_SLOW;
-    slowConfigs.kA = Constants.Pivot.kA_SLOW;
-    slowConfigs.kP = Constants.Pivot.kP_SLOW;
-    slowConfigs.kI = Constants.Pivot.kI_SLOW;
-    slowConfigs.kD = Constants.Pivot.kD_SLOW; 
-
     var slowMotionMagicConfigs = talonFXconfigs.MotionMagic;
     slowMotionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_SLOW;
     slowMotionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_SLOW;
@@ -161,12 +149,12 @@ public class Pivot extends SubsystemBase {
    */
   public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-
-    if(isSlow) {
-      MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0).withSlot(1);
+    // MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
+    if (isSlow) {
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
       motor.setControl(request);
     } else {
-      MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0).withSlot(0);
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
       motor.setControl(request);
     }
   }
