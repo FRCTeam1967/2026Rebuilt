@@ -260,16 +260,6 @@ public class RobotContainer {
         if (visabelle.isAligned()) {
             new RunCommand (() -> candle.setControl(greenSolid));
         }
-<<<<<<< Updated upstream
-=======
-             swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(
-                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
-                )
-                .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            );
->>>>>>> Stashed changes
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
@@ -343,35 +333,37 @@ public class RobotContainer {
 
         m_operatorController.leftTrigger().whileTrue(
             new SequentialCommandGroup( 
-            new ParallelCommandGroup(
                 new ParallelCommandGroup(
-                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                    //new RunCommand (() -> candle.setControl(yellowBlink))
-                ),
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
-                new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                    
-                    // new ParallelCommandGroup( //green
-                    //     new SequentialCommandGroup(
-                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                    //     )
-                    // ),
-
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                    //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
-
-                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
                     new ParallelCommandGroup(
-                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                        new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                    ) 
+                        new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                        //new RunCommand (() -> candle.setControl(yellowBlink))
+                    ),
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+                    new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                        
+                        // new ParallelCommandGroup( //green
+                        //     new SequentialCommandGroup(
+                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                        //     )
+                        // ),
+
+                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                        new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                        new ParallelCommandGroup(
+                            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+                        ) 
+                    ),
+
+                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                 ),
-                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ),
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
+                
+                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
            )
         ); //TODO: add defense mode while the robot is shooting
 
@@ -421,7 +413,7 @@ public class RobotContainer {
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-            new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)
+            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
           )
         );
 
