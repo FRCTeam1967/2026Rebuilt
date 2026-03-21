@@ -15,14 +15,24 @@ public class MovePivot extends Command {
   private Pivot pivot;
   private double targetPosition;
   private boolean isSlow;
+
+  /**
+   * Convenience initalizer. Moves pivot quickly. This alleviates the need
+   * to change all call sites to pass a 3rd parameter when they want the default
+   * behavior that used to exist.
+   * @param pivot Pivot subsystem
+   * @param targetPosition desired position (rotations)
+   */
+  public MovePivot(Pivot pivot, double targetPosition) {
+    this(pivot, targetPosition, false);
+  }
   
-   public MovePivot(Pivot pivot, double targetPosition, boolean isSlow) {
-      this.pivot = pivot;
-      this.targetPosition = targetPosition;
-      this.isSlow = isSlow;
-      addRequirements(this.pivot);
-   }
-    // Use addRequirements() here to declare subsystem dependencies.
+  public MovePivot(Pivot pivot, double targetPosition, boolean isSlow) {
+    this.pivot = pivot;
+    this.targetPosition = targetPosition;
+    this.isSlow = isSlow;
+    addRequirements(this.pivot);
+  }
   
 
   // Called when the command is initially scheduled.
