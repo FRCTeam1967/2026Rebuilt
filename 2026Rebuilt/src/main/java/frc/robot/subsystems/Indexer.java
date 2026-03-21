@@ -20,7 +20,7 @@ public class Indexer extends SubsystemBase {
 
   /** Creates a new Indexer. */
   public Indexer() {
-    motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID);
 
     var talonFXConfigurator = motor.getConfigurator();
     var motorConfigs = new MotorOutputConfigs();

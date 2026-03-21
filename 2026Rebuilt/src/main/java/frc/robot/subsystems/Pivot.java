@@ -70,10 +70,10 @@ public class Pivot extends SubsystemBase {
 
   /** Creates a new Pivot. */
   public Pivot() {
-    motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
+    motor = new TalonFX (Constants.Pivot.MOTOR_ID);
     request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
 
-    absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
+    absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
@@ -264,13 +264,14 @@ public class Pivot extends SubsystemBase {
 
   public void periodic() {
     // This method will be called once per scheduler run
+    //tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
     DogLog.log("Pivot/abs encoder pos", absEncoder.getAbsolutePosition().getValueAsDouble()*360);
     DogLog.log("Pivot/current pos degrees", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
     DogLog.log("Pivot/current pos revs", (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
     DogLog.log("Pivot/abs encoder pos revs", absEncoder.getAbsolutePosition().getValueAsDouble());
-    DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
     DogLog.log("Pivot/pivot reached?", isReached());
-
+    DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+    
     if (Constants.Pivot.verboseLogging) {
       DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());
     }

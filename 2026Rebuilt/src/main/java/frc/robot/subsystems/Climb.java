@@ -85,7 +85,7 @@ public class Climb extends SubsystemBase {
 
 
   public Climb() {
-    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID);
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);

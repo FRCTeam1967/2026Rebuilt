@@ -38,8 +38,8 @@ public class TheHood extends SubsystemBase {
   private MotionMagicVoltage maintainRequest;
 
   public TheHood() {
-    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
-    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
+    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID);
+    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID);
     angleTable = new InterpolatingDoubleTreeMap();
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();

@@ -22,12 +22,12 @@ public class Feeder extends SubsystemBase {
 
   /** Creates a new Feeder. */
   public Feeder() {
-    motor = new TalonFX(Constants.Feeder.FEEDER_MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Feeder.FEEDER_MOTOR_ID);
 
     var talonFXConfigurator = motor.getConfigurator();
     var motorConfigs = new MotorOutputConfigs();
 
-    motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+    motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
     talonFXConfigurator.apply(motorConfigs);
 
     //DogLog.log("feeder speed", motor.getVelocity().getValueAsDouble());

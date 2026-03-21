@@ -69,6 +69,7 @@ public class Robot extends TimedRobot {
       .withCaptureNt(Constants.Logging.captureNT)
       .withLogExtras(Constants.Logging.enableExtras);
     DogLog.setOptions(options);
+    
     if (Constants.Logging.capturePDH) {
       DogLog.setPdh(new PowerDistribution());
     }

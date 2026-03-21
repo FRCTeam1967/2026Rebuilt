@@ -260,6 +260,16 @@ public class RobotContainer {
         if (visabelle.isAligned()) {
             new RunCommand (() -> candle.setControl(greenSolid));
         }
+<<<<<<< Updated upstream
+=======
+             swerve.applyRequest(() ->
+                driveAtAngle.withTargetDirection(
+                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
+                )
+                .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            );
+>>>>>>> Stashed changes
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
@@ -410,7 +420,8 @@ public class RobotContainer {
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
-            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+            new RunFeeder(feeder, -Constants.Feeder.FEEDER_SPEED)
           )
         );
 

@@ -63,8 +63,8 @@ public class Yeeter extends SubsystemBase {
   /** Creates a new FlywheelShooter. */
   public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
     speedTable = new InterpolatingDoubleTreeMap();
-    motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
-    motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
+    motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID);
+    motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID);
     m_robotContainer = robotContainer; 
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -130,7 +130,7 @@ public class Yeeter extends SubsystemBase {
     motor1.setNeutralMode(NeutralModeValue.Coast);
     motor2.setNeutralMode(NeutralModeValue.Coast);
 
-    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     motor2.setControl(followerRequest);
 
