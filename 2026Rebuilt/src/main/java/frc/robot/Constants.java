@@ -56,11 +56,11 @@ public final class Constants {
         public static final int YEETER_MOTOR1_ID = 30; 
         public static final int YEETER_MOTOR2_ID = 28; 
 
-        public static final double kP = 0.7; // placeholder //0.8 5ft
+        public static final double kP = 5.0; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
         public static final double kD = 0.0; // placeholder
-        public static final double kS = 0.0; // placeholder
-        public static final double kV = 0.13; // placeholder
+        public static final double kS = 1.3; // placeholder
+        public static final double kV = 0.08; // placeholder
         public static final double kA = 0.0; // placeholder
 
         public static final double CRUISE_VELOCITY = 100.0; // placeholder
@@ -69,7 +69,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 67.5; //81; //rotations per second
+        public static final double YEETER_SPEED = 67.0; //81; //rotations per second
         public static final double YEETER_ACCELERATION = 500.0; //500
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;

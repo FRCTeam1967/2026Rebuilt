@@ -315,20 +315,20 @@ public class RobotContainer {
             new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new ParallelCommandGroup(
-                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                    new RunCommand (() -> candle.setControl(yellowBlink))
+                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    //new RunCommand (() -> candle.setControl(yellowBlink))
                 ),
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     
-                    new ParallelCommandGroup( //green
-                        new SequentialCommandGroup(
-                            new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                            new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        )
-                    ),
+                    // new ParallelCommandGroup( //green
+                    //     new SequentialCommandGroup(
+                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                    //     )
+                    // ),
 
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                     //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
