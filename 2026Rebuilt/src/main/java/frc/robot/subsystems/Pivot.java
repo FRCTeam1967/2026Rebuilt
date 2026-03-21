@@ -10,8 +10,10 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -53,7 +55,6 @@ public class Pivot extends SubsystemBase {
   private MotionMagicVoltage request;
   private CANcoder absEncoder;
   private double revsToMove;
-
   //simulation
   // private SingleJointedArmSim armSim;
   // private Mechanism2d mech2d = new Mechanism2d(1, 1);
@@ -82,18 +83,18 @@ public class Pivot extends SubsystemBase {
 
     var talonFXconfigs = new TalonFXConfiguration();
 
-    var slot0Configs = talonFXconfigs.Slot0;
-    slot0Configs.kS = Constants.Pivot.kS; 
-    slot0Configs.kV = Constants.Pivot.kV;
-    slot0Configs.kA = Constants.Pivot.kA;
-    slot0Configs.kP = Constants.Pivot.kP;
-    slot0Configs.kI = Constants.Pivot.kI;
-    slot0Configs.kD = Constants.Pivot.kD; 
+    var slotConfigs = talonFXconfigs.Slot0;
+    slotConfigs.kS = Constants.Pivot.kS_FAST; 
+    slotConfigs.kV = Constants.Pivot.kV_FAST;
+    slotConfigs.kA = Constants.Pivot.kA_FAST;
+    slotConfigs.kP = Constants.Pivot.kP_FAST;
+    slotConfigs.kI = Constants.Pivot.kI_FAST;
+    slotConfigs.kD = Constants.Pivot.kD_FAST; 
 
     var motionMagicConfigs = talonFXconfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
-    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_FAST;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_FAST;
+    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK_FAST;
 
     //current limits
     var limitConfigs = new CurrentLimitsConfigs();
@@ -157,10 +158,18 @@ public class Pivot extends SubsystemBase {
    * @param rotations - converted to revs </p>
    * creates and sets a MotionMagicVoltage request with revs
    */
-  public void moveTo(double rotations){
+  public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-    motor.setControl(request.withPosition(revsToMove));
+    if (isSlow) {
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
+      motor.setControl(request);
+    } else {
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
+      motor.setControl(request);
+    }
   }
+
+
 
   /**
    * creates and sets a MotionMagicVoltage request with all 0 values

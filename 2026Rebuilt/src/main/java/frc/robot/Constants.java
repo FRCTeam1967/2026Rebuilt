@@ -15,7 +15,7 @@ public final class Constants {
 
     public static class Hood {
         public static final int HOOD_MOTOR_ID = 19;        
-        public static final int HOOD_CANCODER_ID = 14;     
+        public static final int HOOD_CANCODER_ID = 21;     
 
         public static final double CRUISE_VELOCITY = 500;  // placeholder
         public static final double ACCELERATION = 300;     // placeholder
@@ -37,7 +37,7 @@ public final class Constants {
         public static final double HOOD_MAX = 680.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_MIN = 330.0 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_TOLERANCE_DEG = 5.00;
-        public static final double HOOD_ANGLE = 390.0 * Constants.Hood.DEGREES_TO_REVS;
+        public static final double HOOD_ANGLE = 280.0 * Constants.Hood.DEGREES_TO_REVS;
 
         public static final double DEGREES_TO_REVS = 1.0/360.0;
 
@@ -51,8 +51,8 @@ public final class Constants {
     }
 
     public static class Yeeter {
-        public static final int YEETER_MOTOR1_ID = 30; 
-        public static final int YEETER_MOTOR2_ID = 28; 
+        public static final int YEETER_MOTOR1_ID = 37; 
+        public static final int YEETER_MOTOR2_ID = 18; 
 
         public static final double kP = 0.7; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
@@ -77,35 +77,50 @@ public final class Constants {
     }
 
     public static class Pivot{
-        public static final int MOTOR_ID = 11;
-        public static final int ENCODER_ID = 25;
+        public static final int MOTOR_ID = 10;
+        public static final int ENCODER_ID = 27;
 
-        public static final double kS = 0.25;
-        public static final double kV = 0.12;
-        public static final double kA = 0.01;
-        public static final double kP = 5;
-        public static final int kI = 0;
-        public static final int kD = 0;
+        public static final double kS_FAST = 0.25;
+        public static final double kV_FAST = 0.12;
+        public static final double kA_FAST = 0.01;
+        public static final double kP_FAST = 5;
+        public static final int kI_FAST = 0;
+        public static final int kD_FAST = 0;
+
+        public static final double kS_SLOW = 0.0;
+        public static final double kV_SLOW = 0.12;  
+        public static final double kA_SLOW = 0.01;
+        public static final double kP_SLOW = 0.00;
+        public static final int kI_SLOW = 0;
+        public static final int kD_SLOW = 0;
+
         
-        public static final int CRUISE_VELOCITY = 40;
-        public static final int ACCELERATION = 100;
-        public static final int JERK = 1000;
+        public static final int CRUISE_VELOCITY_FAST = 40;
+        public static final int ACCELERATION_FAST = 100;
+        public static final int JERK_FAST = 1000;
         public static final double GEAR_RATIO = 20.25/1.0;
         public static final double FEED_FORWARD = 1;
+
+        public static final int CRUISE_VELOCITY_SLOW = 5;
+        public static final int ACCELERATION_SLOW = 1;
+        public static final int JERK_SLOW = 10;
+
+        public static final double PIVOT_SPEED = 10.0; //change later WHEN TESTING
+        public static final double PIVOT_SLOW_SPEED = 5.0;//change later WHEN TESTING
         
 
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 1.0/360.0;
         public static final double MAGNET_OFFSET = -0.456787109375;
 
-        public static final double DOWN_POSITION = 165 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 65 * DEGREES_TO_REVS;
-        public static final double SAFE = 40 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
+        public static final double SAFE = 5 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 9;
-        public static final double EATER_MOTOR_SPEED = -120.0;
+        public static final double EATER_MOTOR_SPEED = 120.0;
     }
 
     public static class Indexer{
@@ -126,7 +141,7 @@ public final class Constants {
         public static final double JERK = 600.0;
         public static final double FEED_FORWARD = 0.0;
 
-        public static final int MOTOR_ID = 10;
+        public static final int MOTOR_ID = 9;
         public static final int CRUISE_VELOCITY = 30;//10, 160
         public static final int ACCELERATION = 210;//240
         public static final int CURRENT_LIMIT = 40;

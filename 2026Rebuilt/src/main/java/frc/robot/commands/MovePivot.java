@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix6.controls.VelocityVoltage;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Pivot;
 
@@ -12,10 +14,12 @@ public class MovePivot extends Command {
   /** Creates a new MovePivot. */
   private Pivot pivot;
   private double targetPosition;
+  private boolean isSlow;
   
-   public MovePivot(Pivot pivot, double targetPosition ) {
+   public MovePivot(Pivot pivot, double targetPosition, boolean isSlow) {
       this.pivot = pivot;
       this.targetPosition = targetPosition;
+      this.isSlow = isSlow;
       addRequirements(this.pivot);
    }
     // Use addRequirements() here to declare subsystem dependencies.
@@ -28,12 +32,13 @@ public class MovePivot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    pivot.moveTo(targetPosition);
+    pivot.moveTo(targetPosition, isSlow);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override

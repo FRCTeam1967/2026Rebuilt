@@ -12,6 +12,7 @@ import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import dev.doglog.DogLog;
@@ -69,6 +70,7 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
   
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -82,7 +84,7 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("rio");
+    public static final CANBus CANBus = new CANBus("CANivore");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
@@ -140,6 +142,7 @@ public class RobotContainer {
         //for vision servoing
         driveAtAngle.HeadingController.setPID(8, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+
     }
     
     private void configureBindings() {
@@ -256,12 +259,37 @@ public class RobotContainer {
         if (visabelle.isAligned()) {
             new RunCommand (() -> candle.setControl(greenSolid));
         }
+             swerve.applyRequest(() ->
+                driveAtAngle.withTargetDirection(
+                    new Rotation2d(visabelle.getAngleToHub()) //locks onto angle to hub, trnaslates around it
+                )
+                .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+             )
+         );
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
-        m_driverController.start().onTrue(swerve.runOnce(swerve::seedFieldCentric));
-
         // yaw setter --> 0 faces hub 
+        m_driverController.x().onTrue(new SequentialCommandGroup(
+            // ROTATION2D IS IN **RADIANS!!!!**
+            // SET YAW IS IN **DEGREES!!!!**
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
+                ),
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
+                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
+                ),
+                () -> ally.get() == Alliance.Blue
+            )
+        ));
         m_driverController.x().onTrue(new SequentialCommandGroup(
             // ROTATION2D IS IN **RADIANS!!!!**
             // SET YAW IS IN **DEGREES!!!!**
@@ -338,9 +366,9 @@ public class RobotContainer {
                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                     ) 
                 ),
-                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
             ),
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
            )
         ); //TODO: add defense mode while the robot is shooting
 
@@ -376,6 +404,7 @@ public class RobotContainer {
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
         
         //EJECT HOPPER
+        //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
             new ParallelCommandGroup(
                 new RunFeeder(feeder, 5),
@@ -386,10 +415,16 @@ public class RobotContainer {
         //INTAKE
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
-            new RunFeeder(feeder, 5),
             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+          )
+        );
+
+        // EJECT INTAKE
+        m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+          new ParallelCommandGroup( //wasnt there before
+            new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
           )
         );
 
@@ -409,14 +444,29 @@ public class RobotContainer {
         );
         //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
-        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION));
-        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
+        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
         //CLIMB
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
 
+    }
+
+    private double limelight_aim_proportional() {        
+        double kP = 0.02; //0.035
+        double targetingAngularVelocity = 0.0; 
+        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
+        // your limelight 3 feed, tx should return roughly 31 degrees.
+
+        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
+
+        // convert to radians per second for our drive method
+        targetingAngularVelocity *= MaxAngularRate;
+        //invert since tx is positive when the target is to the right of the crosshair
+        targetingAngularVelocity *= -1.0;
+        return targetingAngularVelocity;
     }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
