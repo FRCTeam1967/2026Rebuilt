@@ -220,10 +220,26 @@ public final class Constants {
          */
         public static boolean enableCTRELogging = true;
 
+        /**
+         * Control aspects of DogLog logging
+         */
         public static boolean enableExtras = true;      // Enable "extras"
         public static boolean capturePDH = true;        // Requires "extras"
         public static boolean captureDS = true;         // Capture driver station input (joystick, etc.)
         public static boolean captureNT = false;        // Capture network table values -- probably expensive, but some teams do this
         public static boolean captureConsole = true;    // Capture console output like loop overruns
+
+        /**
+         * Control aspects of CTRE logging.
+         */
+        public static class CTRE {
+            /**
+             * Is NetworkTable publishing enabled. CTRE default is true, but this could be expensive. They log via 
+             * SignalLogger too, and we log some of the same state via DogLog, so we should disable this if we're
+             * still seeing NT publishing cause loop overruns when we've disabled our NT logging.
+             */
+            public static boolean enableNTPublishing = true; 
+    
+        }
     }
 }
