@@ -38,7 +38,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
   private static final double AREA_THRESHOLD = 0.1;
 
-  private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+  private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
   private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
   private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
