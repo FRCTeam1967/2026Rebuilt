@@ -17,7 +17,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;

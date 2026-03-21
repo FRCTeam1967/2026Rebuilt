@@ -2,21 +2,17 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.RainbowAnimation;
-import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.StripTypeValue;
-import com.google.flatbuffers.Constants;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
 import com.ctre.phoenix6.controls.LarsonAnimation;
 import com.ctre.phoenix6.signals.LarsonBounceValue;
 
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
