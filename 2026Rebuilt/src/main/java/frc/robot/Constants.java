@@ -7,7 +7,6 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.generated.TunerConstants;
 
 public final class Constants {
-
     public static class OperatorConstants{
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
@@ -44,21 +43,24 @@ public final class Constants {
         public static final double OFFSET = 0.0; //-108.45703125
         public static final double PERCENT_UP = 0.5;
 
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class LED {
         public static final int CANDLE_ID = 23;
+
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Yeeter {
         public static final int YEETER_MOTOR1_ID = 37; 
         public static final int YEETER_MOTOR2_ID = 18; 
 
-        public static final double kP = 0.7; // placeholder //0.8 5ft
+        public static final double kP = 5.0; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
         public static final double kD = 0.0; // placeholder
-        public static final double kS = 0.0; // placeholder
-        public static final double kV = 0.13; // placeholder
+        public static final double kS = 1.3; // placeholder
+        public static final double kV = 0.08; // placeholder
         public static final double kA = 0.0; // placeholder
 
         public static final double CRUISE_VELOCITY = 100.0; // placeholder
@@ -67,13 +69,15 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 67.5; //81; //rotations per second
+        public static final double YEETER_SPEED = 67.0; //81; //rotations per second
         public static final double YEETER_ACCELERATION = 500.0; //500
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
         //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
 
         public static final double GEAR_RATIO = 1.333; 
+
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Pivot{
@@ -113,6 +117,7 @@ public final class Constants {
         public static final double DEGREES_TO_REVS = 1.0/360.0;
         public static final double MAGNET_OFFSET = -0.456787109375;
 
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
         public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
@@ -120,13 +125,15 @@ public final class Constants {
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 9;
-        public static final double EATER_MOTOR_SPEED = 120.0;
+        public static final double EATER_MOTOR_SPEED = -120.0;
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
         public static final int INDEXER_SPEED = 10;
 
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Feeder{
@@ -134,6 +141,8 @@ public final class Constants {
         public static final double FEEDER_SPEED = -40.0; //-20 //-10
 
         public static final double PREP_FEEDER = 50.0; 
+
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
   
     public static class Climb {
@@ -167,6 +176,8 @@ public final class Constants {
         public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
         public static final int BOTTOM_SENSOR_CHANNEL = 8;
         public static final int TOP_SENSOR_CHANNEL = 9;
+
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Visabelle {
@@ -192,5 +203,34 @@ public final class Constants {
 
         public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
         public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
-     }
+
+        public static final boolean verboseLogging = false || Logging.verboseLogging;
+    }
+
+    public static class Drivetrain {
+        public static final boolean verboseLogging = true;
+    }
+
+    public static class Logging {
+        /**
+         * Enabling this will enable DogLog.log(). Setting it to false will cause all logging to be disabled.
+         */
+        public static boolean enabled = true;
+
+        /**
+         * Enabling this will enable verbose logging across all subsystems
+         */
+        public static boolean verboseLogging = true;
+
+        /**
+         * Enabling this will start the CTRE signal logger.
+         */
+        public static boolean enableCTRELogging = true;
+
+        public static boolean enableExtras = true;      // Enable "extras"
+        public static boolean capturePDH = true;        // Requires "extras"
+        public static boolean captureDS = true;         // Capture driver station input (joystick, etc.)
+        public static boolean captureNT = false;        // Capture network table values -- probably expensive, but some teams do this
+        public static boolean captureConsole = true;    // Capture console output like loop overruns
+    }
 }

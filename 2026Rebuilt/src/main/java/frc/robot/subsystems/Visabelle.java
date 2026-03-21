@@ -6,58 +6,27 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;  
-import frc.robot.generated.TunerConstants;
 import frc.robot.Constants;
-
-import frc.robot.Constants;
-
-
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
-import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-
+import java.util.function.BooleanSupplier;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Visabelle extends SubsystemBase {
   private double maxAngularRate;
   private SwerveOnTheseBows swerve;
-
-  private DoublePublisher visionDist;
-  //private DoubleSupplier visionDist;
-  private DoublePublisher visionBlueDist;
-  private DoublePublisher visionRedDist;
-  private BooleanPublisher allianceIsBlue;
-
   private Translation2d hubPose;
   
   
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
-
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable table = inst.getTable("vision distances");
-    visionDist = table.getDoubleTopic("dist to hub").publish();
-    visionBlueDist = table.getDoubleTopic("dist to blue hub").publish();
-    visionRedDist = table.getDoubleTopic("dist to red hub").publish();
-    allianceIsBlue = table.getBooleanTopic("allianceIsBlue").publish();
   }
 
   public double limelight_aim_proportional() {        
@@ -76,14 +45,13 @@ public class Visabelle extends SubsystemBase {
 
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
-    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
-    //hubPose = new Translation2d(11.914324760437012, 4.033950328826904);
+    //FOR SIMULATION:
+    //hubPose = Constants.Visabelle.BLUE_HUB_POSE;
+    //hubPose = Constants.Visabelle.RED_HUB_POSE;
 
     if (alliance == Alliance.Blue) {
       hubPose = Constants.Visabelle.BLUE_HUB_POSE;
-      hubPose = Constants.Visabelle.BLUE_HUB_POSE;
     } else {
-      hubPose = Constants.Visabelle.RED_HUB_POSE;
       hubPose = Constants.Visabelle.RED_HUB_POSE;
     }
 
@@ -96,9 +64,11 @@ public class Visabelle extends SubsystemBase {
     Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
-    visionDist.set(eucDist);
     
-    DogLog.log("dist", eucDist);
+    DogLog.log("Visabelle/dist from hub", eucDist);
+    if (Constants.Visabelle.verboseLogging) {
+      DogLog.log("Visabelle/target hub", hubPose);
+    }
     
     return eucDist;
   }
@@ -113,18 +83,40 @@ public class Visabelle extends SubsystemBase {
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
 
-    if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
-      return (angle+Math.PI);
-    }
-    else {
-      return (angle);
+    if (Constants.Visabelle.verboseLogging) {
+      DogLog.log("Visabelle/raw angle to hub", angle);
     }
 
-    //return (angle + Math.PI);
+    if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+      angle += Math.PI;
+    }
+
+    DogLog.log("Visabelle/angle to hub", angle);
+    return (angle);
   }
 
   public boolean isAligned() {
     return (getAngleToHub() <= 0.0872665); //5 degrees to radians
+  }
+
+  public BooleanSupplier getIsAligned() {
+    return (() -> getAngleToHub() <= 0.0872665); //5 degrees to radians
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
+    CameraServer.addCamera(httpCamera1);
+    tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
+        .withSize(3, 2);
+
+    HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
+    CameraServer.addCamera(httpCamera2);
+    tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
+        .withSize(3, 2);
+
+    tab.addBoolean("LL isAligned", this.getIsAligned())
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
+        .withSize(1, 1);
   }
 
   @Override
@@ -140,9 +132,6 @@ public class Visabelle extends SubsystemBase {
       }
     }
 
-    Translation2d ourPose = swerve.getPose().getTranslation();
-
-    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
-    visionDist.set(eucDist);
+    this.getDisFromHub();
   }
 }

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -18,6 +19,7 @@ import frc.robot.RobotContainer;
 public class Eater extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
+  private final DoubleSubscriber intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
   
   /** Creates a new Intake. */
   public Eater() {
@@ -39,7 +41,9 @@ public class Eater extends SubsystemBase {
    * @param speed - sets motor to speed
    */
   public void setMotor(double speed) {
-    motor.set(speed);
+    //motor.set(speed);
+    motor.set(intakeSpeed.get());
+    DogLog.log("Eater/intake desired speed", intakeSpeed.get());
   }
   
   /**
@@ -49,13 +53,10 @@ public class Eater extends SubsystemBase {
     motor.stopMotor();
   }
 
-  public void logVoltage() {
-    DogLog.log("Eater Voltage", motor.getStatorCurrent().getValueAsDouble());
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
   }
 }
 

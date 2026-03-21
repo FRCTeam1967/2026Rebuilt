@@ -129,11 +129,12 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        theHood.configDashboard(matchTab);
-        yeeter.configDashboard(matchTab);
-        pivot.configDashboard(matchTab);
-        configLLTab(limelightTab, fieldTab);
-        climb.configDashboard(fieldTab);
+        visabelle.configDashboard(matchTab);
+        //theHood.configDashboard(matchTab);
+        //yeeter.configDashboard(matchTab);
+        //pivot.configDashboard(matchTab);
+        //configLLTab(limelightTab, fieldTab);
+        //climb.configDashboard(fieldTab);
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
@@ -312,7 +313,7 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
@@ -342,20 +343,20 @@ public class RobotContainer {
             new SequentialCommandGroup( 
             new ParallelCommandGroup(
                 new ParallelCommandGroup(
-                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION), //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                    new RunCommand (() -> candle.setControl(yellowBlink))
+                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    //new RunCommand (() -> candle.setControl(yellowBlink))
                 ),
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
                     
-                    new ParallelCommandGroup( //green
-                        new SequentialCommandGroup(
-                            new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                            new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        )
-                    ),
+                    // new ParallelCommandGroup( //green
+                    //     new SequentialCommandGroup(
+                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                    //     )
+                    // ),
 
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                     //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue

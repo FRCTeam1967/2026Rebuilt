@@ -21,6 +21,7 @@ import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -45,41 +46,19 @@ public class Yeeter extends SubsystemBase {
   private TalonFX motor2;
   private final RobotContainer m_robotContainer; 
 
-   //private TalonFX flywheelMotor2;
+  //private TalonFX flywheelMotor2;
   //private Visabelle visabelle;
 
   private final CANBus canbus = RobotContainer.CANBus;
 
   private InterpolatingDoubleTreeMap speedTable;
 
+  private final DoubleSubscriber yeeterAcceleration = DogLog.tunable("Yeeter/yeeterAcceleration", Constants.Yeeter.YEETER_ACCELERATION);
+  private final DoubleSubscriber cruiseVelocity = DogLog.tunable("Yeeter/cruiseVelocity", Constants.Yeeter.CRUISE_VELOCITY);
+  private final DoubleSubscriber mmAcceleration = DogLog.tunable("Yeeter/mmAcceleration", Constants.Yeeter.ACCELERATION);
+  //private final DoubleSubscriber feedForward = DogLog.tunable("Yeeter/feedForward", 5.0);
+
   private Follower followerRequest = new Follower(Constants.Yeeter.YEETER_MOTOR1_ID, MotorAlignmentValue.Opposed);
-
-  // private static final double kSimDt = 0.02;
-  // private double simRotorPosRot = 0.0;
-
-
-  // private final DCMotorSim flywheelSim = new DCMotorSim(
-  //     LinearSystemId.createDCMotorSystem(
-  //         DCMotor.getKrakenX60Foc(1),
-  //         0.001,
-  //         Constants.FlywheelShooter.GEAR_RATIO
-  //     ),
-  //     DCMotor.getKrakenX60Foc(1)
-  // );
-  // private final Mechanism2d shooterMech = new Mechanism2d(2, 2);
-  // private final MechanismRoot2d shooterRoot = shooterMech.getRoot(“shooterRoot”, 1, 1);
-
-  // // A “spoke” that rotates to show the flywheel spinning
-  // private final MechanismLigament2d flywheelSpoke =
-  //     shooterRoot.append(new MechanismLigament2d(
-  //         “flywheelSpoke”,
-  //         0.8,  // length
-  //         0.0,  // initial angle (deg)
-  //         6,
-  //         new Color8Bit(Color.kOrange)
-  //     ));
-
-  // private double spokeAngleDeg = 0.0;
 
   /** Creates a new FlywheelShooter. */
   public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
@@ -87,21 +66,63 @@ public class Yeeter extends SubsystemBase {
     motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID, canbus);
     motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID, canbus);
     m_robotContainer = robotContainer; 
-    // flywheelMotor2 = new Follower(Constants.FlywheelShooter.FLYWHEELSHOOTER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = Constants.Yeeter.kS;
-    slot0Configs.kV = Constants.Yeeter.kV;
+    // slot0Configs.kS = Constants.Yeeter.kS;
+    // slot0Configs.kV = Constants.Yeeter.kV;
+    // slot0Configs.kA = Constants.Yeeter.kA;
+    // slot0Configs.kP = Constants.Yeeter.kP;
+    // slot0Configs.kI = Constants.Yeeter.kI;
+    // slot0Configs.kD = Constants.Yeeter.kD;
+
+    DogLog.tunable("Yeeter/kP", slot0Configs.kP, 
+      newP -> {
+        motor1.getConfigurator().apply(slot0Configs.withKP(newP));
+        motor2.setControl(followerRequest);
+      }
+    );
+
+    DogLog.tunable("Yeeter/kI", slot0Configs.kI, 
+      newI -> {
+        motor1.getConfigurator().apply(slot0Configs.withKI(newI));
+        motor2.setControl(followerRequest);
+      }
+    );
+
+    DogLog.tunable("Yeeter/kD", slot0Configs.kD, 
+      newD -> {
+        motor1.getConfigurator().apply(slot0Configs.withKD(newD));
+        motor2.setControl(followerRequest);
+      }
+    );
+
+    DogLog.tunable("Yeeter/kS", slot0Configs.kS, 
+      newS -> {
+        motor1.getConfigurator().apply(slot0Configs.withKS(newS));
+        motor2.setControl(followerRequest);
+      }
+    );
+
+    DogLog.tunable("Yeeter/kV", slot0Configs.kV, 
+      newV -> {
+        motor1.getConfigurator().apply(slot0Configs.withKV(newV));
+        motor2.setControl(followerRequest);
+      }
+    );
+
+    DogLog.tunable("Yeeter Speed", Constants.Yeeter.YEETER_SPEED);
+
     slot0Configs.kA = Constants.Yeeter.kA;
-    slot0Configs.kP = Constants.Yeeter.kP;
-    slot0Configs.kI = Constants.Yeeter.kI;
-    slot0Configs.kD = Constants.Yeeter.kD;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Yeeter.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.Yeeter.ACCELERATION;
+    // motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Yeeter.CRUISE_VELOCITY;
+    // motionMagicConfigs.MotionMagicAcceleration = Constants.Yeeter.ACCELERATION;
+
+    motionMagicConfigs.MotionMagicCruiseVelocity = cruiseVelocity.get();
+    motionMagicConfigs.MotionMagicAcceleration = mmAcceleration.get();
+
     //motionMagicConfigs.MotionMagicJerk = Constants.FlywheelShooter.JERK;
 
     talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
@@ -109,12 +130,7 @@ public class Yeeter extends SubsystemBase {
     motor1.setNeutralMode(NeutralModeValue.Coast);
     motor2.setNeutralMode(NeutralModeValue.Coast);
 
-    //visabelle = this.visabelle;
-
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    //SmartDashboard.putData(“ShooterMech2d”, shooterMech);
-
 
     motor2.setControl(followerRequest);
 
@@ -129,19 +145,29 @@ public class Yeeter extends SubsystemBase {
    * @param velocity
    * @param acceleration
    */
-  public void setVelocity(DoubleSupplier velocity, double acceleration) {
-    MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity.getAsDouble())
-      .withAcceleration(acceleration);
-      //.withFeedForward(5.0);
+  public void setVelocity(DoubleSupplier velocitySupplier, double acceleration) {
+    // velocitySupplier should probably stored as a member field and then used in reachedYeeterSpeed() rather than 
+    // having reachedYeeterSpeed() reach into robot container to get the Visabelle. You'd probably want to have
+    // stopMotor() then set velocitySupplier to NULL or set it to a DoubleSupplier that returns a constant value of 0.
 
-    // MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
-    //   .withFeedForward(0.12); //kS value ?
+    double velocity = velocitySupplier.getAsDouble();
+
+    // MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
+    //   .withAcceleration(yeeterAcceleration.get());
+      //.withFeedForward(5.0);
+      //.withFeedFoward(feedForward.get());
+
+    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(-velocity)
+    .withAcceleration(yeeterAcceleration.get()) ; 
+    //.withFeedForward(0.12); //kS value ?
 
     // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
     //   .withAcceleration(acceleration);
     // //   //.withFeedForward(5.0);
 
-    motor1.setControl(requestOne);
+    DogLog.log("Yeeter/target speed (set)", -velocity);
+
+    motor1.setControl(torqueRequest);
     motor2.setControl(followerRequest); //TODO: this is what was in Sunday's code. should we be setting two different control requests on the same motor?
   }
 
@@ -149,7 +175,11 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
-    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()));
+    // Since we're using a double supplier, the value we get here may be different than the value we got in setVelocity().
+    double necessarySpeed = Constants.Yeeter.YEETER_SPEED;
+    //double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
+    DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
+    return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= necessarySpeed);
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
 
@@ -167,6 +197,7 @@ public class Yeeter extends SubsystemBase {
    * stops both motors, obviously :)
    */
   public void stopMotor() {
+    DogLog.log("Yeeter/target speed", 0);
     motor1.stopMotor();
     motor2.setControl(followerRequest);
   }
@@ -179,12 +210,12 @@ public class Yeeter extends SubsystemBase {
     return (motor.getVelocity().getValueAsDouble());
   }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
-    tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
-    tab.addDouble("YeeterSpeed2", () -> getMotorVelocity(motor2));
-    //tab.addDouble("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
+  //   // tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
+  //   // tab.addDouble("YeeterSpeed2", () -> getMotorVelocity(motor2));
+  //   //tab.addDouble("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
+  // }
 
   //TODO: fill in these values
   /**
@@ -192,13 +223,13 @@ public class Yeeter extends SubsystemBase {
    */
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
-    speedTable.put(1.524+1.02235, 64.0); //5ft //TESTED
-    speedTable.put(1.676+1.02235, 65.0); //5.5ft //TESTED
-    speedTable.put(1.8288+1.02235, 66.0); //6ft //TESTED
-    speedTable.put(2.1366+1.02235, 67.0);//7ft //TESTED
+    speedTable.put(1.524+1.02235, 64.0); //5ft //UNTESTED
+    speedTable.put(1.676+1.02235, 65.0); //5.5ft //UNTESTED
+    speedTable.put(1.9812+1.02235, 67.0); //6.5ft //TESTED
+    speedTable.put(2.1366+1.02235, 67.0);//7ft //UNTESTED
     speedTable.put(2.286+1.02235, 69.0); //7.5 ftUNTESTED
-    speedTable.put(2.4384+1.02235, 69.5); //8ft //78
-    // speedTable.put(3.353+1.02235, 79.0); //11ft // change speed
+    speedTable.put(2.4384+1.02235, 69.5); //8ft //78 UNTESTED
+    // speedTable.put(3.353+1.02235, 79.0); //11ft // UNTESTED
 
     // speedTable.put(3.3288, 68.0); //6 feet
     // speedTable.put(3.9384, 75.0); //8 feet
@@ -210,24 +241,27 @@ public class Yeeter extends SubsystemBase {
    */
   //TODO: call this in robot container when setting speed
   public double getNecessarySpeed(DoubleSupplier distanceToHub) {
-    double speed = speedTable.get(distanceToHub.getAsDouble());
-    DogLog.log("target", speed);
+    double distance = distanceToHub.getAsDouble();
+    double speed = speedTable.get(distance);
+    DogLog.log("Yeeter/distance", distance);
+    DogLog.log("Yeeter/target", speed);
     return speed;
-  }
-
-  public void logYeeterSpeeds(){
-    DogLog.log("YeeterSpeed1", getMotorVelocity(motor1));
-    DogLog.log("YeeterSpeed2", getMotorVelocity(motor2));
   }
 
   @Override
   public void periodic() {
+    DogLog.log("Yeeter/Speed1", getMotorVelocity(motor1));
+    DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
+
+    if (Constants.Yeeter.verboseLogging) {
+      DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed());
+    }
   }
 
   @Override
   public void simulationPeriodic() {
-
-
     // if (RobotState.isDisabled()) {
     //   stopMotor();
 
@@ -277,10 +311,5 @@ public class Yeeter extends SubsystemBase {
 
     // sim1.setRawRotorPosition(simRotorPosRot);
     // sim2.setRawRotorPosition(simRotorPosRot);
-
-
-    
-
-    
   }
 }

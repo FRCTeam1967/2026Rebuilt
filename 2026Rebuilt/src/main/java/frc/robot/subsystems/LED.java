@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.StripTypeValue;
+import com.google.flatbuffers.Constants;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
 import com.ctre.phoenix6.controls.LarsonAnimation;
