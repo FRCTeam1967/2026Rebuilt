@@ -232,7 +232,7 @@ public class RobotContainer {
         //snap to hub
         m_driverController.leftBumper().whileTrue(
             swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(new Rotation2d(Math.PI))
+                driveAtAngle.withTargetDirection(Rotation2d.kPi)
                     .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             )
@@ -250,16 +250,16 @@ public class RobotContainer {
             // SET YAW IS IN **DEGREES!!!!**
             new ConditionalCommand(
                 new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kPi)),
                     new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kPi)))        
                 ),
                 new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
+                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kZero)),
                     new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
+                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
                 ),
                 () -> ally.get() == Alliance.Blue
             )
@@ -314,35 +314,37 @@ public class RobotContainer {
 
         m_operatorController.leftTrigger().whileTrue(
             new SequentialCommandGroup( 
-            new ParallelCommandGroup(
                 new ParallelCommandGroup(
-                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                    //new RunCommand (() -> candle.setControl(yellowBlink))
-                ),
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
-                new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                    
-                    // new ParallelCommandGroup( //green
-                    //     new SequentialCommandGroup(
-                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                    //     )
-                    // ),
-
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                    //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
-
-                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
                     new ParallelCommandGroup(
-                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                        new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                    ) 
+                        new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                        //new RunCommand (() -> candle.setControl(yellowBlink))
+                    ),
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+                    new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                        
+                        // new ParallelCommandGroup( //green
+                        //     new SequentialCommandGroup(
+                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                        //     )
+                        // ),
+
+                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                        new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                        new ParallelCommandGroup(
+                            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+                        ) 
+                    ),
+
+                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                 ),
-                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ),
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
+                
+                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
            )
         ); //TODO: add defense mode while the robot is shooting
 
@@ -391,7 +393,8 @@ public class RobotContainer {
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
-            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
+            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
           )
         );
 

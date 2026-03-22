@@ -105,32 +105,56 @@ public final class Constants {
 
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 1.0/360.0;
-        public static final double MAGNET_OFFSET = -0.456787109375;
+        public static final double MAGNET_OFFSET = -0.451904296875;
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
         public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 100 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 70 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
-        public static final int EATER_MOTOR_ID = 9;
+        public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -120.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final int INDEXER_SPEED = 10;
+        public static final int INDEXER_SPEED = 30;
+
+        public static final double kP = 1.5; // placeholder //0.8 5ft
+        public static final double kI = 0.0; // placeholder
+        public static final double kD = 0.0; // placeholder
+        public static final double kS = 0.12; // placeholder
+        public static final double kV = 0.0; // placeholder
+        public static final double kA = 0.0; // placeholder
+
+        public static final double CRUISE_VELOCITY = 50.0; // placeholder
+        public static final double ACCELERATION = 100.0;   // placeholder
+        public static final double JERK = 0.0;           // placeholder
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Feeder{
-        public static final int FEEDER_MOTOR_ID = 13;
-        public static final double FEEDER_SPEED = -40.0; //-20 //-10
+        public static final int FEEDER_MOTOR_ID = 36;
+        public static final double FEEDER_SPEED = 100.0; //-20 //-10
 
-        public static final double PREP_FEEDER = 50.0; 
+        public static final double PREP_FEEDER = -50.0; 
+
+        public static final double INTAKE_FEEDER = -10.0; 
+
+        public static final double kP = 1.5; // placeholder //0.8 5ft
+        public static final double kI = 0.0; // placeholder
+        public static final double kD = 0.0; // placeholder
+        public static final double kS = 0.12; // placeholder
+        public static final double kV = 0.0; // placeholder
+        public static final double kA = 0.0; // placeholder
+
+        public static final double CRUISE_VELOCITY = 50.0; // placeholder
+        public static final double ACCELERATION = 100.0;   // placeholder
+        public static final double JERK = 0.0;           // placeholder
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
@@ -218,7 +242,7 @@ public final class Constants {
         public static boolean enableCTRELogging = true;
 
         public static boolean enableExtras = true;      // Enable "extras"
-        public static boolean capturePDH = true;        // Requires "extras"
+        public static boolean capturePDH = false;        // Requires "extras"
         public static boolean captureDS = true;         // Capture driver station input (joystick, etc.)
         public static boolean captureNT = false;        // Capture network table values -- probably expensive, but some teams do this
         public static boolean captureConsole = true;    // Capture console output like loop overruns

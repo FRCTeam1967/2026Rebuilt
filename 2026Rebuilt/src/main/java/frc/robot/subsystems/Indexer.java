@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
@@ -20,17 +22,31 @@ public class Indexer extends SubsystemBase {
 
   /** Creates a new Indexer. */
   public Indexer() {
-    motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Indexer.INDEXER_MOTOR_ID);
 
-    var talonFXConfigurator = motor.getConfigurator();
-    var motorConfigs = new MotorOutputConfigs();
+    var talonFXConfigs = new TalonFXConfiguration();
 
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    var motionMagicConfigs = talonFXConfigs.MotionMagic;
+
+    var slot0Configs = talonFXConfigs.Slot0;
+    slot0Configs.kS = Constants.Indexer.kS;
+    slot0Configs.kV = Constants.Indexer.kV;
+    slot0Configs.kA = Constants.Indexer.kA;
+    slot0Configs.kP = Constants.Indexer.kP;
+    slot0Configs.kI = Constants.Indexer.kI;
+    slot0Configs.kD = Constants.Indexer.kD;
+
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Indexer.CRUISE_VELOCITY;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.Indexer.ACCELERATION;
+    motionMagicConfigs.MotionMagicJerk = Constants.Indexer.JERK;
+    
     var limitConfigs = new CurrentLimitsConfigs();
     limitConfigs.StatorCurrentLimit = 40;
     limitConfigs.StatorCurrentLimitEnable = true;
 
-    motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
-    talonFXConfigurator.apply(motorConfigs);
+    motor.getConfigurator().apply(talonFXConfigs);
   }
 
   /**
@@ -39,6 +55,12 @@ public class Indexer extends SubsystemBase {
   public void setMotor(double speed){
     motor.set(speed);
     DogLog.log("indexer desired speed", speed);
+  }
+
+  public void setVelocity(double speed) {
+    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
+
+    motor.setControl(request);
   }
 
   /**

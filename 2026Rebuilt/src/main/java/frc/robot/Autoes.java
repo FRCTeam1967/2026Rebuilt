@@ -103,7 +103,7 @@ public class Autoes {
     );
 
     goBack.done().onTrue(
-      score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION))
+      score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false))
     );
     // score.active().onTrue(
     //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
@@ -149,7 +149,7 @@ public class Autoes {
 
     otToO.active().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
@@ -216,7 +216,7 @@ public class Autoes {
 
     trenchToCenter.active().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
@@ -320,7 +320,7 @@ public class Autoes {
 
     trenchNeutral.active().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
       )
     );
     trenchNeutral.done().onTrue(intake1.cmd());
@@ -409,7 +409,7 @@ public class Autoes {
     // WITH EVENT MARKER
     shootFromABitBack.atPose("Deploy Eater", 1.0, Math.PI/4).onTrue(
       Commands.sequence(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION).withTimeout(3),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(3),
         Commands.parallel(
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0))
@@ -723,7 +723,7 @@ private AutoRoutine dt_tw() {
     
     trenchToCenterEM.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(4)
@@ -818,7 +818,7 @@ private AutoRoutine dt_tw() {
     );
     trenchToDepot.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(6)
@@ -867,7 +867,7 @@ private AutoRoutine dt_tw() {
     
     depotEater.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)
@@ -902,7 +902,7 @@ private AutoRoutine dt_tw() {
     
     Eater.atPose("Deploy Eater", 0.02,Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3) // might have to edit timeout
@@ -936,7 +936,7 @@ private AutoRoutine dt_tw() {
     );
     outpost.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
        Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)

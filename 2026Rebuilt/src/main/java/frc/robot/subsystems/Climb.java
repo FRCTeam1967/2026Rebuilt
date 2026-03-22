@@ -66,7 +66,7 @@ public class Climb extends SubsystemBase {
 
 
   public Climb() {
-    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID);
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
@@ -258,10 +258,11 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble()) < Constants.Climb.ERROR_THRESHOLD);
+    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
+    DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
     DogLog.log("Climb/target rotations", rotations);
-    DogLog.log("Climb/rotations", motor.getRotorPosition().getValueAsDouble());
-    DogLog.log("Climb/inches", motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    DogLog.log("Climb/rotations", rotorPosition);
+    DogLog.log("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
     DogLog.log("Climb/bottom sensor", getBottomSensor());
     DogLog.log("Climb/top sensor", getTopSensor());
 
