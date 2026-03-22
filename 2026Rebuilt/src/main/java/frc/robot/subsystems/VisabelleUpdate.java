@@ -61,13 +61,14 @@ public class VisabelleUpdate extends SubsystemBase {
     // if (estimate.tagCount == 1 && estimate.avgTagDist < DIST_THRESHOLD)
     //     return true;
 
-    if (estimate.rawFiducials[0].ambiguity > 0.9)
+    if (estimate.rawFiducials.length >= 1) {
+      if (estimate.rawFiducials[0].ambiguity > 0.9)
         return true;
-
+    }
+    
     return false;
   }
 
-  // TODO: add conditional to add either front or back limelight
   public void setFirstVisionPose() {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
@@ -126,8 +127,17 @@ public class VisabelleUpdate extends SubsystemBase {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
     
-    frontAmbiguity = mt2_front.rawFiducials[0].ambiguity;
-    backAmbiguity = mt2_back.rawFiducials[0].ambiguity;
+    if (mt2_front.rawFiducials.length >= 1) {
+      frontAmbiguity = mt2_front.rawFiducials[0].ambiguity;
+    } else {
+      frontAmbiguity = 0.5;
+    }
+    
+    if (mt2_back.rawFiducials.length >= 1) {
+      backAmbiguity = mt2_back.rawFiducials[0].ambiguity;
+    } else {
+      backAmbiguity = 0.5;
+    }
 
     //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
 
@@ -180,7 +190,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.2,0.2,9999999)); //TODO: tune?
+      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999)); //TODO: tune?
 
       swerve.addVisionMeasurement(
         mt2_front.pose,
@@ -191,7 +201,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only back
     else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.2,0.2,9999999));
+      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
 
       swerve.addVisionMeasurement(
         mt2_back.pose,
@@ -207,14 +217,14 @@ public class VisabelleUpdate extends SubsystemBase {
       // trust front more
       if (frontAmbiguity < backAmbiguity) {
         // add front
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5,9999999));
         
         swerve.addVisionMeasurement(
           mt2_front.pose,
           mt2_front.timestampSeconds);
 
         // add back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(999,999,9999999)); //TODO: what is the range of the values?
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999)); //TODO: what is the range of the values?
         
         swerve.addVisionMeasurement(
           mt2_back.pose,
@@ -229,14 +239,14 @@ public class VisabelleUpdate extends SubsystemBase {
       // else if (mt2_back.tagCount > mt2_front.tagCount) {
       else if (backAmbiguity < frontAmbiguity) {
         // front
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(999,999,9999999));
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999));
         
         swerve.addVisionMeasurement(
           mt2_front.pose,
           mt2_front.timestampSeconds);
 
         // back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5,9999999));
         
         swerve.addVisionMeasurement(
           mt2_back.pose,
