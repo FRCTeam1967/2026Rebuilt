@@ -4,32 +4,25 @@
 
 
 package frc.robot;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
-import edu.wpi.first.wpilibj.LEDPattern;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AlignTowerPose;
 import frc.robot.commands.MoveClimbHalfwayDown;
 import frc.robot.commands.MoveClimbUp;
@@ -38,8 +31,6 @@ import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunYeeter;
 import frc.robot.commands.RunIndexer;
 import frc.robot.commands.RunEater;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Visabelle;
 
 /** Add your docs here. */
 public class Autoes {
@@ -88,6 +79,11 @@ public class Autoes {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
+    private AutoRoutine hubScore() {
+    AutoRoutine routine = autoFactory.newRoutine("HUBSCORE");
+    AutoTrajectory goBack = routine.trajectory("ShootFromABitBack");
+    AutoTrajectory score  = routine.trajectory("H_Shoot");
+    double initialOrientation = goBack.getInitialPose().get().getRotation().getDegrees();
 
   private AutoRoutine testDis() {
     AutoRoutine routine = autoFactory.newRoutine("TESTDIS");
@@ -215,7 +211,7 @@ public class Autoes {
 
     otToO.active().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
@@ -525,7 +521,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     trenchToCenter.done().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
       )
     );
@@ -702,7 +698,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     // WITH EVENT MARKER
     shootFromABitBack.atPose("Deploy Eater", 1.0, Math.PI/4).onTrue(
       Commands.sequence(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION).withTimeout(3),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(3),
         Commands.parallel(
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0))
@@ -1016,7 +1012,7 @@ private AutoRoutine dt_tw() {
     
     trenchToCenterEM.atPose("Deploy Eater", 0.2, Math.PI/4).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(4)
@@ -1111,7 +1107,7 @@ private AutoRoutine dt_tw() {
     );
     trenchToDepot.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(6)
@@ -1160,7 +1156,7 @@ private AutoRoutine dt_tw() {
     
     depotEater.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)
@@ -1195,7 +1191,7 @@ private AutoRoutine dt_tw() {
     
     Eater.atPose("Deploy Eater", 0.02,Math.PI/6).onTrue(
       Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3) // might have to edit timeout
@@ -1229,7 +1225,7 @@ private AutoRoutine dt_tw() {
     );
     outpost.atPose("Deploy Eater", 0.02, Math.PI/6).onTrue(
        Commands.parallel(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
         new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
         new RunIndexer(m_robotContainer.indexer, 10.0)
       ).withTimeout(3)

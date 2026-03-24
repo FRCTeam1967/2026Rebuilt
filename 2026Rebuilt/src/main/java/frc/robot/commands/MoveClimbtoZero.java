@@ -34,6 +34,7 @@ public class MoveClimbtoZero extends Command {
   @Override
   public void end(boolean interrupted) {
     climb.stopMotor();
+    climb.setSafe();
   }
 
   // Returns true when the command should end.
