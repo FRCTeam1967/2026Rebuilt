@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -15,6 +16,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import dev.doglog.DogLog;
+
 import com.ctre.phoenix6.CANBus;
 
 
@@ -91,8 +95,15 @@ public class Pivot extends SubsystemBase {
     motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
     motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
 
+    //current limits
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 40;
+    limitConfigs.StatorCurrentLimitEnable = true;
+
     absEncoder.getConfigurator().apply(ccdConfigs);
     motor.getConfigurator().apply(talonFXconfigs);
+    motor.getConfigurator().apply(limitConfigs);
+    
     motor.setNeutralMode(NeutralModeValue.Brake);
 
 
@@ -148,8 +159,7 @@ public class Pivot extends SubsystemBase {
    */
   public void moveTo(double rotations){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
-    motor.setControl(request);
+    motor.setControl(request.withPosition(revsToMove));
   }
 
   /**
@@ -165,6 +175,10 @@ public class Pivot extends SubsystemBase {
    */
   public void resetAbsEncoder(){
     absEncoder.setPosition(0);
+  }
+
+  public void logVoltage() {
+    DogLog.log("Pivot Voltage", motor.getStatorCurrent().getValueAsDouble());
   }
 
   public void simulationInit(){
@@ -193,7 +207,7 @@ public class Pivot extends SubsystemBase {
    */
   public void maintainPosition() {
     double currentPos = motor.getRotorPosition().getValueAsDouble();
-    motor.setControl(new MotionMagicVoltage(currentPos));
+    motor.setControl(request.withPosition(currentPos));
   }
 /* 
   @Override

@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -28,6 +29,7 @@ public class TheHood extends SubsystemBase {
   private final CANcoder absEncoder;
 
   public double revsToMove;
+  public double currentPos;
 
   public double currentPos;
 
@@ -45,8 +47,9 @@ public class TheHood extends SubsystemBase {
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     request = (new MotionMagicVoltage(revsToMove));
     maintainRequest = (new MotionMagicVoltage(currentPos));
+
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.3110351625;
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.408935546875;
     ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -66,7 +69,14 @@ public class TheHood extends SubsystemBase {
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
 
+    //current limits
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 120;
+    limitConfigs.StatorCurrentLimitEnable = true;
+
     hoodMotor.getConfigurator().apply(talonFXConfigs);
+    hoodMotor.getConfigurator().apply(limitConfigs);
+
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
     absEncoder.getConfigurator().apply(ccdConfigs);
@@ -82,7 +92,7 @@ public class TheHood extends SubsystemBase {
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
     //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
-    hoodMotor.setControl(request);
+    hoodMotor.setControl(request.withPosition(revsToMove));
   }
 
   /**
@@ -153,7 +163,7 @@ public class TheHood extends SubsystemBase {
    */
   public void maintainPosition() {
     currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
-    hoodMotor.setControl(maintainRequest);
+    hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees

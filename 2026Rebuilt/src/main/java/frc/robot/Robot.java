@@ -81,6 +81,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SignalLogger.stop();
+    //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
     LimelightHelpers.SetIMUMode("limelight-back", 0);
@@ -88,7 +89,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    
+  }
 
   @Override
   public void disabledExit() {}
@@ -104,7 +107,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+   //removed LL IMU Mode setting bc its also in init
+  }
 
   @Override
   public void autonomousExit() {}
@@ -121,6 +126,11 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
     m_robotContainer.yeeter.logYeeterSpeeds();
+    m_robotContainer.eater.logVoltage();
+    m_robotContainer.indexer.logVoltage();
+    m_robotContainer.pivot.logVoltage();
+
+
     // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0);
   }

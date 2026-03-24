@@ -45,7 +45,7 @@ import frc.robot.subsystems.Visabelle;
 public class Autoes {
   private final AutoChooser autoChooserLOL = new AutoChooser();
   private final AutoFactory autoFactory;
-  private final int disSensorID = 0;
+  private final int disSensorID = 50;
   private final RobotContainer m_robotContainer; 
   private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
   // Write these configs to the CANrange
@@ -80,13 +80,14 @@ public class Autoes {
     autoChooserLOL.addRoutine("HubToOutpost to Neutral Intake Shoot", this::hotn);
     autoChooserLOL.addRoutine("HubToDepot to Neutral Intake Shoot", this::hdtn);
     autoChooserLOL.addRoutine("test dis", this::testDis);
+    autoChooserLOL.addRoutine("dtn with dis sensor", this::dtnDisSensor);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-    // tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
+    tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
 
   private AutoRoutine testDis() {
@@ -123,7 +124,7 @@ public class Autoes {
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
-    score.done().and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(
+    score.done().and(()-> disSensor.getDistance().getValueAsDouble() >= 22).onTrue(
       Commands.sequence(
         new ParallelRaceGroup(
           new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION),
@@ -519,14 +520,16 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           ),
           new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
-          trenchToCenter.cmd()
+          trenchToCenter.cmd(),
+          new PrintCommand("auto start")
       )
     );
 
-    trenchToCenter.done().onTrue(
+    trenchToCenter.active().onTrue(
       new ParallelCommandGroup(
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new PrintCommand("intake started running")
       )
     );
     trenchToCenter.done().onTrue(intakeMore1.cmd());
@@ -577,6 +580,136 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     return routine;
   }
+
+  private AutoRoutine dtnDisSensor() {
+    AutoRoutine routine = autoFactory.newRoutine("DT Neutral Zone Distance Sensor");
+
+    AutoTrajectory trenchToCenter = routine.trajectory("DT_N_DisSensor");
+    AutoTrajectory intake  = routine.trajectory("DT_N_intake_first_time");
+    AutoTrajectory shootFirstCondition = routine.trajectory("N_DTShoot2_enough_balls");
+    AutoTrajectory intakeMore = routine.trajectory("DT_N_fuelBranch2_disSensor");
+    AutoTrajectory shootSecondCondition = routine.trajectory("N_DTShoot2_not_enough");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+    // WITHOUT EVENT MARKER
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchToCenter.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          trenchToCenter.cmd(),
+          new PrintCommand("auto start")
+      )
+    );
+
+    trenchToCenter.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new PrintCommand("intake started running")
+      )
+    );
+    trenchToCenter.done().onTrue(intake.cmd());
+    
+    intake.active().onTrue(
+      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED));
+
+    shootFirstCondition.done().onTrue(
+      new SequentialCommandGroup( 
+            new ParallelCommandGroup(
+                new ParallelCommandGroup(
+                    new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    //new RunCommand (() -> candle.setControl(yellowBlink))
+                ),
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                    
+                    // new ParallelCommandGroup( //green
+                    //     new SequentialCommandGroup(
+                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                    //     )
+                    //),
+
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                    //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
+                    new ParallelCommandGroup(
+                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+                    ) 
+                ),
+                new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+            ),
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
+           ));
+    
+
+    intakeMore.active().onTrue(
+      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+    );
+
+    intakeMore.done().onTrue(shootSecondCondition.cmd());
+
+    shootSecondCondition.done().onTrue(
+     new SequentialCommandGroup( 
+            new ParallelCommandGroup(
+                new ParallelCommandGroup(
+                    new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                    //new RunCommand (() -> candle.setControl(yellowBlink))
+                ),
+                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                    
+                    // new ParallelCommandGroup( //green
+                    //     new SequentialCommandGroup(
+                    //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                    //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                    //     )
+                    //),
+
+                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                    //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(1.0),
+                    new ParallelCommandGroup(
+                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
+                    ) 
+                ),
+                new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN)
+            ),
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
+           ));
+
+   
+    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
+    //the hopper is full, so we should continue with the rest of the auto and go shoot
+    Trigger atNeutral = intake.done();
+     atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 22).onTrue(intakeMore.cmd());//if true then intake 
+    // //  //write intake for fuel traj if true 
+     atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 22).onTrue(shootFirstCondition.cmd());
+
+    return routine;
+  }
+
 
     private AutoRoutine otn2x() {
     AutoRoutine routine = autoFactory.newRoutine("OTN2X");
