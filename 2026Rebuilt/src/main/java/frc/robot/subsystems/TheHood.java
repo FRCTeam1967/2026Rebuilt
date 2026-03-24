@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -17,6 +16,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -28,6 +28,7 @@ public class TheHood extends SubsystemBase {
   private final CANcoder absEncoder;
 
   public double revsToMove;
+
   public double currentPos;
 
   private final CANBus canbus = RobotContainer.CANBus;
@@ -37,20 +38,15 @@ public class TheHood extends SubsystemBase {
   private MotionMagicVoltage maintainRequest;
 
   public TheHood() {
-    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID);
-    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID);
+    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
+    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
     angleTable = new InterpolatingDoubleTreeMap();
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     request = (new MotionMagicVoltage(revsToMove));
     maintainRequest = (new MotionMagicVoltage(currentPos));
-
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.408935546875;
-    // Because your expected range is 3/4 of a rotation, I recommend we set this to 0.875. That will place your expected 
-    // range [0, 0.75] within the middle of the reporting range, which would then be [-0.125, 0.875]. That way if the mechanism
-    // goes a little bit past zero, you won't suddenly get a reading that wrapped around of 0.99. It means you don't ever have to 
-    // deal with the discontinuity.
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.3110351625;
     ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -70,14 +66,7 @@ public class TheHood extends SubsystemBase {
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
 
-    //current limits
-    var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 120;
-    limitConfigs.StatorCurrentLimitEnable = true;
-
     hoodMotor.getConfigurator().apply(talonFXConfigs);
-    hoodMotor.getConfigurator().apply(limitConfigs);
-
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
     absEncoder.getConfigurator().apply(ccdConfigs);
@@ -93,7 +82,7 @@ public class TheHood extends SubsystemBase {
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
     //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
-    hoodMotor.setControl(request.withPosition(revsToMove));
+    hoodMotor.setControl(request);
   }
 
   /**
@@ -124,15 +113,15 @@ public class TheHood extends SubsystemBase {
    * @return position of absolute encoder in degrees
    */
   public double getAbsDeg() {
-    return getAbsPos() * 360.0;
+    // return (getAbsPos() * 360 >= 359.0 ? 0 : getAbsPos() * 360);
+    return getAbsPos() * 360;
   }
 
   /**
    * @return true if the motor's position is within error threshold of the end goal
    */
   public boolean isReached() {
-    // This seems wrong!
-    return getAbsDeg() >= Constants.Hood.HOOD_MAX * 360;///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+    return getAbsDeg() >= (Constants.Hood.HOOD_MAX * 360);///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
   }
 
   /**
@@ -164,7 +153,7 @@ public class TheHood extends SubsystemBase {
    */
   public void maintainPosition() {
     currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
-    hoodMotor.setControl(maintainRequest.withPosition(currentPos));
+    hoodMotor.setControl(maintainRequest);
   }
 
   // public void moveToDeg(double rotations) { //goes to target degrees
@@ -194,13 +183,13 @@ public class TheHood extends SubsystemBase {
   //   return isReachedDeg(Constants.Hood.HOOD_TOLERANCE_DEG);
   // }
 
-  // public void configDashboard(ShuffleboardTab tab) {
-  //   tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
-  //   tab.addDouble("Hood AbsEnc (deg)", () -> getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
-  //   //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
-  //   tab.addBoolean("Hood at Target?", () -> isReached());
-  //   tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
-  // }
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addDouble("Hood Position (deg)", () -> ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
+    tab.addDouble("Hood AbsEnc (deg)", () -> getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
+    //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
+    tab.addBoolean("Hood at Target?", () -> isReached());
+    tab.addDouble("Hood Rotor Rotations", () -> hoodMotor.getRotorPosition().getValueAsDouble());
+  }
 
   // public void maintainPosition() {
   //     moveTo(Constants.Hood.HOOD_HOLD_DEG);
@@ -209,15 +198,5 @@ public class TheHood extends SubsystemBase {
   @Override
   public void periodic() {
     //resetEncoder();
-    DogLog.log("Hood/Position (deg)", ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
-    DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); //TODO: in changed code, this was indicated to be rotations, not degrees
-    //tab.addDouble("Hood Target (deg)", () -> motorRotToDeg(targetMotorRot));
-    DogLog.log("Hood/target", revsToMove);
-    DogLog.log("Hood/at Target?", isReached());
-    DogLog.log("Hood/Rotor Rotations", hoodMotor.getRotorPosition().getValueAsDouble());
-
-    if (Constants.Hood.verboseLogging) {
-      DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
-    }
   }
 }

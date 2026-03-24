@@ -4,16 +4,46 @@
 
 package frc.robot;               
 
-import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.MoveClimbUp;
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.Optional;
+
 import com.ctre.phoenix6.SignalLogger;
 
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
+import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import dev.doglog.DogLog;
-import dev.doglog.DogLogOptions;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.*;
+//import frc.robot.LimelightHelpers.PoseEstimate;
+import dev.doglog.DogLog;
 
 
 public class Robot extends TimedRobot {
@@ -30,23 +60,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    DogLog.setEnabled(Constants.Logging.enabled);
-    DogLogOptions options = new DogLogOptions()
-      .withCaptureConsole(Constants.Logging.captureConsole)
-      .withCaptureDs(Constants.Logging.captureDS)
-      .withCaptureNt(Constants.Logging.captureNT)
-      .withLogExtras(Constants.Logging.enableExtras);
-    DogLog.setOptions(options);
-    
-    if (Constants.Logging.capturePDH) {
-      DogLog.setPdh(new PowerDistribution());
-    }
-
-    // Start the CTRE signal logger
-    if (Constants.Logging.enableCTRELogging) {
-      SignalLogger.start();
-    }
-
     m_robotContainer = new RobotContainer();
   }
 
@@ -68,7 +81,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     SignalLogger.stop();
-    //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
     LimelightHelpers.SetIMUMode("limelight-back", 0);
@@ -76,9 +88,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {
-    
-  }
+  public void disabledPeriodic() {}
 
   @Override
   public void disabledExit() {}
@@ -89,12 +99,12 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 50);
     LimelightHelpers.SetIMUMode("limelight-back", 0);
     LimelightHelpers.SetThrottle("limelight-back", 50);
+
+    SignalLogger.start();
   }
 
   @Override
-  public void autonomousPeriodic() {
-   //removed LL IMU Mode setting bc its also in init
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void autonomousExit() {}
@@ -104,12 +114,13 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
+    SignalLogger.start();
   }
 
   @Override
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
-
+    m_robotContainer.yeeter.logYeeterSpeeds();
     // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
     // LimelightHelpers.SetIMUMode("limelight-back", 0);
   }

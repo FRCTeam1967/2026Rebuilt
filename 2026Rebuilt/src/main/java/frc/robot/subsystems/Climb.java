@@ -4,23 +4,41 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -30,7 +48,11 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 
 
@@ -64,32 +86,23 @@ public class Climb extends SubsystemBase {
   private Pose3d poses;
   private Rotation3d rotation;
 
-
   public Climb() {
-    motor = new TalonFX(Constants.Climb.MOTOR_ID);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
     request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
 
-
     // SIM INITS
-    if (RobotBase.isSimulation()){
-      motorSim = motor.getSimState();
-      field = new Field2d();
-      swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
-      rotation = new Rotation3d();
-      poses = new Pose3d(0.0,0.0,0.0,rotation);
-    }
+    motorSim = motor.getSimState();
+    field = new Field2d();
+    swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+    rotation = new Rotation3d();
+    poses = new Pose3d(0.0,0.0,0.0,rotation);
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
-
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-
-    // var limitConfigs = new CurrentLimitsConfigs();
-    // limitConfigs.StatorCurrentLimit = 1;
-    // limitConfigs.StatorCurrentLimitEnable = true;
     
     config.Slot0.kP = Constants.Climb.kP;
     config.Slot0.kI = Constants.Climb.kI;
@@ -102,7 +115,6 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
-    
   }
     /* 
     if (RobotBase.isSimulation()) {
@@ -199,8 +211,7 @@ public class Climb extends SubsystemBase {
    */
   public void moveTo(double inches) {  
     rotations = inches*(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE);
-    appliedVoltage = Constants.Climb.FEED_FORWARD;
-    motor.setControl(request.withPosition(rotations));
+    motor.setControl(request);
   }
 
   /**
@@ -248,6 +259,14 @@ public class Climb extends SubsystemBase {
     motor.stopMotor();
   }
 
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addBoolean("at height", ()-> (Math.abs(rotations) - Math.abs(motor.getRotorPosition().getValueAsDouble())) < Constants.Climb.ERROR_THRESHOLD);
+    tab.addNumber("rotations", () -> motor.getRotorPosition().getValueAsDouble());
+    tab.addNumber("inches", () -> motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    tab.addBoolean("bottom sensor", () -> getBottomSensor());
+    tab.addBoolean("top sensor", () -> getTopSensor());
+  }
+
   // public void reachGoal(double goal) {
   //   m_controller.setGoal(goal);
   //   // With the setpoint value we run PID control like normal
@@ -258,19 +277,7 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
-    DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
-    DogLog.log("Climb/target rotations", rotations);
-    DogLog.log("Climb/rotations", rotorPosition);
-    DogLog.log("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
-    DogLog.log("Climb/bottom sensor", getBottomSensor());
-    DogLog.log("Climb/top sensor", getTopSensor());
-
-    if (Constants.Climb.verboseLogging) {
-      DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
-    }
-
-    //setSafe();
+    setSafe();
   }
   /*
    * @Override
