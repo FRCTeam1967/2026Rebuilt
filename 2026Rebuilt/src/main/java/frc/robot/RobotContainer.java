@@ -5,6 +5,11 @@ package frc.robot;
 import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.hardware.CANdle;
+import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -18,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -90,16 +96,30 @@ public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     private final CommandXboxController m_operatorController = new CommandXboxController(1);
   
-    public LED ledSubsystem = new LED();
-    LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
-    LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
-    Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
+    //public LED ledSubsystem = new LED();
+    //public LED candle = new LED();
+    //LEDPattern solidBlue = LEDPattern.solid(Color.kWhite);
+    //LEDPattern blinking = solidBlue.blink(Seconds.of(0.5)).atBrightness(Percent.of(10));
+    //Command blinkCommand = ledSubsystem.runPattern(blinking).ignoringDisable(true);
 
     private Optional<Alliance> ally; 
   
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
+
+    //leds\
+    private final CANdle candle = new CANdle(23);
+    private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
+    // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
+    // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
+    
+    private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
+
+    private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
+    private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0));
+    private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0));
+    private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
 
     //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
     //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
@@ -109,7 +129,7 @@ public class RobotContainer {
         autoes.configDashboard(matchTab);
         theHood.configDashboard(matchTab);
         yeeter.configDashboard(matchTab);
-        pivot.configDashboard(fieldTab);
+        pivot.configDashboard(matchTab);
         configLLTab(limelightTab, fieldTab);
         climb.configDashboard(fieldTab);
         
@@ -133,6 +153,17 @@ public class RobotContainer {
                     .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+
+        // candle.setDefaultCommand(
+        //     //new ConditionalCommand(
+        //         new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)) //green - when aligned
+        //         // new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
+        //         // () -> visabelle.isAligned()
+        //     );
+
+        // candle.setDefaultCommand (
+        //     new RunCommand (() -> candle.setControl(janksterRed))
+        // );
 
         /* reset gyro */
         m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
@@ -193,9 +224,18 @@ public class RobotContainer {
         m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
+        //m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
 
         // hub alignment
+        // m_driverController.rightTrigger().whileTrue(
+        //     swerve.applyRequest(() ->
+        //         drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+        //             .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        //             .withRotationalRate(visabelle.limelight_aim_proportional()) // Drive with targetAngularVelocity
+        //     )
+        // );
+
+        // hub alignment but with localization
         m_driverController.rightTrigger().whileTrue(
             swerve.applyRequest(() ->
                 driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
@@ -242,10 +282,10 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+       pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-        ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.solid(Color.kBlack)).withName("Off"));
+        //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
 
         // SHOOTER AND HOOD BUTTON BINDINGS
         // m_operatorController.leftTrigger()
@@ -268,7 +308,6 @@ public class RobotContainer {
         //   //)
         // );
 
-        //SHOOTER AND HOOD BUTTON BINDINGS
         m_operatorController.leftTrigger().whileTrue(
             new SequentialCommandGroup( 
             new ParallelCommandGroup(
@@ -349,14 +388,19 @@ public class RobotContainer {
         
         //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
-            new RunFeeder(feeder, 5)
+            new ParallelCommandGroup(
+                new RunFeeder(feeder, 5),
+                new RunCommand (() -> candle.setControl(magentaBlink))
+            )
         );
 
         //INTAKE
         m_operatorController.rightTrigger().whileTrue(
           new ParallelCommandGroup(
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
-            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new RunFeeder(feeder, 5),
+            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
           )
         );
 
@@ -387,12 +431,12 @@ public class RobotContainer {
     }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
-        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.13:5801/"); //http://10.19.67.202:5801/
+        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
         CameraServer.addCamera(httpCamera1);
         tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
         .withSize(3, 2);
 
-        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.11:5801/"); //http://10.19.67.202:5801/
+        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
         CameraServer.addCamera(httpCamera2);
         tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
         .withSize(3, 2);

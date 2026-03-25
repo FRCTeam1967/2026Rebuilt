@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
+import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,6 +24,10 @@ public class Indexer extends SubsystemBase {
 
     var talonFXConfigurator = motor.getConfigurator();
     var motorConfigs = new MotorOutputConfigs();
+
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 40;
+    limitConfigs.StatorCurrentLimitEnable = true;
 
     motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
     talonFXConfigurator.apply(motorConfigs);
@@ -39,6 +45,10 @@ public class Indexer extends SubsystemBase {
    */
   public void stopMotor(){
     motor.stopMotor();
+  }
+
+  public void logVoltage() {
+    DogLog.log("Inde Voltage", motor.getStatorCurrent().getValueAsDouble());
   }
   
   @Override

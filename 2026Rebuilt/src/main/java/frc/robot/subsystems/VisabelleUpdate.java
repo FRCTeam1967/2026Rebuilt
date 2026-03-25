@@ -21,7 +21,6 @@ import frc.robot.LimelightHelpers;
 
 public class VisabelleUpdate extends SubsystemBase {
   /** Creates a new VisionUpdate. */
-  public static Pose2d towerPose;
 
   // visibility dataType name;
   private SwerveOnTheseBows swerve;
@@ -93,7 +92,6 @@ public class VisabelleUpdate extends SubsystemBase {
     }
   }
 
-
   @Override
   public void periodic() {
     // TODO: see if we can move this to disabled periodic (bc why not?)
@@ -106,6 +104,7 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation("limelight-back", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
 
     // // front timestamp accounting for latency
     // var front_t2d = LimelightHelpers.getT2DArray("limelight-front");
