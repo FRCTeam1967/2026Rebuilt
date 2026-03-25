@@ -21,15 +21,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-
+import frc.robot.subsystems.Visabelle;
+//heloo
 import java.util.function.DoubleSupplier;
 
 public class Yeeter extends SubsystemBase {
   private TalonFX motor1;
   private TalonFX motor2;
-  // private final RobotContainer m_robotContainer; 
-
-  //private TalonFX flywheelMotor2;
+  private final RobotContainer m_robotContainer; 
   //private Visabelle visabelle;
 
   private final CANBus canbus = RobotContainer.CANBus;
@@ -124,33 +123,26 @@ public class Yeeter extends SubsystemBase {
   /**
    * set velocity of the motor with MotionMagicVelocityVoltage requests params </p>
    * creates torque request but doesn't use it?
+   * velocitySupplier should probably stored as a member field and then used in reachedYeeterSpeed() rather than 
+   * having reachedYeeterSpeed() reach into robot container to get the Visabelle. You'd probably want to have
+   * stopMotor() then set velocitySupplier to NULL or set it to a DoubleSupplier that returns a constant value of 0.
    * @param velocity
    * @param acceleration
    */
   public void setVelocity(DoubleSupplier velocitySupplier, double acceleration) {
-    // velocitySupplier should probably stored as a member field and then used in reachedYeeterSpeed() rather than 
-    // having reachedYeeterSpeed() reach into robot container to get the Visabelle. You'd probably want to have
-    // stopMotor() then set velocitySupplier to NULL or set it to a DoubleSupplier that returns a constant value of 0.
 
     double velocity = velocitySupplier.getAsDouble();
 
-    // MotionMagicVelocityVoltage requestOne = new MotionMagicVelocityVoltage(-velocity)
-    //   .withAcceleration(yeeterAcceleration.get());
-      //.withFeedForward(5.0);
-      //.withFeedFoward(feedForward.get());
 
     MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
     .withAcceleration(yeeterAcceleration.get()) ; 
     //.withFeedForward(0.12); //kS value ?
 
-    // MotionMagicVelocityVoltage requestTwo = new MotionMagicVelocityVoltage(-velocity)
-    //   .withAcceleration(acceleration);
-    // //   //.withFeedForward(5.0);
 
     DogLog.log("Yeeter/target speed (set)", velocity);
 
     motor1.setControl(torqueRequest);
-    motor2.setControl(followerRequest); //TODO: this is what was in Sunday's code. should we be setting two different control requests on the same motor?
+    motor2.setControl(followerRequest); 
   }
 
   /**
@@ -182,7 +174,7 @@ public class Yeeter extends SubsystemBase {
   }
 
   /**
-   * stops both motors, obviously :)
+   * stops both motors
    */
   public void stopMotor() {
     DogLog.log("Yeeter/target speed", 0);
@@ -205,20 +197,15 @@ public class Yeeter extends SubsystemBase {
   //   //tab.addDouble("TargetVelocity", Constants.Yeeter.YEETER_SPEED);
   // }
 
-  //TODO: fill in these values
-  /**
-   * populates angle tables with given distance and hood angles
-   */
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
     speedTable.put(1.524+1.02235, 64.0); //5ft //UNTESTED
     speedTable.put(1.676+1.02235, 65.0); //5.5ft //UNTESTED
     speedTable.put(1.9812+1.02235, 67.0); //6.5ft //TESTED
     speedTable.put(2.1366+1.02235, 67.0);//7ft //UNTESTED
-    speedTable.put(2.286+1.02235, 69.0); //7.5 ftUNTESTED
+    speedTable.put(2.286+1.02235, 69.0); //7.5ft UNTESTED
     speedTable.put(2.4384+1.02235, 69.5); //8ft //78 UNTESTED
     // speedTable.put(3.353+1.02235, 79.0); //11ft // UNTESTED
-
     // speedTable.put(3.3288, 68.0); //6 feet
     // speedTable.put(3.9384, 75.0); //8 feet
   }
@@ -227,7 +214,7 @@ public class Yeeter extends SubsystemBase {
    * @param distanceToHub
    * @return speed of the shooter based on distance in tree map
    */
-  //TODO: call this in robot container when setting speed
+
   public double getNecessarySpeed(DoubleSupplier distanceToHub) {
     double distance = distanceToHub.getAsDouble();
     double speed = speedTable.get(distance);
@@ -251,54 +238,5 @@ public class Yeeter extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    // if (RobotState.isDisabled()) {
-    //   stopMotor();
-
-
-    //   flywheelSim.setInputVoltage(0.0);
-    //   flywheelSim.update(kSimDt);
-
-    //   simRotorPosRot = 0.0;
-
-    //   var sim1 = flywheelMotor1.getSimState();
-    //   var sim2 = flywheelMotor2.getSimState();
-
-    //   double batteryV = RobotController.getBatteryVoltage();
-    //   sim1.setSupplyVoltage(batteryV);
-    //   sim2.setSupplyVoltage(batteryV);
-
-    //   sim1.setRotorVelocity(0.0);
-    //   sim2.setRotorVelocity(0.0);
-
-    //   sim1.setRawRotorPosition(0.0);
-    //   sim2.setRawRotorPosition(0.0);
-
-    //   flywheelSpoke.setAngle(0.0);
-    //   SmartDashboard.putNumber(“Flywheel/RotorRPS”, 0.0);
-    //   return;
-    // }
-
-    // var sim1 = flywheelMotor1.getSimState();
-    // var sim2 = flywheelMotor2.getSimState();
-
-    // double batteryV = RobotController.getBatteryVoltage();
-    // sim1.setSupplyVoltage(batteryV);
-    // sim2.setSupplyVoltage(batteryV);
-
-    // double motorVolts = sim1.getMotorVoltageMeasure().in(Volts);
-
-    // flywheelSim.setInputVoltage(motorVolts);
-    // flywheelSim.update(kSimDt);
-
-    // double mechRps = flywheelSim.getAngularVelocityRadPerSec() / (2.0 * Math.PI);
-    // double rotorRps = mechRps * Constants.FlywheelShooter.GEAR_RATIO;
-
-    // simRotorPosRot += rotorRps * kSimDt;
-
-    // sim1.setRotorVelocity(rotorRps);
-    // sim2.setRotorVelocity(rotorRps*3);
-
-    // sim1.setRawRotorPosition(simRotorPosRot);
-    // sim2.setRawRotorPosition(simRotorPosRot);
   }
 }

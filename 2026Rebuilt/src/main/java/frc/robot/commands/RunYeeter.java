@@ -14,8 +14,7 @@ public class RunYeeter extends Command {
   private final Yeeter yeeter;
   private final DoubleSupplier speed;
   private final double acceleration;
-    
-  //public RunYeeter(Yeeter shooter, DoubleSupplier speed, double acceleration)
+
   public RunYeeter(Yeeter yeeter, DoubleSupplier speed, double acceleration) {
     this.yeeter = yeeter;
     this.speed = speed;
