@@ -9,7 +9,6 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
-import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -27,8 +26,6 @@ public class Feeder extends SubsystemBase {
 
     motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
     talonFXConfigurator.apply(motorConfigs);
-
-    //DogLog.log("feeder speed", motor.getVelocity().getValueAsDouble());
   }
 
   /**

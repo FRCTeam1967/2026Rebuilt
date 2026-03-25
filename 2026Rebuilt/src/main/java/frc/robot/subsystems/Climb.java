@@ -86,7 +86,6 @@ public class Climb extends SubsystemBase {
   private Pose3d poses;
   private Rotation3d rotation;
 
-
   public Climb() {
     motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
     config = new TalonFXConfiguration();
@@ -95,22 +94,15 @@ public class Climb extends SubsystemBase {
     request = new MotionMagicVoltage(rotations).withFeedForward(Constants.Climb.FEED_FORWARD);
 
     // SIM INITS
-    if (RobotBase.isSimulation()){
-      motorSim = motor.getSimState();
-      field = new Field2d();
-      swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
-      rotation = new Rotation3d();
-      poses = new Pose3d(0.0,0.0,0.0,rotation);
-    }
+    motorSim = motor.getSimState();
+    field = new Field2d();
+    swerve = new DifferentialDrivetrainSim(null, null, simRotorPosition, rotations, appliedVoltage, null);
+    rotation = new Rotation3d();
+    poses = new Pose3d(0.0,0.0,0.0,rotation);
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
 
-
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-
-    // var limitConfigs = new CurrentLimitsConfigs();
-    // limitConfigs.StatorCurrentLimit = 1;
-    // limitConfigs.StatorCurrentLimitEnable = true;
     
     config.Slot0.kP = Constants.Climb.kP;
     config.Slot0.kI = Constants.Climb.kI;
@@ -123,7 +115,6 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
-    
   }
     /* 
     if (RobotBase.isSimulation()) {
@@ -287,7 +278,7 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    //setSafe();
+    setSafe();
   }
   /*
    * @Override

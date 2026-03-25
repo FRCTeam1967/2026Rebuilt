@@ -8,20 +8,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;  
 import frc.robot.generated.TunerConstants;
-import frc.robot.Constants;
-
-import frc.robot.Constants;
-
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -48,8 +40,7 @@ public class Visabelle extends SubsystemBase {
   private BooleanPublisher allianceIsBlue;
 
   private Translation2d hubPose;
-  
-  
+
   public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
@@ -97,7 +88,7 @@ public class Visabelle extends SubsystemBase {
 
     Translation2d ourPose = swerve.getPose().getTranslation();
 
-    double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
+    double eucDist = Math.sqrt(Math.pow(ourPose.getX() - hubPose.getX(), 2) + Math.pow(ourPose.getY() - hubPose.getY(), 2));    
     visionDist.set(eucDist);
     
     DogLog.log("dist", eucDist);
@@ -131,7 +122,6 @@ public class Visabelle extends SubsystemBase {
 
   @Override
   public void periodic() {
-    hubPose = Constants.Visabelle.BLUE_HUB_POSE; // In case we're not connected yet
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
         hubPose = Constants.Visabelle.BLUE_HUB_POSE;
