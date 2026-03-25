@@ -27,7 +27,7 @@ import java.util.function.DoubleSupplier;
 public class Yeeter extends SubsystemBase {
   private TalonFX motor1;
   private TalonFX motor2;
-  // private final RobotContainer m_robotContainer; 
+  private final RobotContainer m_robotContainer; 
 
   //private TalonFX flywheelMotor2;
   //private Visabelle visabelle;
