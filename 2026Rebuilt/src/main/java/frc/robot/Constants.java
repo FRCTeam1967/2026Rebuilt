@@ -116,7 +116,15 @@ public final class Constants {
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -120.0;
+        public static final double FEED_FORWARD = 0; // placeholder
         public static final boolean verboseLogging = false || Logging.verboseLogging;
+
+        public static final double kP = 1.5; // placeholder //0.8 5ft
+        public static final double kI = 0.0; // placeholder
+        public static final double kD = 0.0; // placeholder
+        public static final double kS = 0.12; // placeholder
+        public static final double kV = 0.0; // placeholder
+        public static final double kA = 0.0; // placeholder
     }
 
     public static class Indexer{

@@ -7,6 +7,11 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
@@ -18,32 +23,49 @@ public class Eater extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
   private final DoubleSubscriber intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
-  
+  private MotionMagicVoltage request;
+  private double rotations;
+
   /** Creates a new Intake. */
   public Eater() {
     motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID);
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 75;
-    limitConfigs.StatorCurrentLimitEnable = true;
-
+  
     var motorConfigs = new MotorOutputConfigs();
 
     motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+    var talonFXConfigs = new TalonFXConfiguration();
+    var slot0Configs = talonFXConfigs.Slot0;
+
+    slot0Configs.kS = Constants.Feeder.kS;
+    slot0Configs.kV = Constants.Feeder.kV;
+    slot0Configs.kA = Constants.Feeder.kA;
+    slot0Configs.kP = Constants.Feeder.kP;
+    slot0Configs.kI = Constants.Feeder.kI;
+    slot0Configs.kD = Constants.Feeder.kD;
+    
+
+
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    //var motionMagicConfigs = talonFXConfigs.MotionMagic;
+    motor.getConfigurator().apply(talonFXConfigs);
     talonFXConfigurator.apply(motorConfigs);
     talonFXConfigurator.apply(limitConfigs);
+
   }
 
   /**
    * @param speed - sets motor to speed
-   */
+   */  
   public void setMotor(double speed) {
-    //motor.set(speed);
-    motor.set(intakeSpeed.get());
+    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
+    motor.setControl(request);
     DogLog.log("Eater/intake desired speed", intakeSpeed.get());
+
   }
-  
   /**
    * stops motor
    */
