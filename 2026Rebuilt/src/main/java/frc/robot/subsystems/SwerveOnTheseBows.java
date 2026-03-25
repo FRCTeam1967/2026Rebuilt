@@ -145,7 +145,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(-Math.PI, Math.PI);
+        headingController.enableContinuousInput(headingMin, headingMax);
         
     }
 
@@ -206,7 +206,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(-Math.PI, Math.PI);
+        headingController.enableContinuousInput(headingMin, headingMax);
     }
 
     /**
@@ -258,13 +258,11 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getPose();
-        double rotationalRate = sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading);
-
         // Generate and apply the next speeds for the robot
         setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(rotationalRate)
+            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
             .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
 
 
