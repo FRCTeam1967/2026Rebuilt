@@ -9,12 +9,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import dev.doglog.DogLog;
+
 import com.ctre.phoenix6.CANBus;
 
 
@@ -87,9 +91,9 @@ public class Pivot extends SubsystemBase {
     slot0Configs.kD = Constants.Pivot.kD; 
 
     var motionMagicConfigs = talonFXconfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY;
-    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION;
-    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.Pivot.CRUISE_VELOCITY_FAST;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.Pivot.ACCELERATION_FAST;
+    motionMagicConfigs.MotionMagicJerk = Constants.Pivot.JERK_FAST;
 
     absEncoder.getConfigurator().apply(ccdConfigs);
     motor.getConfigurator().apply(talonFXconfigs);
@@ -129,11 +133,18 @@ public class Pivot extends SubsystemBase {
     motor.setPosition(0);
   }
 
-  /**
-   * @return true if motor's current position is within error threshold of target position
-   */
-  public boolean isReached(){
+  public boolean isReached() {
     double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    return isReached(currentPos);
+  }
+  
+  /**
+   * Determine if the position is within error threshold of target position. This version is used
+   * when the rotor position is already known to avoid fetching it again.
+   * @param currentPos Current rotor position
+   * @return whether the position has reached the 
+   */
+  private boolean isReached(double currentPos) {
     double targetPosition = (revsToMove/Constants.Pivot.GEAR_RATIO)*360;
     double diff = Math.abs(currentPos - targetPosition);
     return diff < 10; 
@@ -142,15 +153,23 @@ public class Pivot extends SubsystemBase {
     // return diff < 0.1;
   }
 
+
   /**
    * @param rotations - converted to revs </p>
    * creates and sets a MotionMagicVoltage request with revs
    */
-  public void moveTo(double rotations){
+  public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
-    MotionMagicVoltage request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
-    motor.setControl(request);
+    if (isSlow) {
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
+      motor.setControl(request);
+    } else {
+      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
+      motor.setControl(request);
+    }
   }
+
+
 
   /**
    * creates and sets a MotionMagicVoltage request with all 0 values
@@ -193,7 +212,7 @@ public class Pivot extends SubsystemBase {
    */
   public void maintainPosition() {
     double currentPos = motor.getRotorPosition().getValueAsDouble();
-    motor.setControl(new MotionMagicVoltage(currentPos));
+    motor.setControl(request.withPosition(currentPos));
   }
 /* 
   @Override
@@ -236,17 +255,29 @@ public class Pivot extends SubsystemBase {
   }
   */
 
-  public void configDashboard(ShuffleboardTab tab) {
-    tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
-    tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-    tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
-    tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
-    tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
-    tab.addBoolean("pivot reached?", () -> isReached());
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   // tab.addNumber("abs encoder pos", () -> absEncoder.getAbsolutePosition().getValueAsDouble()*360);
+  //   // tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+  //   // tab.addNumber("current pivot pos revs", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO));
+  //   // tab.addNumber("abs encoder pos revs", () -> absEncoder.getAbsolutePosition().getValueAsDouble());
+  //   // tab.addNumber("target pivot pos degrees", () -> (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+  //   // tab.addBoolean("pivot reached?", () -> isReached());
+  // }
 
   public void periodic() {
     // This method will be called once per scheduler run
+    //tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
+    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
+    DogLog.log("Pivot/abs encoder pos", encoderPosition*360);
+    DogLog.log("Pivot/current pos degrees", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
+    DogLog.log("Pivot/current pos revs", (rotorPosition/Constants.Pivot.GEAR_RATIO));
+    DogLog.log("Pivot/abs encoder pos revs", encoderPosition);
+    DogLog.log("Pivot/pivot reached?", isReached(rotorPosition));
+    DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+
+    if (Constants.Pivot.verboseLogging) {
+      DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
   }
 }
-
