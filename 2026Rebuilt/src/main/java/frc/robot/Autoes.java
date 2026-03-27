@@ -409,7 +409,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
    private AutoRoutine hdtn() { // hub to depot to trench to neutral to shoot
     AutoRoutine routine = autoFactory.newRoutine("hubToOutpostToTrenchToNeutral");
-    AutoTrajectory hubToD = routine.trajectory("D_O");
+    AutoTrajectory hubToD = routine.trajectory("H_D");
     AutoTrajectory Shoot = routine.trajectory("D_Shoot");//change choreo name 
     AutoTrajectory TrenchNeutral= routine.trajectory("TrenchNeutralDT"); //change choreo name
     AutoTrajectory NeutralIntake= routine.trajectory("DT_N_Intake");
