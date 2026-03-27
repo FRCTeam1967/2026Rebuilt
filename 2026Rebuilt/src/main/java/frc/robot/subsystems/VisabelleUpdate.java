@@ -43,9 +43,6 @@ public class VisabelleUpdate extends SubsystemBase {
 
   //private static final double AREA_THRESHOLD = 0.1;
   //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
-
-  // private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-  // private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
   //private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
   public static Pose2d towerPose = RED_TOWER; // Initialize to something
@@ -175,6 +172,8 @@ public class VisabelleUpdate extends SubsystemBase {
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
     DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
     DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
+    DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
+    DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
     
     // reset pose to next raw vision estimate after 5 seconds of not seeing a tag
     // if ((mt2_front.timestampSeconds > (prevFrontTimestamp + 5)) && (mt2_back.timestampSeconds > (Timer.getFPGATimestamp() + 5))) {
@@ -226,57 +225,6 @@ public class VisabelleUpdate extends SubsystemBase {
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
       //if (mt2_front.tagCount > mt2_back.tagCount) {
 
-        // add front
-        
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
-
-        // add back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999)); //TODO: what is the range of the values?
-        
-        swerve.addVisionMeasurement(
-          mt2_back.pose,
-          mt2_back.timestampSeconds);
-        
-        DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
-    }
-
-      // trust back more
-      // else if (mt2_back.tagCount > mt2_front.tagCount) {
-    else if (backAmbiguity < frontAmbiguity) {
-        // front
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999));
-        
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
-
-        // back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5,9999999));
-        
-        swerve.addVisionMeasurement(
-          mt2_back.pose,
-          mt2_back.timestampSeconds);
-        
-        DogLog.log("VisabelleUpdate/acc both", "Front 999, Back 0.7");
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
-    }
-
-      // same amount of tags
-    else if (frontAmbiguity == backAmbiguity) {
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
-
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-    }
-      //}
-
       // add front
       setStandardDevs(true);        
       swerve.addVisionMeasurement(
@@ -292,5 +240,6 @@ public class VisabelleUpdate extends SubsystemBase {
       
       DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
       DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
+    }
   }
 }
