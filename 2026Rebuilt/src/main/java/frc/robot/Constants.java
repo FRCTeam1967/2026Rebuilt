@@ -218,6 +218,8 @@ public final class Constants {
         public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
         public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
 
+        public static final double DIST_THRESHOLD = 5; // in meters? TODO: check and change
+
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 

@@ -3,6 +3,7 @@
 // // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import frc.robot.Constants;
 
 import java.util.ArrayList;
 
@@ -31,7 +32,7 @@ public class VisabelleUpdate extends SubsystemBase {
   private int frontLLEstimatecount = 0;
   private int backLLEstimatecount = 0;
 
-  private boolean isBlue = true;
+  private boolean isTowerPoseSet = false;
 
   private int[] validIDs = new int[16];
 
@@ -65,8 +66,8 @@ public class VisabelleUpdate extends SubsystemBase {
     if (estimate.tagCount == 0)
         return true;
 
-    // if (estimate.tagCount == 1 && estimate.avgTagDist < DIST_THRESHOLD)
-    //     return true;
+    if (estimate.avgTagDist < Constants.Visabelle.DIST_THRESHOLD)
+        return true;
 
     if (estimate.rawFiducials.length >= 1) {
       if (estimate.rawFiducials[0].ambiguity > 0.9)
@@ -99,31 +100,29 @@ public class VisabelleUpdate extends SubsystemBase {
     }
   }
 
-  public void setStandardDevs(double dist) {
-    deviation = 1;
-    swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7,9999999));
+  // set standard deviations based on ambiguity (the lower the )
+  public void setStandardDevs(boolean isFront) {
+    if (isFront) {
+      deviation = frontAmbiguity;
+    }
+    else {
+      deviation = backAmbiguity;
+    }
+    swerve.setVisionMeasurementStdDevs(VecBuilder.fill(deviation, deviation,9999999));
   }
 
   @Override
   public void periodic() {
     // TODO: see if we can move this to disabled periodic (bc why not?)
-    if (DriverStation.getAlliance().isPresent()) {
+    if (!isTowerPoseSet){
+      if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
             towerPose = RED_TOWER;
-            isBlue = false;
-
-            for (int i = 0; i < 16; i++) {
-              validIDs[i] = i+1;
-            }
-
         } else {
             towerPose = BLUE_TOWER;
-            isBlue = true;
-
-            for (int i = 0; i < 16; i++) {
-              validIDs[i] = i+16;
-            }
         }
+        isTowerPoseSet = true;
+      }
     }
 
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
@@ -150,8 +149,8 @@ public class VisabelleUpdate extends SubsystemBase {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
-    LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
-    LimelightHelpers.SetFiducialIDFiltersOverride("limelight-back", validIDs);
+    //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
+    //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-back", validIDs);
     
     if (mt2_front.rawFiducials.length >= 1) {
       frontAmbiguity = mt2_front.rawFiducials[0].ambiguity;
@@ -169,26 +168,8 @@ public class VisabelleUpdate extends SubsystemBase {
 
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
-
-    // choose based on smaller distance
-    // if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-    //   chosenPoseEstimate = mt2_front;
-    //   DogLog.log("front count", frontLLcount++);
-    // }
-    // else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
-    //   chosenPoseEstimate = mt2_back;
-    //   DogLog.log("back count", backLLcount++);
-    // }
-    // else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
-    //   if (mt2_front.avgTagDist > mt2_back.avgTagDist) {
-    //     chosenPoseEstimate = mt2_back;
-    //     DogLog.log("back count", backLLcount++);
-    //   }
-    //   else {
-    //     chosenPoseEstimate = mt2_front;
-    //     DogLog.log("front count", frontLLcount++);
-    //   }
-    // }
+    DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
+    DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
     
     // reset pose to next raw vision estimate after 5 seconds of not seeing a tag
     // if ((mt2_front.timestampSeconds > (prevFrontTimestamp + 5)) && (mt2_back.timestampSeconds > (Timer.getFPGATimestamp() + 5))) {
@@ -216,7 +197,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999)); //TODO: tune?
+      setStandardDevs(true); //TODO: tune?
 
       swerve.addVisionMeasurement(
         mt2_front.pose,
@@ -226,8 +207,8 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     // accept only back
-    else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+    else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)){
+      setStandardDevs(false);
 
       swerve.addVisionMeasurement(
         mt2_back.pose,
@@ -240,60 +221,23 @@ public class VisabelleUpdate extends SubsystemBase {
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
       //if (mt2_front.tagCount > mt2_back.tagCount) {
 
-      // trust front more
-      if (frontAmbiguity < backAmbiguity) {
-        // add front
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5,9999999));
-        
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
+      // add front
+      setStandardDevs(true);        
+      swerve.addVisionMeasurement(
+        mt2_front.pose,
+        mt2_front.timestampSeconds);
 
-        // add back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999)); //TODO: what is the range of the values?
-        
-        swerve.addVisionMeasurement(
-          mt2_back.pose,
-          mt2_back.timestampSeconds);
-        
-        DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
-      }
-
-      // trust back more
-      // else if (mt2_back.tagCount > mt2_front.tagCount) {
-      else if (backAmbiguity < frontAmbiguity) {
-        // front
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.9,0.9,9999999));
-        
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
-
-        // back
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5,9999999));
-        
-        swerve.addVisionMeasurement(
-          mt2_back.pose,
-          mt2_back.timestampSeconds);
-        
-        DogLog.log("VisabelleUpdate/acc both", "Front 999, Back 0.7");
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
-      }
-
-      // same amount of tags
-      else if (frontAmbiguity == backAmbiguity) {
-        swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
-        swerve.addVisionMeasurement(
-          mt2_front.pose,
-          mt2_front.timestampSeconds);
-
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-      }
-      //}
+      // add back
+      setStandardDevs(false); //TODO: what is the range of the values?
+      
+      swerve.addVisionMeasurement(
+        mt2_back.pose,
+        mt2_back.timestampSeconds);
+      
+      DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
+      DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
+  }
 
     // if (chosenPoseEstimate != null) {
     //   DogLog.log("VisabelleUpdate/chosen update", chosenPoseEstimate.pose);
@@ -309,5 +253,4 @@ public class VisabelleUpdate extends SubsystemBase {
     // else {
     //   DogLog.log("VisabelleUpdate/vision update accepted", false);
     // } 
-  }
 }
