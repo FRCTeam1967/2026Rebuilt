@@ -53,7 +53,7 @@ public class Pivot extends SubsystemBase {
 
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
-    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
     ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
