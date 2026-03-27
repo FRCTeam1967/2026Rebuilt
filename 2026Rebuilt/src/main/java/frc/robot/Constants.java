@@ -105,23 +105,23 @@ public final class Constants {
 
         public static final double THRESHOLD = 1;
         public static final double DEGREES_TO_REVS = 1.0/360.0;
-        public static final double MAGNET_OFFSET = -0.3349609375;
+        public static final double MAGNET_OFFSET = 0.451171875;
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
-        public static final double DOWN_POSITION = 120 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 125 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 70 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 75 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
-        public static final double EATER_MOTOR_SPEED = 70.0;
+        public static final double EATER_MOTOR_SPEED = -70.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final int INDEXER_SPEED = 30;
+        public static final int INDEXER_SPEED = 75;
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
