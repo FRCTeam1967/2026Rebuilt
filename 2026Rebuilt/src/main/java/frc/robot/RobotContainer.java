@@ -122,7 +122,7 @@ public class RobotContainer {
         ally = DriverStation.getAlliance(); 
     
         //for vision servoing
-        driveAtAngle.HeadingController.setPID(8, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.setPID(5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
     }
@@ -260,25 +260,6 @@ public class RobotContainer {
                     new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
                     new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
-                ),
-                () -> ally.get() == Alliance.Blue
-            )
-        ));
-        m_driverController.x().onTrue(new SequentialCommandGroup(
-            // ROTATION2D IS IN **RADIANS!!!!**
-            // SET YAW IS IN **DEGREES!!!!**
-            new ConditionalCommand(
-                new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(Math.PI))),
-                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
-                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(Math.PI))))        
-                ),
-                new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(new Rotation2d(0.0))),    
-                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
-                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
                 ),
                 () -> ally.get() == Alliance.Blue
             )

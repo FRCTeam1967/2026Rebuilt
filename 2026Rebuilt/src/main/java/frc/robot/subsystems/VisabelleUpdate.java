@@ -73,7 +73,7 @@ public class VisabelleUpdate extends SubsystemBase {
         return true;
 
     if (estimate.rawFiducials.length >= 1) {
-      if (estimate.rawFiducials[0].ambiguity > 0.9)
+      if (estimate.rawFiducials[0].ambiguity > 0.8)
         return true;
     }
     
@@ -104,13 +104,28 @@ public class VisabelleUpdate extends SubsystemBase {
   }
 
   // set standard deviations based on ambiguity (the lower the )
-  public void setStandardDevs(boolean isFront) {
-    if (isFront) {
-      deviation = frontAmbiguity;
-    }
-    else {
-      deviation = backAmbiguity;
-    }
+  public void setStandardDevs(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
+    String name = isFront ? "limelight-front" : "limelight-back";
+    double tagCount = LimelightHelpers.getTargetCount(name);
+    double distance = estimate.rawFiducials[0].distToCamera;
+    double ambiguity = estimate.rawFiducials[0].ambiguity;
+
+    double distanceScale = Math.pow(distance, 2);
+    double tagScale = 1.0 / tagCount;
+    double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
+    double scale = distanceScale * tagScale * ambiguityScale;
+    double deviation = 0.01 * scale;
+
+    DogLog.log("deviation", deviation);
+    DogLog.log("LL name", name);
+
+    // if (isFront) {
+    //   deviation = frontAmbiguity;
+    // }
+    // else {
+    //   deviation = backAmbiguity;
+    // }
+
     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(deviation, deviation,9999999));
   }
 
@@ -202,7 +217,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      setStandardDevs(true); //TODO: tune?
+      setStandardDevs(mt2_front, true); //TODO: tune?
 
       swerve.addVisionMeasurement(
         mt2_front.pose,
@@ -213,7 +228,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only back
     else if (!rejectUpdate(mt2_back) && rejectUpdate(mt2_front)){
-      setStandardDevs(false);
+      setStandardDevs(mt2_back, false);
 
       swerve.addVisionMeasurement(
         mt2_back.pose,
@@ -227,13 +242,13 @@ public class VisabelleUpdate extends SubsystemBase {
       //if (mt2_front.tagCount > mt2_back.tagCount) {
 
         // add front
-        setStandardDevs(true);
+        setStandardDevs(mt2_front, true);
         swerve.addVisionMeasurement(
           mt2_front.pose,
           mt2_front.timestampSeconds);
 
         // add back
-        setStandardDevs(false);        
+        setStandardDevs(mt2_back, false);        
 
         swerve.addVisionMeasurement(
           mt2_back.pose,
@@ -243,28 +258,5 @@ public class VisabelleUpdate extends SubsystemBase {
         DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
         DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
-
-      // trust back more
-      // else if (mt2_back.tagCount > mt2_front.tagCount) {
-    //else if (backAmbiguity < frontAmbiguity) {
-        // front
-
-      //}
-
-      // add front
-      setStandardDevs(true);        
-      swerve.addVisionMeasurement(
-        mt2_front.pose,
-        mt2_front.timestampSeconds);
-
-      // add back
-      setStandardDevs(false); //TODO: what is the range of the values?
-      
-      swerve.addVisionMeasurement(
-        mt2_back.pose,
-        mt2_back.timestampSeconds);
-      
-      DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-      DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
   }
 }
