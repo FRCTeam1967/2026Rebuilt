@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AimHub;
 import frc.robot.commands.AlignTowerPose;
 import frc.robot.commands.MoveClimbHalfwayDown;
 import frc.robot.commands.MoveClimbUp;
@@ -40,9 +41,9 @@ import frc.robot.commands.RunEater;
 public class Autoes {
   private final AutoChooser autoChooserLOL = new AutoChooser();
   private final AutoFactory autoFactory;
-  private final int disSensorID = 50;
+  private final int disSensorID = 24;
   private final RobotContainer m_robotContainer; 
-  private final CANrange disSensor = new CANrange(disSensorID, TunerConstants.kCANBus);
+  private final CANrange disSensor = new CANrange(disSensorID);
   // Write these configs to the CANrange
 
   public Autoes(RobotContainer container) {
@@ -74,7 +75,6 @@ public class Autoes {
     autoChooserLOL.addRoutine("HubToDepot Shoot", this::hTd);
     autoChooserLOL.addRoutine("HubToOutpost to Neutral Intake Shoot", this::hotn);
     autoChooserLOL.addRoutine("HubToDepot to Neutral Intake Shoot", this::hdtn);
-    autoChooserLOL.addRoutine("test dis", this::testDis);
     autoChooserLOL.addRoutine("dtn with dis sensor", this::dtnDisSensor);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
@@ -89,86 +89,7 @@ public class Autoes {
     return disSensor.getDistance(true).getValueAsDouble();
   }
 
-  private AutoRoutine testDis() {
-    AutoRoutine routine = autoFactory.newRoutine("TESTDIS");
-    AutoTrajectory goBack = routine.trajectory("ShootFromABitBack");
-    AutoTrajectory score  = routine.trajectory("H_Shoot");
-    double initialOrientation = goBack.getInitialPose().get().getRotation().getDegrees();
-
-    // WITHOUT EVENT MARKER
-    routine.active().onTrue(
-      Commands.sequence(
-          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-          //step one: set gyro to starting heading (flips for alliance)
-          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-          new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-          goBack.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
-          
-          goBack.cmd()
-      )
-    );
-
-    goBack.done().onTrue(
-      score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION))
-    );
-
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    score.done().and(()-> disSensor.getDistance().getValueAsDouble() >= 22).onTrue(
-      Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
-
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
-
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
-
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); //TODO: add defense mode while the robot is shooting
-
-        //EJECT SHOOTER
-        // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
-        //     new ParallelCommandGroup(
-        //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
-        //         new RunCommand (() -> candle.setControl(magentaBlink))
-        //     )
-        // );
-    return routine;
-  }
+  
   
   private AutoRoutine hubScore() {
     AutoRoutine routine = autoFactory.newRoutine("HUBSCORE");
@@ -206,15 +127,15 @@ public class Autoes {
     // );
     score.done().onTrue(
        Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                new ParallelCommandGroup(
+                    new ParallelCommandGroup(
+                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                         //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
+                    ),
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                    new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
                         
                         // new ParallelCommandGroup( //green
                         //     new SequentialCommandGroup(
@@ -226,19 +147,17 @@ public class Autoes {
                         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                         //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                         
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                        new ParallelCommandGroup(
+                            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-        ).withTimeout(3),
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-      )
-    ); 
+                        )
+                    )
+                )
+            ));
     return routine;
   }
   
@@ -277,40 +196,37 @@ public class Autoes {
    
     turnAndShoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
     return routine;
   }
 
@@ -348,40 +264,37 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
     return routine;
   }
@@ -419,40 +332,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
     return routine;
   }
@@ -494,39 +404,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           ).andThen(TrenchNeutral.cmd()));
+                  )
+              )
+          ).withTimeout(3)
+      ).andThen(TrenchNeutral.cmd()));
     
 
     TrenchNeutral.done().onTrue(
@@ -540,40 +448,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
     return routine;
   }
@@ -615,39 +520,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           ).andThen(TrenchNeutral.cmd()));
+                  )
+              )
+          ).withTimeout(3)
+      ).andThen(TrenchNeutral.cmd()));
 
      TrenchNeutral.done().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
@@ -661,40 +564,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
     return routine;
   }
@@ -749,40 +649,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack1.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        .andThen(shootToCenter.cmd()));
+                  )
+              )
+          ).withTimeout(3)
+      ).andThen(shootToCenter.cmd()));
 
     shootToCenter.done().onTrue(intakeMore2.cmd());
     intakeMore2.active().onTrue(
@@ -791,40 +688,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); //TODO: add defense mode while the robot is shooting
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
@@ -891,41 +785,38 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootFirstCondition.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new AimHub(m_robotContainer, m_robotContainer.visabelle),
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); //TODO: add defense mode while the robot is shooting
-
+                  )
+              )
+          ).withTimeout(3)
+      )); 
     
 
     intakeMore.active().onTrue(
@@ -936,40 +827,38 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootSecondCondition.done().onTrue(
      Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new AimHub(m_robotContainer, m_robotContainer.visabelle),
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); //TODO: add defense mode while the robot is shooting
+                  )
+              )
+          ).withTimeout(3)
+      )); 
 
     return routine;
   }
@@ -1021,39 +910,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           ).andThen(goBack.cmd())
+                  )
+              )
+          ).withTimeout(3)
+      ).andThen(goBack.cmd())
     );
 
     goBack.done().onTrue(intake2.cmd());
@@ -1063,40 +950,37 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); 
+                  )
+              )
+          ).withTimeout(3)
+      )); 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     // Trigger atNeutral = trenchToCenter.done();
@@ -1154,41 +1038,38 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootFromABitBack.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  
+                  // new ParallelCommandGroup( //green
+                  //     new SequentialCommandGroup(
+                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                  //     )
+                  // ),
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+                  
                   new ParallelCommandGroup(
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
+                  )
+              )
+          ).withTimeout(3)
+      )
       .andThen(hubTowerShoot.cmd()));
-
     hubTowerShoot.done().onTrue(
       new SequentialCommandGroup(
         new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),

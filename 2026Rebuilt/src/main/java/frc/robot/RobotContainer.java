@@ -65,7 +65,7 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("CANivore");
+    public static final CANBus CANBus = new CANBus("Default Name");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
@@ -286,7 +286,7 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-        //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
@@ -338,16 +338,13 @@ public class RobotContainer {
                         
                         new ParallelCommandGroup(
                             new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                        ) 
-                    ),
+                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                            new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
-                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-                ),
-                
-                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false)
-           )
-        ); //TODO: add defense mode while the robot is shooting
+                        )
+                    )
+                )
+            )); //TODO: add defense mode while the robot is shooting
 
         //EJECT SHOOTER
         // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
