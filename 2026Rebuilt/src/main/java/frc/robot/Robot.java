@@ -18,6 +18,7 @@ import edu.wpi.first.networktables.StructPublisher;
 
 public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
+  private Autoes autoes;
 
   boolean enableLimelight = false;
 
@@ -26,6 +27,7 @@ public class Robot extends TimedRobot {
   
   public Robot() {
     choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
+   
   }
 
   @Override
@@ -48,11 +50,13 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer = new RobotContainer();
+     autoes = m_robotContainer.autoes;
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    DogLog.log("dis sensor", autoes.getDisSensor());
   }
 
   /*

@@ -35,17 +35,18 @@ public class VisabelleUpdate extends SubsystemBase {
   //private static final double AREA_THRESHOLD = 0.1;
   //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
 
-  private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
-  private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
   private boolean isTowerPoseSet = false;
 
   //private int[] validIDs = new int[16];
 
   //private static final double AREA_THRESHOLD = 0.1;
   //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
+
+  // private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
+  // private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
   //private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
-  public static Pose2d towerPose = RED_TOWER; // Initialize to something
+  public static Pose2d towerPose = Constants.Visabelle.RED_TOWER; // Initialize to something
 
   LimelightHelpers.PoseEstimate mt2_front;
   LimelightHelpers.PoseEstimate mt2_back;
@@ -119,9 +120,9 @@ public class VisabelleUpdate extends SubsystemBase {
     if (!isTowerPoseSet){
       if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            towerPose = RED_TOWER;
+            towerPose = Constants.Visabelle.RED_TOWER;
         } else {
-            towerPose = BLUE_TOWER;
+            towerPose = Constants.Visabelle.BLUE_TOWER;
         }
         isTowerPoseSet = true;
       }
@@ -157,13 +158,13 @@ public class VisabelleUpdate extends SubsystemBase {
     if (mt2_front.rawFiducials.length >= 1) {
       frontAmbiguity = mt2_front.rawFiducials[0].ambiguity;
     } else {
-      frontAmbiguity = 0.5;
+      frontAmbiguity = 9999999;
     }
     
     if (mt2_back.rawFiducials.length >= 1) {
       backAmbiguity = mt2_back.rawFiducials[0].ambiguity;
     } else {
-      backAmbiguity = 0.5;
+      backAmbiguity = 9999999;
     }
 
     //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
@@ -225,6 +226,31 @@ public class VisabelleUpdate extends SubsystemBase {
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
       //if (mt2_front.tagCount > mt2_back.tagCount) {
 
+        // add front
+        setStandardDevs(true);
+        swerve.addVisionMeasurement(
+          mt2_front.pose,
+          mt2_front.timestampSeconds);
+
+        // add back
+        setStandardDevs(false);        
+
+        swerve.addVisionMeasurement(
+          mt2_back.pose,
+          mt2_back.timestampSeconds);
+        
+        DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
+        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
+        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
+    }
+
+      // trust back more
+      // else if (mt2_back.tagCount > mt2_front.tagCount) {
+    //else if (backAmbiguity < frontAmbiguity) {
+        // front
+
+      //}
+
       // add front
       setStandardDevs(true);        
       swerve.addVisionMeasurement(
@@ -240,6 +266,5 @@ public class VisabelleUpdate extends SubsystemBase {
       
       DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
       DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
-    }
   }
 }

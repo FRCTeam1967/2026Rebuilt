@@ -286,7 +286,7 @@ public class RobotContainer {
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+        //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
         yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
         //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
         //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
@@ -335,6 +335,7 @@ public class RobotContainer {
                         //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                         new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                        
                         new ParallelCommandGroup(
                             new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
