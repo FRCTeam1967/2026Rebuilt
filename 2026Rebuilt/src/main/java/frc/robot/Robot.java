@@ -90,9 +90,9 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
-    LimelightHelpers.SetThrottle("limelight-front", 50);
+    LimelightHelpers.SetThrottle("limelight-front", 0); //used to be 50
     LimelightHelpers.SetIMUMode("limelight-back", 0);
-    LimelightHelpers.SetThrottle("limelight-back", 50);
+    LimelightHelpers.SetThrottle("limelight-back", 0); //used to be 50
   }
 
   @Override

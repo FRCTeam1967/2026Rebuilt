@@ -199,13 +199,18 @@ public class Yeeter extends SubsystemBase {
 
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
-    speedTable.put(1.524+1.02235, 64.0); //5ft //UNTESTED
-    speedTable.put(1.676+1.02235, 65.0); //5.5ft //UNTESTED
+    speedTable.put(1.524+1.02235, 66.0); //5ft //TESTED
+    speedTable.put(1.676+1.02235, 67.0); //5.5ft //UNTESTED
     speedTable.put(1.9812+1.02235, 67.0); //6.5ft //TESTED
-    speedTable.put(2.1366+1.02235, 67.0);//7ft //UNTESTED
-    speedTable.put(2.286+1.02235, 69.0); //7.5ft UNTESTED
-    speedTable.put(2.4384+1.02235, 69.5); //8ft //78 UNTESTED
-    // speedTable.put(3.353+1.02235, 79.0); //11ft // UNTESTED
+    speedTable.put(2.1366+1.02235, 71.0);//7ft //UNTESTED
+    speedTable.put(2.286+1.02235, 71.5); //7.5ft UNTESTED
+    speedTable.put(2.4384+1.02235, 72.0); //8ft //TESTED
+    speedTable.put(2.5908+1.02235,72.5); //8.5ft //78 UNTESTED
+    speedTable.put(2.7432+1.02235, 73.0); //9ft UNTESTED
+    speedTable.put(2.8956+1.02235, 74.0); //9.5ft UNTESTED
+    speedTable.put(3.048+1.02235, 75.0); //10ft TESTED
+    speedTable.put(3.2004+1.02235, 75.5); //10.5 //78 UNTESTED
+    speedTable.put(3.3528+1.02235, 76.0); //11ft // UNTESTED
     // speedTable.put(3.3288, 68.0); //6 feet
     // speedTable.put(3.9384, 75.0); //8 feet
   }

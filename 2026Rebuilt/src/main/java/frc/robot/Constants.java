@@ -68,7 +68,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 72.0; //75; //rotations per second
+        public static final double YEETER_SPEED = 75.0; //75; //rotations per second
         public static final double YEETER_ACCELERATION = 500.0; //500
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
@@ -223,7 +223,7 @@ public final class Constants {
         public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
         public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
         
-        public static final double DIST_THRESHOLD = 2; // in meters? TODO: check and change
+        public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }

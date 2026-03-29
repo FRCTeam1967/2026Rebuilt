@@ -779,9 +779,9 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     Trigger atNeutral = intake.done();
-    atNeutral.and(()-> (disSensor.getDistance().getValueAsDouble()) >= 0.6096).onTrue(intakeMore.cmd());//if not within 24 in. then intake 
+    atNeutral.and(()-> (disSensor.getDistance().getValueAsDouble()) >= 0.4).onTrue(intakeMore.cmd());//if not within 24 in. then intake 
     // //  //write intake for fuel traj if true 
-    atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 0.6096).onTrue(shootFirstCondition.cmd());
+    atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 0.4).onTrue(shootFirstCondition.cmd());
 
     shootFirstCondition.done().onTrue(
       Commands.sequence( 

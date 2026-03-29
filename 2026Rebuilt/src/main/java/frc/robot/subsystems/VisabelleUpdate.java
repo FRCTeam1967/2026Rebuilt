@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 // import frc.robot.LimelightHelpers.LimelightResults;
 // import edu.wpi.first.wpilibj.Timer;
+import frc.robot.LimelightHelpers.RawFiducial;
 
 public class VisabelleUpdate extends SubsystemBase {
   /** Creates a new VisionUpdate. */
@@ -69,7 +70,7 @@ public class VisabelleUpdate extends SubsystemBase {
     if (estimate.tagCount == 0)
         return true;
 
-    if (estimate.avgTagDist < Constants.Visabelle.DIST_THRESHOLD)
+    if (estimate.avgTagDist > Constants.Visabelle.DIST_THRESHOLD)
         return true;
 
     if (estimate.rawFiducials.length >= 1) {
@@ -190,6 +191,23 @@ public class VisabelleUpdate extends SubsystemBase {
     DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
     DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
     DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
+
+    if (mt2_front != null && mt2_front.tagCount > 0) {
+      long tagArray[] = new long[mt2_front.tagCount];
+      int idx = 0;
+      for (RawFiducial fiducial: mt2_front.rawFiducials) {
+        tagArray[idx++] = fiducial.id;
+      }
+      DogLog.log("Front fiducials", tagArray);
+    }
+    if (mt2_back != null && mt2_back.tagCount > 0) {
+      long tagArray[] = new long[mt2_back.tagCount];
+      int idx = 0;
+      for (RawFiducial fiducial: mt2_back.rawFiducials) {
+        tagArray[idx++] = fiducial.id;
+      }
+      DogLog.log("Back fiducials", tagArray);
+    }
     
     // reset pose to next raw vision estimate after 5 seconds of not seeing a tag
     // if ((mt2_front.timestampSeconds > (prevFrontTimestamp + 5)) && (mt2_back.timestampSeconds > (Timer.getFPGATimestamp() + 5))) {
