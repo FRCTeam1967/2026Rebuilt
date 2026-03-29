@@ -5,7 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -58,12 +58,14 @@ public class Pivot extends SubsystemBase {
 
     absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
-    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
     ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
     var talonFXconfigs = new TalonFXConfiguration();
-
+    // talonFXconfigs.Feedback.FeedbackRemoteSensorID = absEncoder.getDeviceID(); //check later and use if wait command don't work
+    // talonFXconfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;  //check later and use if wait command don't work
+   
     var motorConfigs = new MotorOutputConfigs();
     motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
 
@@ -84,6 +86,11 @@ public class Pivot extends SubsystemBase {
     motor.getConfigurator().apply(talonFXconfigs);
     motor.getConfigurator().apply(motorConfigs);
     motor.setNeutralMode(NeutralModeValue.Brake);
+
+    // Make sure the encoder configuration applied before using it to sync the motor
+    // position below.
+    absEncoder.getAbsolutePosition().waitForUpdate(0.02);
+
 
 
     //simulation 
