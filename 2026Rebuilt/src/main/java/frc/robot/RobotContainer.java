@@ -110,7 +110,7 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        visabelle.configDashboard(matchTab);
+        //visabelle.configDashboard(matchTab);
         //theHood.configDashboard(matchTab);
         //yeeter.configDashboard(matchTab);
         //pivot.configDashboard(matchTab);
@@ -261,7 +261,7 @@ public class RobotContainer {
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
                     new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
                 ),
-                () -> ally.get() == Alliance.Blue
+                () -> ally.get() == Alliance.Red
             )
         ));
         m_driverController.x().onTrue(new SequentialCommandGroup(
@@ -280,7 +280,7 @@ public class RobotContainer {
                     new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
                     new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), new Rotation2d(0))))
                 ),
-                () -> ally.get() == Alliance.Blue
+                () -> ally.get() == Alliance.Red
             )
         ));
     
@@ -383,7 +383,7 @@ public class RobotContainer {
         //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
             new ParallelCommandGroup(
-                new RunFeeder(feeder, 5),
+                new RunFeeder(feeder, -5),
                 new RunCommand (() -> candle.setControl(magentaBlink))
             )
         );
@@ -413,12 +413,12 @@ public class RobotContainer {
         //     )  
         // );
 
-        m_operatorController.x().whileTrue(
-            new ParallelCommandGroup(  
-                new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
-                new RunCommand (() -> candle.setControl(magentaBlink))
-            )  
-        );
+        // m_operatorController.x().whileTrue(
+        //     new ParallelCommandGroup(  
+        //         new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
+        //         new RunCommand (() -> candle.setControl(magentaBlink))
+        //     )  
+        // );
         //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));

@@ -24,7 +24,7 @@ public class Feeder extends SubsystemBase {
     var talonFXConfigurator = motor.getConfigurator();
     var motorConfigs = new MotorOutputConfigs();
 
-    motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
+    motorConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
     talonFXConfigurator.apply(motorConfigs);
   }
 

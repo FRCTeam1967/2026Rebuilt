@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.generated.TunerConstants;
 
@@ -108,14 +110,14 @@ public final class Constants {
         public static final double MAGNET_OFFSET = -0.451904296875;
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
-        public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 179 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 70 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
-        public static final double EATER_MOTOR_SPEED = -120.0;
+        public static final double EATER_MOTOR_SPEED = 120.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
@@ -143,7 +145,7 @@ public final class Constants {
 
         public static final double PREP_FEEDER = -50.0; 
 
-        public static final double INTAKE_FEEDER = -10.0; 
+        public static final double INTAKE_FEEDER = -2.5; 
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
@@ -217,6 +219,11 @@ public final class Constants {
 
         public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
         public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
+
+        public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
+        public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
+        
+        public static final double DIST_THRESHOLD = 5; // in meters? TODO: check and change
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }

@@ -21,7 +21,7 @@ public class Eater extends SubsystemBase {
   
   /** Creates a new Intake. */
   public Eater() {
-    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID);
+    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID, canbus);
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
