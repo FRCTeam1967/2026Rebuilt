@@ -67,6 +67,7 @@ public class VisabelleUpdate extends SubsystemBase {
     if (estimate == null)
         return true;
 
+    //TODO: this should reject all if we don't see anything, test if that's the case
     if (estimate.tagCount == 0)
         return true;
 
@@ -74,7 +75,7 @@ public class VisabelleUpdate extends SubsystemBase {
         return true;
 
     if (estimate.rawFiducials.length >= 1) {
-      if (estimate.rawFiducials[0].ambiguity > 0.8)
+      if (estimate.rawFiducials[0].ambiguity > 0.8) //TODO: according to LL chief delphi, use 0.9- according to jonah from mechanical advantage (advantage scope guy), use something lower like 0.4
         return true;
     }
     
@@ -104,28 +105,42 @@ public class VisabelleUpdate extends SubsystemBase {
     }
   }
 
-  // set standard deviations based on ambiguity (the lower the )
+  // set standard deviations based on ambiguity (the lower the ambiguity, the more we trust it)
   public void setStandardDevs(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
     String name = isFront ? "limelight-front" : "limelight-back";
     double tagCount = LimelightHelpers.getTargetCount(name);
     double distance = estimate.rawFiducials[0].distToCamera;
     double ambiguity = estimate.rawFiducials[0].ambiguity;
 
-    double distanceScale = Math.pow(distance, 2);
-    double tagScale = 1.0 / tagCount;
-    double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
-    double scale = distanceScale * tagScale * ambiguityScale;
-    double deviation = 0.01 * scale;
+    // double distanceScale = Math.pow(distance, 2);
+    // double tagScale = 1.0 / tagCount;
+    // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
+    // double scale = distanceScale * tagScale * ambiguityScale;
+    // double deviation = 0.01 * scale;
+
+    //TODO: test these derivations in order, see if they are useful
+    double deviation = 6.0 * Math.pow(ambiguity, 3); 
+        //verify examples: 0.1	>> 0.006; 0.3	>> 0.162; 0.5 >> 0.75; 0.7 >> 2.06; 1.0	>> 6.0
+
+    //2) double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
+        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
+        //(dist >> 2) 0.1 >> 0.015; 0.3 >> 0.135; 0.5 >> 0.375; 0.7 >> 0.735
+        //(dist >> 4) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
+
+    //3) double deviation = 0.75 * Math.pow(distance, 2) * Math.pow(ambiguity, 2);
+        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
+        //(dist >> 2) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
+        //(dist >> 4) 0.1 >> 0.12; 0.3 >> 1.08; 0.5 >> 3.0; 0.7 >> 5.88
+
+
+    //4) double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
+        //(dist >> 2, tags >> 1) 0.1 >> 0.02; 0.3 >> 0.18; 0.5 >> 0.5; 0.7 >> 0.98
+        //(dist >> 2, tags >> 4) 0.1 >> 0.01; 0.3 >> 0.09; 0.5 >> 0.25; 0.7 >> 0.49
+        //(dist >> 4, tags >> 1) 0.1 >> 0.08; 0.3 >> 0.72; 0.5 >> 2.0; 0.7 >> 3.92
+        //(dist >> 4, tags >> 4) 0.1 >> 0.04; 0.3 >> 0.36; 0.5 >> 1.0; 0.7 >> 1.96
 
     DogLog.log("deviation", deviation);
     DogLog.log("LL name", name);
-
-    // if (isFront) {
-    //   deviation = frontAmbiguity;
-    // }
-    // else {
-    //   deviation = backAmbiguity;
-    // }
 
     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(deviation, deviation,9999999));
   }
@@ -184,7 +199,6 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
-
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
     DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
@@ -192,6 +206,7 @@ public class VisabelleUpdate extends SubsystemBase {
     DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
     DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
+    //logging all the tags we can see
     if (mt2_front != null && mt2_front.tagCount > 0) {
       long tagArray[] = new long[mt2_front.tagCount];
       int idx = 0;
@@ -200,6 +215,7 @@ public class VisabelleUpdate extends SubsystemBase {
       }
       DogLog.log("Front fiducials", tagArray);
     }
+
     if (mt2_back != null && mt2_back.tagCount > 0) {
       long tagArray[] = new long[mt2_back.tagCount];
       int idx = 0;
@@ -235,7 +251,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      setStandardDevs(mt2_front, true); //TODO: tune?
+      setStandardDevs(mt2_front, true);
 
       swerve.addVisionMeasurement(
         mt2_front.pose,
