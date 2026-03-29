@@ -122,7 +122,7 @@ public class TheHood extends SubsystemBase {
    * @return true if the motor's position is within error threshold of the end goal
    */
   public boolean isReached() {
-    return getAbsDeg() >= Constants.Hood.HOOD_MAX * 360;///Math.abs(((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
+    return getAbsDeg() >= Constants.Hood.HOOD_MAX * 360;///Math.abs(((hoodMotor.getPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360) - (revsToMove*360)) < 10.0;
   }
 
   /**
@@ -152,18 +152,19 @@ public class TheHood extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with current position of motor
    */
   public void maintainPosition() {
-    currentPos = hoodMotor.getRotorPosition().getValueAsDouble();
+    currentPos = hoodMotor.getPosition().getValueAsDouble();
     hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
   @Override
   public void periodic() {
     //resetEncoder();
-    DogLog.log("Hood/Position (deg)", ((hoodMotor.getRotorPosition().getValueAsDouble()/Constants.Hood.GEAR_RATIO)*360));
+    double position = hoodMotor.getPosition().getValueAsDouble();
+    DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
     DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
     DogLog.log("Hood/target", revsToMove);
     DogLog.log("Hood/at Target?", isReached());
-    DogLog.log("Hood/Rotor Rotations", hoodMotor.getRotorPosition().getValueAsDouble());
+    DogLog.log("Hood/Rotor Rotations", position);
     if (Constants.Hood.verboseLogging) {
       DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
     }

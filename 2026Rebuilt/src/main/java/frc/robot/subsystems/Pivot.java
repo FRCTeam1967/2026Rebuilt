@@ -120,7 +120,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public boolean isReached() {
-    double currentPos = motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    double currentPos = motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
     return isReached(currentPos);
   }
   
@@ -190,7 +190,7 @@ public class Pivot extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with current position of motor
    */
   public void maintainPosition() {
-    double currentPos = motor.getRotorPosition().getValueAsDouble();
+    double currentPos = motor.getPosition().getValueAsDouble();
     motor.setControl(request.withPosition(currentPos));
   }
 
@@ -198,9 +198,9 @@ public class Pivot extends SubsystemBase {
   
   public void periodic() {
     // This method will be called once per scheduler run
-    //tab.addNumber("current pivot pos degrees", () -> (motor.getRotorPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
+    //tab.addNumber("current pivot pos degrees", () -> (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
     double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
-    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
+    double rotorPosition = motor.getPosition().getValueAsDouble();
     DogLog.log("Pivot/abs encoder pos", encoderPosition*360);
     DogLog.log("Pivot/current pos degrees", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
     DogLog.log("Pivot/current pos revs", (rotorPosition/Constants.Pivot.GEAR_RATIO));

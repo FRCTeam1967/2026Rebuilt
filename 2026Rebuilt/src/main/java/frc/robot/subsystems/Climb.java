@@ -207,7 +207,7 @@ public class Climb extends SubsystemBase {
    * @return true if motor's current position is within error threshold of target height
    */
   public boolean atHeight(){
-    double currentPosition = motor.getRotorPosition().getValueAsDouble();
+    double currentPosition = motor.getPosition().getValueAsDouble();
     return Math.abs(rotations - currentPosition) < Constants.Climb.ERROR_THRESHOLD;
 
     /*
@@ -258,7 +258,7 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double rotorPosition = motor.getRotorPosition().getValueAsDouble();
+    double rotorPosition = motor.getPosition().getValueAsDouble();
     DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
     DogLog.log("Climb/target rotations", rotations);
     DogLog.log("Climb/rotations", rotorPosition);
