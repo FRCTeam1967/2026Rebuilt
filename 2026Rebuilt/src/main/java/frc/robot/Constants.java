@@ -223,7 +223,7 @@ public final class Constants {
         public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
         public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
         
-        public static final double DIST_THRESHOLD = 2; // in meters? TODO: check and change
+        public static final double DIST_THRESHOLD = 5; // in meters? TODO: check and change
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
@@ -266,7 +266,7 @@ public final class Constants {
              * SignalLogger too, and we log some of the same state via DogLog, so we should disable this if we're
              * still seeing NT publishing cause loop overruns when we've disabled our NT logging.
              */
-            public static boolean enableNTPublishing = false; 
+            public static boolean enableNTPublishing = true; 
     
         }
     }
