@@ -12,6 +12,8 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import frc.robot.commands.RumbleController;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -374,7 +376,8 @@ public class RobotContainer {
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
+            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), 
+            new SequentialCommandGroup(new RumbleController(m_driverController, m_operatorController).withTimeout(2))
           )
         );
 
