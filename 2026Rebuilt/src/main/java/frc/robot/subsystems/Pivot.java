@@ -85,6 +85,10 @@ public class Pivot extends SubsystemBase {
     motor.getConfigurator().apply(motorConfigs);
     motor.setNeutralMode(NeutralModeValue.Brake);
 
+    // Make sure the encoder configuration applied before using it to sync the motor
+    // position below.
+    absEncoder.getAbsolutePosition().waitForUpdate(0.02);
+
 
     //simulation 
     // motorSim = motor.getSimState();
