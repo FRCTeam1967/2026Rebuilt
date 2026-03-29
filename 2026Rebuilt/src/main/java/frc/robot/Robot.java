@@ -44,11 +44,6 @@ public class Robot extends TimedRobot {
       DogLog.setPdh(new PowerDistribution());
     }
 
-    // Start the CTRE signal logger
-    if (Constants.Logging.enableCTRELogging) {
-      SignalLogger.start();
-    }
-
     m_robotContainer = new RobotContainer();
      autoes = m_robotContainer.autoes;
   }
@@ -71,7 +66,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    SignalLogger.stop();
     //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
     LimelightHelpers.SetIMUMode("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-front", 200);
