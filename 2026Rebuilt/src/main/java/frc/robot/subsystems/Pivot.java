@@ -152,6 +152,7 @@ public class Pivot extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with revs
    */
   public void moveTo(double rotations, boolean isSlow){
+    setRelToAbs();
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
     if (isSlow) {
       DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
