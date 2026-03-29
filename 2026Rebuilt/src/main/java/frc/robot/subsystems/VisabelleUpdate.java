@@ -187,10 +187,10 @@ public class VisabelleUpdate extends SubsystemBase {
 
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
-    DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
-    DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
-    DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
-    DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
+    // DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
+    // DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
+    // DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
+    // DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
     if (mt2_front != null && mt2_front.tagCount > 0) {
       long tagArray[] = new long[mt2_front.tagCount];
@@ -241,7 +241,7 @@ public class VisabelleUpdate extends SubsystemBase {
         mt2_front.pose,
         mt2_front.timestampSeconds);
       
-      DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
+      // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
     }
 
     // accept only back
@@ -252,7 +252,7 @@ public class VisabelleUpdate extends SubsystemBase {
         mt2_back.pose,
         mt2_back.timestampSeconds);
 
-      DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
+      // DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
 
     // accept both
@@ -272,9 +272,9 @@ public class VisabelleUpdate extends SubsystemBase {
           mt2_back.pose,
           mt2_back.timestampSeconds);
         
-        DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
-        DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
+        // DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
+        // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
+        // DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
   }
 }

@@ -110,14 +110,14 @@ public final class Constants {
         public static final double MAGNET_OFFSET = -0.451904296875;
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
-        public static final double DOWN_POSITION = 119 * DEGREES_TO_REVS;
+        public static final double DOWN_POSITION = 179 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 70 * DEGREES_TO_REVS;
     }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
-        public static final double EATER_MOTOR_SPEED = -120.0;
+        public static final double EATER_MOTOR_SPEED = 120.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 

@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -17,15 +16,19 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+
+// WELCOME TO DA HOOD
 
 public class TheHood extends SubsystemBase {
   private final TalonFX hoodMotor;
   private final CANcoder absEncoder;
 
   public double revsToMove;
+
   public double currentPos;
 
   private final CANBus canbus = RobotContainer.CANBus;
@@ -35,16 +38,15 @@ public class TheHood extends SubsystemBase {
   private MotionMagicVoltage maintainRequest;
 
   public TheHood() {
-    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID);
-    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID);
+    hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID, canbus);
+    absEncoder = new CANcoder(Constants.Hood.HOOD_CANCODER_ID, canbus);
     angleTable = new InterpolatingDoubleTreeMap();
 
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     request = (new MotionMagicVoltage(revsToMove));
     maintainRequest = (new MotionMagicVoltage(currentPos));
-
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =-0.408935546875;
+    ccdConfigs.MagnetSensor.MagnetOffset =-0.3110351625;
     ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -64,14 +66,7 @@ public class TheHood extends SubsystemBase {
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     talonFXConfigs.Feedback.RotorToSensorRatio = 1.0;
 
-    //current limits
-    var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 120;
-    limitConfigs.StatorCurrentLimitEnable = true;
-
     hoodMotor.getConfigurator().apply(talonFXConfigs);
-    hoodMotor.getConfigurator().apply(limitConfigs);
-
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
     absEncoder.getConfigurator().apply(ccdConfigs);
@@ -87,18 +82,21 @@ public class TheHood extends SubsystemBase {
   public void moveTo(double revolutions) {
     revsToMove = revolutions*(Constants.Hood.GEAR_RATIO); 
     //.withFeedForward(0.12); //changed this from 0.0 to 0.12 (value of kV)
-    hoodMotor.setControl(request.withPosition(revsToMove));
+    hoodMotor.setControl(request);
   }
 
   /**
    * sets current position of motor to current position of encoder </p>
+   * USE AS RESET ENCODER IF NEEDED IN PERIODIC (add an if in periodic, instead of creating a new method)
    */
   public void setRelToAbs(){
+    //this should take care of the initial "set zero" method 
+    //because the abs encoder will be zero at the start too
     hoodMotor.setPosition(getAbsPos()*Constants.Hood.GEAR_RATIO);
   }
 
   /**
-   * stop motor
+   * stop motor obviously :)
    */
   public void stop() {
     hoodMotor.stopMotor();
@@ -115,7 +113,8 @@ public class TheHood extends SubsystemBase {
    * @return position of absolute encoder in degrees
    */
   public double getAbsDeg() {
-    return getAbsPos() * 360.0;
+    // return (getAbsPos() * 360 >= 359.0 ? 0 : getAbsPos() * 360);
+    return getAbsPos() * 360;
   }
 
   /**
@@ -133,6 +132,7 @@ public class TheHood extends SubsystemBase {
     angleTable.put(1.0, 20.0); //example
   }
 
+  //TODO: call this in robot container when setting speed
   /**
    * @param distanceToHub
    * @return angle of the hood based on distance in tree map
@@ -145,7 +145,7 @@ public class TheHood extends SubsystemBase {
    * log value of absolute encoder to doglog
    */
   public void logRequest(){
-    DogLog.log("HoodRequest", Constants.Hood.HOOD_ANGLE);
+    // DogLog.log("HoodRequest", Constants.Hood.HOOD_ANGLE);
   }
 
   /**
@@ -156,17 +156,21 @@ public class TheHood extends SubsystemBase {
     hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
+  // public void maintainPosition() {
+  //     moveTo(Constants.Hood.HOOD_HOLD_DEG);
+  //  }
+
   @Override
   public void periodic() {
     //resetEncoder();
     double position = hoodMotor.getPosition().getValueAsDouble();
-    DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
-    DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
-    DogLog.log("Hood/target", revsToMove);
-    DogLog.log("Hood/at Target?", isReached());
-    DogLog.log("Hood/Rotor Rotations", position);
+    // DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
+    // DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
+    // DogLog.log("Hood/target", revsToMove);
+    // DogLog.log("Hood/at Target?", isReached());
+    // DogLog.log("Hood/Rotor Rotations", position);
     if (Constants.Hood.verboseLogging) {
-      DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
+      // DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
     }
   }
 }
