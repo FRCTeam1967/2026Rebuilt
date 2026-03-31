@@ -150,6 +150,8 @@ public class Pivot extends SubsystemBase {
    */
   public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
+    // TODO: Create these requests in the constructor and use them here. Or create one, and just modify it velocity and 
+    // acceleration of the one object here.
     if (isSlow) {
       DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
       motor.setControl(request);

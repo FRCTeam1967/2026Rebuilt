@@ -58,6 +58,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public void setVelocity(double speed) {
+    // TODO: Create this request in the constructor and modify it here
     MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
 
     motor.setControl(request);
