@@ -280,8 +280,13 @@ public class RobotContainer {
             isEaterStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
 
             //default (when nothing is triggered)
-            (isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(seeTag.negate()).and(isDisabled.negate()).whileTrue(new RunCommand(()-> candle.setControl(black)));
-        
+            (   
+                isAligned.negate()
+                .and(speedReached.negate())
+                .and(isEaterStalling.negate())
+                .and(seeTag.negate())
+                .and(isDisabled.negate())
+            ).whileTrue(new RunCommand(()-> candle.setControl(black)));
         
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));

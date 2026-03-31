@@ -30,7 +30,6 @@ public LED() {
   cfg.LED.StripType = StripTypeValue.RGB;
   cfg.LED.BrightnessScalar = 0.25;
   candle.getConfigurator().apply(cfg);
-  setRainbow();
 }
 
 public void setRainbow() {
