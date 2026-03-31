@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -108,6 +110,11 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
+
+    m_robotContainer.autoDone.onTrue(
+      new InstantCommand(() -> wonAuto(m_robotContainer.matchTab))
+    );
+
   }
 
   @Override
