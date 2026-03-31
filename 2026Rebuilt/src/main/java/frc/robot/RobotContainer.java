@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
@@ -93,15 +94,26 @@ public class RobotContainer {
 
     //leds\
     private final CANdle candle = new CANdle(23);
+    
     private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
-    // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
-    // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
+    private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed());
+    
+    private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
+    public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
+    
+    private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
     
     private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
-
+    
     private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
+    private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+
     private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0));
+    private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
+    
     private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0));
+    private final Trigger isStalling = new Trigger(() -> eater.isStalling());
+    
     private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
 
     //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
@@ -128,286 +140,245 @@ public class RobotContainer {
     }
     
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        swerve.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            swerve.applyRequest(() ->
-                drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
+        //SWERVE
+            // Note that X is defined as forward according to WPILib convention,
+            // and Y is defined as to the left according to WPILib convention.
+            swerve.setDefaultCommand(
+                // Drivetrain will execute this command periodically
+                swerve.applyRequest(() ->
+                    drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-m_driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                )
+            );
 
-        // candle.setDefaultCommand(
-        //     //new ConditionalCommand(
-        //         new RunCommand (() -> candle.runColorFlowPattern(0, 255, 0)) //green - when aligned
-        //         // new RunCommand (() -> candle.runColorFlowPattern(255, 165, 0)), //orange - default
-        //         // () -> visabelle.isAligned()
-        //     );
+            /* reset gyro */
+            m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
 
-        // candle.setDefaultCommand (
-        //     new RunCommand (() -> candle.setControl(janksterRed))
-        // );
+            //POV buttons
+            m_driverController.povUp().whileTrue(swerve.applyRequest(() ->
+            drive.withVelocityX(0.2 * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
 
-        /* reset gyro */
-        m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
+            m_driverController.povDown().whileTrue(swerve.applyRequest(() ->
+            drive.withVelocityX(-0.2 * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
 
-        //POV buttons
-        m_driverController.povUp().whileTrue(swerve.applyRequest(() ->
-        drive.withVelocityX(0.2 * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        ));
+            m_driverController.povRight().whileTrue(swerve.applyRequest(() ->
+            drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-0.2 * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
 
-        m_driverController.povDown().whileTrue(swerve.applyRequest(() ->
-        drive.withVelocityX(-0.2 * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        ));
+            m_driverController.povLeft().whileTrue(swerve.applyRequest(() ->
+            drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(0.2 * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
 
-        m_driverController.povRight().whileTrue(swerve.applyRequest(() ->
-        drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(-0.2 * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        ));
+            // Idle while the robot is disabled. This ensures the configured
+            // neutral mode is applied to the drive motors while disabled.
+            final var idle = new SwerveRequest.Idle();
+            RobotModeTriggers.disabled().whileTrue(
+                swerve.applyRequest(() -> idle).ignoringDisable(true)
+            );
 
-        m_driverController.povLeft().whileTrue(swerve.applyRequest(() ->
-        drive.withVelocityX(0 * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(0.2 * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(0 * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        ));
+            swerve.registerTelemetry(logger::telemeterize);
 
-        // Idle while the robot is disabled. This ensures the configured
-        // neutral mode is applied to the drive motors while disabled.
-        final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(
-            swerve.applyRequest(() -> idle).ignoringDisable(true)
-        );
+            /* brake mode */
+            m_driverController.a().whileTrue(swerve.applyRequest(() -> brake));
+            
+            /* defense mode? */
+            m_driverController.b().whileTrue(swerve.applyRequest(() ->
+                point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
+            ));
 
-        swerve.registerTelemetry(logger::telemeterize);
+            // m_driverController.x().whileTrue(
+            //     new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
+            //         new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
+            //         () -> autoes.getDisSensor() <= 0.15)
+            // );
 
-        /* brake mode */
-        m_driverController.a().whileTrue(swerve.applyRequest(() -> brake));
+            // Run SysId routines when holding back/start and X/Y.
+            // Note that each routine should be run exactly once in a single log.
+            m_driverController.povDown().and(m_driverController.y()).whileTrue(swerve.sysIdDynamic(Direction.kForward));
+            m_driverController.povDown().and(m_driverController.x()).whileTrue(swerve.sysIdDynamic(Direction.kReverse));
+            m_driverController.povUp().and(m_driverController.y()).whileTrue(swerve.sysIdQuasistatic(Direction.kForward));
+            m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
+
+            // reset the field-centric heading on left bumper press
+            //m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
+
         
-        /* defense mode? */
-        m_driverController.b().whileTrue(swerve.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
-        ));
+        //ALL LED TRIGGERS
+            //default
+            isDisabled.whileTrue(new RunCommand (() -> candle.setControl(janksterRed)));
 
-        // m_driverController.x().whileTrue(
-        //     new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
-        //         new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
-        //         () -> autoes.getDisSensor() <= 0.15)
-        // );
+            //vision aligned
+            isAligned.whileTrue(new RunCommand (() -> candle.setControl(greenSolid)));
 
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        m_driverController.povDown().and(m_driverController.y()).whileTrue(swerve.sysIdDynamic(Direction.kForward));
-        m_driverController.povDown().and(m_driverController.x()).whileTrue(swerve.sysIdDynamic(Direction.kReverse));
-        m_driverController.povUp().and(m_driverController.y()).whileTrue(swerve.sysIdQuasistatic(Direction.kForward));
-        m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
+            //reached shooter speed
+            speedReached.whileTrue(new RunCommand (() -> candle.setControl(yellowBlink)));
 
-        // reset the field-centric heading on left bumper press
-        //m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
+            //intake stalling
+            isStalling.whileTrue(new RunCommand (() -> candle.setControl(redSolid)));
 
-        // hub alignment
-        // m_driverController.rightTrigger().whileTrue(
-        //     swerve.applyRequest(() ->
-        //         drive.withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-        //             .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-        //             .withRotationalRate(visabelle.limelight_aim_proportional()) // Drive with targetAngularVelocity
-        //     )
-        // );
+            //eject intak
+            m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(new RunCommand (() -> candle.setControl(magentaBlink)));
 
-        // hub alignment but with localization
-        m_driverController.rightTrigger().whileTrue(
-            swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
-                    .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            )
-        );
+            //can see A tag
+            seeTag.whileTrue(new RunCommand (() -> candle.setControl(blueSolid)));
 
-        //snap to hub
-        m_driverController.leftBumper().whileTrue(
-            swerve.applyRequest(() ->
-                driveAtAngle.withTargetDirection(Rotation2d.kPi)
-                    .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            )
-        );
+        
+        //VISION
+            //hub alignment but with localization
+            m_driverController.rightTrigger().whileTrue(
+                swerve.applyRequest(() ->
+                    driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+                        .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                )
+            );
 
-        if (visabelle.isAligned()) {
-            new RunCommand (() -> candle.setControl(greenSolid));
-        }
+            //snap to hub
+            m_driverController.leftBumper().whileTrue(
+                swerve.applyRequest(() ->
+                    driveAtAngle.withTargetDirection(Rotation2d.kPi)
+                        .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                )
+            );
 
-        m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
+            //win button to climb
+            m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
-        // yaw setter --> 0 faces hub 
-        m_driverController.x().onTrue(new SequentialCommandGroup(
-            // ROTATION2D IS IN **RADIANS!!!!**
-            // SET YAW IS IN **DEGREES!!!!**
-            new ConditionalCommand(
-                new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kPi)),
-                    new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
-                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kPi)))        
-                ),
-                new SequentialCommandGroup(
-                    new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kZero)),
-                    new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
-                    new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                    new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
-                ),
-                () -> ally.get() == Alliance.Blue
-            )
-        ));
-    
-        //MECHANISM DEFAULT COMMANDS
-        //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-        pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
-        yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-        //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-        //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
-
-        // SHOOTER AND HOOD BUTTON BINDINGS
-        // m_operatorController.leftTrigger()
-        // .whileTrue(
-        //   //new SequentialCommandGroup(
-        //     // new ParallelCommandGroup(
-        //     //   new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-        //     //   new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-        //     // ),
-        //     /*flywheelShooter.getNecessarySpeed(vision.getDisFromHub())*/
-
-        //     //new SequentialCommandGroup(
-        //       //new WaitUntilCommand(() -> flywheelShooter.reachedShooterSpeed()),
-        //       new ParallelCommandGroup(
-        //         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-        //         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-        //         new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)
-        //       )
-        //     //)
-        //   //)
-        // );
-
-        m_operatorController.leftTrigger().whileTrue(
-            new SequentialCommandGroup( 
-                new ParallelCommandGroup(
-                    new ParallelCommandGroup(
-                        //new ConditionalCommand(new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION), null, null)
-                        new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
-                    ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
+            //yaw setter --> 0 faces hub (TESTING)
+            m_driverController.x().onTrue(new SequentialCommandGroup(
+                // ROTATION2D IS IN **RADIANS!!!!**
+                // SET YAW IS IN **DEGREES!!!!**
+                new ConditionalCommand(
                     new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+                        new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kPi)),
+                        new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
+                        new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                        new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kPi)))        
+                    ),
+                    new SequentialCommandGroup(
+                        new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kZero)),
+                        new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
+                        new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
+                        new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
+                    ),
+                    () -> ally.get() == Alliance.Blue
+                )
+            ));
+    
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+        //MECHANISM DEFAULT COMMANDS
+            //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
+            pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
+            yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
+            //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+            //ledSubsystem.setDefaultCommand(ledSubsystem.runPattern(LEDPattern.gradient(GradientType.kContinuous, Color.kGold)).withName("Default")); //TODO: update color
 
-                        new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
+
+        //SHOOTER
+            m_operatorController.leftTrigger().whileTrue(
+                new SequentialCommandGroup( 
+                    new ParallelCommandGroup(
                         new ParallelCommandGroup(
-                            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                            new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                            //new ConditionalCommand(new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION), null, null)
+                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                        ),
 
+                        new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+
+                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                            
+                            new ParallelCommandGroup(
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+
+                            )
                         )
                     )
                 )
-            )); //TODO: add defense mode while the robot is shooting
+            ); //TODO: add defense mode while the robot is shooting
 
-        //EJECT SHOOTER
-        // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
-        //     new ParallelCommandGroup(
-        //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
-        //         new RunCommand (() -> candle.setControl(magentaBlink))
-        //     )
-        // );
+            //eject shooter //TODO: see if we need this
+            // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
+            //     new ParallelCommandGroup(
+            //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+            //         new RunCommand (() -> candle.setControl(magentaBlink))
+            //     )
+            // );
+
 
         //SHUTTLING
-        m_operatorController.leftBumper().whileTrue(
-            new SequentialCommandGroup(
-                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
-                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+            m_operatorController.leftBumper().whileTrue(
+                new SequentialCommandGroup(
+                    new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                    new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                )
+            );
 
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
-            )
-        );
-
-        //hood back down
-        m_operatorController.y().whileTrue(
-            //new SequentialCommandGroup(
+            //hood back down
+            m_operatorController.y().whileTrue(
                 new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
-                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
-            //)
-        );
+            );
 
-        //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
-        //PIVOT AND INTAKE AND INDEXER BUTTON BINDINGS
-        //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
+        //PIVOT
+            m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
+            m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
+
         
         //EJECT HOPPER
-        //EJECT HOPPER
-        m_operatorController.rightBumper().whileTrue(
-            new ParallelCommandGroup(
-                new RunFeeder(feeder, 5),
-                new RunCommand (() -> candle.setControl(magentaBlink))
-            )
-        );
+            m_operatorController.rightBumper().whileTrue(
+                new ParallelCommandGroup(
+                    new RunFeeder(feeder, 5),
+                    new RunCommand (() -> candle.setControl(magentaBlink))
+                )
+            );
+
 
         //INTAKE
-        m_operatorController.rightTrigger().whileTrue(
-          new ParallelCommandGroup(
-            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
-            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
-          )
-        );
+            m_operatorController.rightTrigger().whileTrue(
+                new ParallelCommandGroup(
+                    new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
+                )
+            );
 
-        // EJECT INTAKE
-        m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
-          new ParallelCommandGroup( //wasnt there before
-            new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
-          )
-        );
+            //eject
+            m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
+                new ParallelCommandGroup( //wasnt there before
+                    new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
+                )
+            );
 
-        //EJECT INTAKE
-        // m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
-        //     new ParallelCommandGroup(  
-        //         new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
-        //         new RunCommand (() -> candle.setControl(magentaBlink))
-        //     )  
-        // );
+            // m_operatorController.x().whileTrue(
+            //     new ParallelCommandGroup(  
+            //         new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
+            //         new RunCommand (() -> candle.setControl(magentaBlink))
+            //     )  
+            // );
+        
+            //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
-        m_operatorController.x().whileTrue(
-            new ParallelCommandGroup(  
-                new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
-                new RunCommand (() -> candle.setControl(magentaBlink))
-            )  
-        );
-        //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
-
-        m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
-        m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
-
+            
         //CLIMB
-        m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
-        m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
-        m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
+            m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
+            m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
+            m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
 
     }
 

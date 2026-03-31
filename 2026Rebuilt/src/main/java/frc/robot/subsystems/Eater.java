@@ -51,6 +51,10 @@ public class Eater extends SubsystemBase {
     motor.stopMotor();
   }
 
+  public boolean isStalling() {
+    return (motor.getSupplyCurrent().getValueAsDouble() > 40.0); //TODO: is 40 amps the current limit?
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

@@ -93,6 +93,13 @@ public class VisabelleUpdate extends SubsystemBase {
     return false;
   }
 
+  public boolean canSeeATag() {
+    mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
+
+    return (mt2_front.tagCount > 0 || mt2_back.tagCount > 0);
+  }
+
   public void setFirstVisionPose() {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
