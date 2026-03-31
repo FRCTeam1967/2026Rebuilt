@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -27,6 +28,10 @@ public class Feeder extends SubsystemBase {
     var talonFXConfigs = new TalonFXConfiguration();
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 75;
+    limitConfigs.StatorCurrentLimitEnable = true;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
 
@@ -57,6 +62,9 @@ public class Feeder extends SubsystemBase {
   public void setVelocity(double speed) {
     MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
     motor.setControl(request);
+  }
+  public boolean isStalling() {
+    return (motor.getSupplyCurrent().getValueAsDouble() > 75.0); 
   }
 
   /**

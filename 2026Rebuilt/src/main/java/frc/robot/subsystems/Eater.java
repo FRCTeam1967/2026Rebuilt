@@ -25,7 +25,7 @@ public class Eater extends SubsystemBase {
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 60;
+    limitConfigs.StatorCurrentLimit = 75;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     var motorConfigs = new MotorOutputConfigs();
@@ -45,7 +45,7 @@ public class Eater extends SubsystemBase {
   }
 
   public boolean isStalling() {
-    return (motor.getSupplyCurrent().getValueAsDouble() > 60.0); 
+    return (motor.getSupplyCurrent().getValueAsDouble() > 75.0); 
   }
 
   

@@ -276,23 +276,21 @@ public class RobotContainer {
                 () -> ally.get() == Alliance.Blue
             )
         ));
-        isDisabled.whileTrue(
-            new ParallelCommandGroup(
-                new RunCommand(()-> candle.setControl(janksterRed)), 
-                new PrintCommand("jankster on!!!!!!1!!!!!!!")
-                ));
+        isDisabled.whileTrue(new RunCommand(() -> candle.setControl(janksterRed)).ignoringDisable(true));
 
-        //vision aligned
-        isAligned.whileTrue(new RunCommand(()-> candle.setControl(greenSolid)));
+        //seeing any tag
+        seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isStalling.negate())
+            .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
-        //reached shooter speed
-        speedReached.whileTrue(new RunCommand (()-> candle.setControl(yellowBlink)));
+        //aligned with tag
+        isAligned.and(speedReached.negate()).and(isStalling.negate())
+            .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
-        seeTag.whileTrue(new RunCommand(()-> candle.setControl(blueSolid)));
+        //shooter speed reached
+        speedReached.and(isStalling.negate())
+            .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
 
-        isStalling.whileTrue(new RunCommand(()-> candle.setControl(magentaBlink)));
-
-
+        isStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
@@ -401,9 +399,9 @@ public class RobotContainer {
             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
             new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-            new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
-          )
-        );
+            new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
+)
+          );
 
         // EJECT INTAKE
         m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
