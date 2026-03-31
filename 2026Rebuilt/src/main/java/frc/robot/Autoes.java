@@ -75,7 +75,8 @@ public class Autoes {
     autoChooserLOL.addRoutine("HubToDepot Shoot", this::hTd);
     autoChooserLOL.addRoutine("HubToOutpost to Neutral Intake Shoot", this::hotn);
     autoChooserLOL.addRoutine("HubToDepot to Neutral Intake Shoot", this::hdtn);
-    autoChooserLOL.addRoutine("dtn with dis sensor", this::dtnDisSensor);
+    autoChooserLOL.addRoutine("DT Neutral Score (dissensor)", this::dtnDisSensor);
+    autoChooserLOL.addRoutine("DT Neutral Bump Shoot", this::dtnBump);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -860,6 +861,76 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           ).withTimeout(3)
       )); 
 
+    return routine;
+  }
+  private AutoRoutine dtnBump() {
+    AutoRoutine routine = autoFactory.newRoutine("DT Neutral Zone Distance Sensor");
+
+    AutoTrajectory trenchToCenter = routine.trajectory("DT_N_DisSensor");
+    AutoTrajectory intake  = routine.trajectory("DT_N_intake_first_time");
+    AutoTrajectory goBackScore = routine.trajectory("N_DTShoot2Bump");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+    // WITHOUT EVENT MARKER
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchToCenter.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          trenchToCenter.cmd(),
+          new PrintCommand("auto start")
+      )
+    );
+
+    trenchToCenter.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), //wasnt there before
+            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+            new PrintCommand("intake started running")
+      )
+    );
+    trenchToCenter.done().onTrue(intake.cmd());
+    
+    intake.active().onTrue(
+      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED));
+    intake.done().onTrue(goBackScore.cmd());
+
+  
+    goBackScore.done().onTrue(
+      Commands.sequence( 
+          new AimHub(m_robotContainer, m_robotContainer.visabelle),
+          new ParallelCommandGroup(
+              new ParallelCommandGroup(
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  //new RunCommand (() -> candle.setControl(yellowBlink))
+              ),
+              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed()),
+                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                  
+                  new ParallelCommandGroup(
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+
+                  )
+              )
+          ).withTimeout(3)
+      )); 
     return routine;
   }
 
