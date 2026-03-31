@@ -63,8 +63,9 @@ public class Feeder extends SubsystemBase {
     MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
     motor.setControl(request);
   }
+  
   public boolean isStalling() {
-    return (motor.getSupplyCurrent().getValueAsDouble() > 75.0); 
+    return (motor.getSupplyCurrent().getValueAsDouble() > 40.0); //65
   }
 
   /**
