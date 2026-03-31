@@ -5,22 +5,15 @@
 package frc.robot.subsystems;
 import frc.robot.Constants;
 
-import java.util.ArrayList;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
-//import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
-//import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-//import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
-// import frc.robot.LimelightHelpers.LimelightResults;
-// import edu.wpi.first.wpilibj.Timer;
 import frc.robot.LimelightHelpers.RawFiducial;
 
 public class VisabelleUpdate extends SubsystemBase {
@@ -30,8 +23,8 @@ public class VisabelleUpdate extends SubsystemBase {
   private SwerveOnTheseBows swerve;
 
   // number of accepted pose estimates
-  private int frontLLEstimatecount = 0;
-  private int backLLEstimatecount = 0;
+  // private int frontLLEstimatecount = 0;
+  // private int backLLEstimatecount = 0;
 
   //private static final double AREA_THRESHOLD = 0.1;
   //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
@@ -64,20 +57,39 @@ public class VisabelleUpdate extends SubsystemBase {
   }
 
   public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
-    if (estimate == null)
-        return true;
-
-    if (estimate.tagCount == 0)
-        return true;
-
-    if (estimate.avgTagDist > Constants.Visabelle.DIST_THRESHOLD)
-        return true;
-
-    if (estimate.rawFiducials.length >= 1) {
-      if (estimate.rawFiducials[0].ambiguity > 0.8)
+    if (estimate == null) {
         return true;
     }
-    
+
+    if (estimate.tagCount == 0) {
+        return true;
+    }
+
+    if (estimate.avgTagDist > Constants.Visabelle.DIST_THRESHOLD) {
+        return true;
+    }
+
+    if (estimate.rawFiducials.length >= 1) {
+      if (estimate.rawFiducials[0].ambiguity > 0.8) {
+        return true;
+      }
+    }
+
+    // angular velocity
+    if (swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() > 360.0) {
+        return true;
+    }
+
+    // speed
+    ChassisSpeeds speeds = swerve.getState().Speeds;
+
+    // pythagorean theorem
+    double linearVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+
+    if (linearVelocity > 5.0) { // TODO: tune
+        return true;    
+    }
+
     return false;
   }
 
@@ -111,23 +123,65 @@ public class VisabelleUpdate extends SubsystemBase {
     double distance = estimate.rawFiducials[0].distToCamera;
     double ambiguity = estimate.rawFiducials[0].ambiguity;
 
-    double distanceScale = Math.pow(distance, 2);
-    double tagScale = 1.0 / tagCount;
-    double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
-    double scale = distanceScale * tagScale * ambiguityScale;
-    double deviation = 0.01 * scale;
+    // double distanceScale = Math.pow(distance, 2);
+    // double tagScale = 1.0 / tagCount;
+    // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
+    // double scale = distanceScale * tagScale * ambiguityScale;
+    // double deviation = 0.01 * scale;
+
+    //TODO: test these derivations in order, see if they are useful
+    //double deviation = 6.0 * Math.pow(ambiguity, 3); 
+        //verify examples: 0.1	>> 0.006; 0.3	>> 0.162; 0.5 >> 0.75; 0.7 >> 2.06; 1.0	>> 6.0
+
+    double deviation = 0.75 * distance * Math.pow(ambiguity, 2); //!! best so far
+        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
+        //(dist >> 2) 0.1 >> 0.015; 0.3 >> 0.135; 0.5 >> 0.375; 0.7 >> 0.735
+        //(dist >> 4) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
+
+    //double deviation = 0.75 * Math.pow(distance, 2) * Math.pow(ambiguity, 2);
+        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
+        //(dist >> 2) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
+        //(dist >> 4) 0.1 >> 0.12; 0.3 >> 1.08; 0.5 >> 3.0; 0.7 >> 5.88
+
+
+    //double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
+        //(dist >> 2, tags >> 1) 0.1 >> 0.02; 0.3 >> 0.18; 0.5 >> 0.5; 0.7 >> 0.98
+        //(dist >> 2, tags >> 4) 0.1 >> 0.01; 0.3 >> 0.09; 0.5 >> 0.25; 0.7 >> 0.49
+        //(dist >> 4, tags >> 1) 0.1 >> 0.08; 0.3 >> 0.72; 0.5 >> 2.0; 0.7 >> 3.92
+        //(dist >> 4, tags >> 4) 0.1 >> 0.04; 0.3 >> 0.36; 0.5 >> 1.0; 0.7 >> 1.96
 
     DogLog.log("deviation", deviation);
     DogLog.log("LL name", name);
 
-    // if (isFront) {
-    //   deviation = frontAmbiguity;
-    // }
-    // else {
-    //   deviation = backAmbiguity;
-    // }
-
     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(deviation, deviation,9999999));
+  }
+
+  public double getDeviation(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
+      String name = isFront ? "limelight-front" : "limelight-back";
+      double tagCount = LimelightHelpers.getTargetCount(name);
+      double distance = estimate.rawFiducials[0].distToCamera;
+      double ambiguity = estimate.rawFiducials[0].ambiguity;
+
+      double distanceScale = Math.pow(distance, 2);
+      double tagScale = 1.0 / tagCount;
+      double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
+      double scale = distanceScale * tagScale * ambiguityScale;
+
+      DogLog.log("scale", scale);
+      DogLog.log("LL name", name);
+
+      return scale;
+  }
+
+  public boolean posesAreClose(LimelightHelpers.PoseEstimate frontEstimate, LimelightHelpers.PoseEstimate backEstimate) {
+    Pose2d frontPose = frontEstimate.pose;
+    Pose2d backPose = backEstimate.pose;
+
+    double eucDist = frontPose.getTranslation().getDistance(backPose.getTranslation());
+
+    double MAX_DISTANCE = 0.33655; // 13.25 in (half the robot)
+
+    return eucDist <= MAX_DISTANCE;
   }
 
   @Override
@@ -259,18 +313,35 @@ public class VisabelleUpdate extends SubsystemBase {
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
       //if (mt2_front.tagCount > mt2_back.tagCount) {
 
+      if (posesAreClose(mt2_front, mt2_back)) {
         // add front
         setStandardDevs(mt2_front, true);
         swerve.addVisionMeasurement(
-          mt2_front.pose,
+          mt2_front.pose, 
           mt2_front.timestampSeconds);
 
         // add back
         setStandardDevs(mt2_back, false);        
-
         swerve.addVisionMeasurement(
-          mt2_back.pose,
+          mt2_back.pose, 
           mt2_back.timestampSeconds);
+
+      }
+
+      else {
+        if (getDeviation(mt2_front, true) < getDeviation(mt2_back, false)) {
+          setStandardDevs(mt2_front, true);
+          swerve.addVisionMeasurement(
+            mt2_front.pose, 
+            mt2_front.timestampSeconds);
+        }
+        else {
+          setStandardDevs(mt2_back, true);
+          swerve.addVisionMeasurement(
+            mt2_back.pose, 
+            mt2_back.timestampSeconds);
+        }
+      }
         
         // DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
         // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
