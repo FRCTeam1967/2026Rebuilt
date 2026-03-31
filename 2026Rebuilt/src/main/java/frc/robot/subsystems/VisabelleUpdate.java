@@ -119,21 +119,21 @@ public class VisabelleUpdate extends SubsystemBase {
     // double deviation = 0.01 * scale;
 
     //TODO: test these derivations in order, see if they are useful
-    double deviation = 6.0 * Math.pow(ambiguity, 3); 
+    //double deviation = 6.0 * Math.pow(ambiguity, 3); 
         //verify examples: 0.1	>> 0.006; 0.3	>> 0.162; 0.5 >> 0.75; 0.7 >> 2.06; 1.0	>> 6.0
 
-    //2) double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
+    double deviation = 0.75 * distance * Math.pow(ambiguity, 2); //!! best so far
         //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
         //(dist >> 2) 0.1 >> 0.015; 0.3 >> 0.135; 0.5 >> 0.375; 0.7 >> 0.735
         //(dist >> 4) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
 
-    //3) double deviation = 0.75 * Math.pow(distance, 2) * Math.pow(ambiguity, 2);
+    //double deviation = 0.75 * Math.pow(distance, 2) * Math.pow(ambiguity, 2);
         //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
         //(dist >> 2) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
         //(dist >> 4) 0.1 >> 0.12; 0.3 >> 1.08; 0.5 >> 3.0; 0.7 >> 5.88
 
 
-    //4) double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
+    //double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
         //(dist >> 2, tags >> 1) 0.1 >> 0.02; 0.3 >> 0.18; 0.5 >> 0.5; 0.7 >> 0.98
         //(dist >> 2, tags >> 4) 0.1 >> 0.01; 0.3 >> 0.09; 0.5 >> 0.25; 0.7 >> 0.49
         //(dist >> 4, tags >> 1) 0.1 >> 0.08; 0.3 >> 0.72; 0.5 >> 2.0; 0.7 >> 3.92
