@@ -116,7 +116,7 @@ public class VisabelleUpdate extends SubsystemBase {
     }
   }
 
-  // set standard deviations based on ambiguity (the lower the )
+  // set standard deviations based on ambiguity (the lower the ambiguity, the more we trust it)
   public void setStandardDevs(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
     String name = isFront ? "limelight-front" : "limelight-back";
     double tagCount = LimelightHelpers.getTargetCount(name);
@@ -238,7 +238,6 @@ public class VisabelleUpdate extends SubsystemBase {
     }
 
     //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
-
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
     // DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
@@ -246,6 +245,7 @@ public class VisabelleUpdate extends SubsystemBase {
     // DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
     // DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
+    //logging all the tags we can see
     if (mt2_front != null && mt2_front.tagCount > 0) {
       long tagArray[] = new long[mt2_front.tagCount];
       int idx = 0;
@@ -254,6 +254,7 @@ public class VisabelleUpdate extends SubsystemBase {
       }
       DogLog.log("Front fiducials", tagArray);
     }
+
     if (mt2_back != null && mt2_back.tagCount > 0) {
       long tagArray[] = new long[mt2_back.tagCount];
       int idx = 0;
@@ -289,7 +290,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
-      setStandardDevs(mt2_front, true); //TODO: tune?
+      setStandardDevs(mt2_front, true);
 
       swerve.addVisionMeasurement(
         mt2_front.pose,

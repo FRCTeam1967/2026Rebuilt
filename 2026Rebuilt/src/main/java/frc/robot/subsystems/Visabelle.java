@@ -63,8 +63,8 @@ public class Visabelle extends SubsystemBase {
     Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
-    
     DogLog.log("Visabelle/dist from hub", eucDist);
+    
     if (Constants.Visabelle.verboseLogging) {
       DogLog.log("Visabelle/target hub", hubPose);
     }
