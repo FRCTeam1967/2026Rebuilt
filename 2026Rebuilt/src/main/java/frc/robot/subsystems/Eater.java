@@ -21,11 +21,11 @@ public class Eater extends SubsystemBase {
   
   /** Creates a new Intake. */
   public Eater() {
-    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID);
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 75;
+    limitConfigs.StatorCurrentLimit = 60;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     var motorConfigs = new MotorOutputConfigs();
@@ -43,6 +43,11 @@ public class Eater extends SubsystemBase {
     motor.set(intakeSpeed.get());
     // DogLog.log("Eater/intake desired speed", intakeSpeed.get());
   }
+
+  public boolean isStalling() {
+    return (motor.getSupplyCurrent().getValueAsDouble() > 60.0); 
+  }
+
   
   /**
    * stops motor

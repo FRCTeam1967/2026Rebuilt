@@ -30,7 +30,7 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
-        SignalLogger.setPath("/u/logs");
+        SignalLogger.setPath("/logs");
         SignalLogger.start();
 
         /* Set up the module state Mechanism2d telemetry */

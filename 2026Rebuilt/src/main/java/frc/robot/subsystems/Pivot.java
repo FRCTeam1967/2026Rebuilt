@@ -8,11 +8,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -74,13 +76,16 @@ public class Pivot extends SubsystemBase {
     motor = new TalonFX (Constants.Pivot.MOTOR_ID, canbus);
     request = new MotionMagicVoltage(revsToMove).withFeedForward(0.0);
 
-    absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID, canbus);
+    absEncoder = new CANcoder(Constants.Pivot.ENCODER_ID);
     CANcoderConfiguration ccdConfigs = new CANcoderConfiguration();
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     //ccdConfigs.MagnetSensor.MagnetOffset = 0;
     ccdConfigs.MagnetSensor.MagnetOffset = Constants.Pivot.MAGNET_OFFSET;    
 
     var talonFXconfigs = new TalonFXConfiguration();
+
+    var motorConfigs = new MotorOutputConfigs();
+    motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
 
     var slot0Configs = talonFXconfigs.Slot0;
     slot0Configs.kS = Constants.Pivot.kS; 

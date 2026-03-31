@@ -83,7 +83,6 @@ public class VisabelleUpdate extends SubsystemBase {
     // speed
     ChassisSpeeds speeds = swerve.getState().Speeds;
 
-    // pythagorean theorem
     double linearVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
     if (linearVelocity > 5.0) { // TODO: tune
@@ -92,7 +91,12 @@ public class VisabelleUpdate extends SubsystemBase {
 
     return false;
   }
+  public boolean canSeeATag() { 
+    mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+    mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
 
+    return (mt2_front.tagCount > 0 || mt2_back.tagCount > 0);
+  }
   public void setFirstVisionPose() {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
@@ -162,15 +166,17 @@ public class VisabelleUpdate extends SubsystemBase {
       double distance = estimate.rawFiducials[0].distToCamera;
       double ambiguity = estimate.rawFiducials[0].ambiguity;
 
-      double distanceScale = Math.pow(distance, 2);
-      double tagScale = 1.0 / tagCount;
-      double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
-      double scale = distanceScale * tagScale * ambiguityScale;
+      // double distanceScale = Math.pow(distance, 2);
+      // double tagScale = 1.0 / tagCount;
+      // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
+      // double scale = distanceScale * tagScale * ambiguityScale;
 
-      DogLog.log("scale", scale);
-      DogLog.log("LL name", name);
+      double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
 
-      return scale;
+      //DogLog.log("scale", deviation);
+      //DogLog.log("LL name", name);
+
+      return deviation;
   }
 
   public boolean posesAreClose(LimelightHelpers.PoseEstimate frontEstimate, LimelightHelpers.PoseEstimate backEstimate) {

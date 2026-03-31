@@ -15,6 +15,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.math.controller.PIDController;
-
+import frc.robot.Constants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -145,7 +146,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax);
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
         
     }
 
@@ -172,7 +173,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax); 
+        headingController.enableContinuousInput(-Math.PI, Math.PI); 
     }
 
     /**
@@ -206,7 +207,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax);
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -258,11 +259,18 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     public void followTrajectory(SwerveSample sample) {
         // Get the current pose of the robot
         Pose2d pose = getPose();
+        double rotationalRate = sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading);
+
+        if (Constants.Drivetrain.verboseLogging) {
+            DogLog.log("Drivetrain/Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
+            DogLog.log("Drivetrain/Trajectory/commanded rot rate", rotationalRate);
+        }
+
         // Generate and apply the next speeds for the robot
         setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
-            .withRotationalRate(sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading))
+            .withRotationalRate(rotationalRate)
             .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
 
 
@@ -295,6 +303,8 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        DogLog.log("Drivetrain/pose", getPose());
     }
 
     private void startSimThread() {

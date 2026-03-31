@@ -5,6 +5,7 @@ package frc.robot;
 import java.util.Optional;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
@@ -65,7 +67,7 @@ public class RobotContainer {
     public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
   
     //mechanism
-    public static final CANBus CANBus = new CANBus("CANivore");
+    public static final CANBus CANBus = new CANBus("Default Name");
     public final Pivot pivot = new Pivot();
     public final Eater eater = new Eater();
     public final Indexer indexer = new Indexer();
@@ -91,17 +93,31 @@ public class RobotContainer {
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
 
-    //leds\
-    private final CANdle candle = new CANdle(23);
+    //leds
+    public final CANdle candle = new CANdle(23);
     private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
     // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
     // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
+
+     private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed());
+    
+    public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 45).withColor(new RGBWColor(255, 0, 0));
+    public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
+    
+    private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
     
     private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
 
+    private final FireAnimation fire = new FireAnimation(0, 45);
     private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
+    private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+
     private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0));
+    private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
+    
     private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0));
+    private final Trigger isStalling = new Trigger(() -> eater.isStalling());
+    
     private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
 
     //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
@@ -230,17 +246,13 @@ public class RobotContainer {
         );
 
         //snap to hub
-        m_driverController.leftBumper().whileTrue(
+        m_driverController.rightBumper().whileTrue(
             swerve.applyRequest(() ->
                 driveAtAngle.withTargetDirection(Rotation2d.kPi)
                     .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             )
         );
-
-        if (visabelle.isAligned()) {
-            new RunCommand (() -> candle.setControl(greenSolid));
-        }
 
         m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
@@ -264,6 +276,23 @@ public class RobotContainer {
                 () -> ally.get() == Alliance.Blue
             )
         ));
+        isDisabled.whileTrue(
+            new ParallelCommandGroup(
+                new RunCommand(()-> candle.setControl(janksterRed)), 
+                new PrintCommand("jankster on!!!!!!1!!!!!!!")
+                ));
+
+        //vision aligned
+        isAligned.whileTrue(new RunCommand(()-> candle.setControl(greenSolid)));
+
+        //reached shooter speed
+        speedReached.whileTrue(new RunCommand (()-> candle.setControl(yellowBlink)));
+
+        seeTag.whileTrue(new RunCommand(()-> candle.setControl(blueSolid)));
+
+        isStalling.whileTrue(new RunCommand(()-> candle.setControl(magentaBlink)));
+
+
     
         //MECHANISM DEFAULT COMMANDS
         //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
@@ -339,7 +368,7 @@ public class RobotContainer {
         //SHUTTLING
         m_operatorController.leftBumper().whileTrue(
             new SequentialCommandGroup(
-                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE),
+                new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE).withTimeout(3), //added timeout in case hood doesnt move so that they can still shuttle
                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
 
                 //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
@@ -360,13 +389,11 @@ public class RobotContainer {
         //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
         
         //EJECT HOPPER
-        //EJECT HOPPER
         m_operatorController.rightBumper().whileTrue(
             new ParallelCommandGroup(
                 new RunFeeder(feeder, 5),
-                new RunCommand (() -> candle.setControl(magentaBlink))
-            )
-        );
+                new RunCommand(()-> candle.setControl(whiteSolid))
+        ));
 
         //INTAKE
         m_operatorController.rightTrigger().whileTrue(
@@ -385,21 +412,14 @@ public class RobotContainer {
           )
         );
 
-        //EJECT INTAKE
-        // m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
-        //     new ParallelCommandGroup(  
-        //         new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
-        //         new RunCommand (() -> candle.setControl(magentaBlink))
-        //     )  
-        // );
+      
 
         m_operatorController.x().whileTrue(
             new ParallelCommandGroup(  
                 new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
-                new RunCommand (() -> candle.setControl(magentaBlink))
+                new RunCommand (() -> candle.setControl(whiteSolid))
             )  
         );
-        //new RunIndexer(indexer, 10.0))); //is this formatting intended? why is feeder outside?
 
         m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
         m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
@@ -411,20 +431,6 @@ public class RobotContainer {
 
     }
 
-    private double limelight_aim_proportional() {        
-        double kP = 0.02; //0.035
-        double targetingAngularVelocity = 0.0; 
-        // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of
-        // your limelight 3 feed, tx should return roughly 31 degrees.
-
-        targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
-
-        // convert to radians per second for our drive method
-        targetingAngularVelocity *= MaxAngularRate;
-        //invert since tx is positive when the target is to the right of the crosshair
-        targetingAngularVelocity *= -1.0;
-        return targetingAngularVelocity;
-    }
 
     public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
         HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
