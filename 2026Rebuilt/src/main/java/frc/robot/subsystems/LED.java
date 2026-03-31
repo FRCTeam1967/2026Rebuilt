@@ -33,15 +33,20 @@ public LED() {
 }
 
 public void setRainbow() {
+  // TODO: Create this control request in the constructor and use it here
   candle.setControl(new RainbowAnimation(LED_START, LED_COUNT));
 }
 
 public void setFire() {
+  // TODO: Create this control request in the constructor and use it here
   candle.setControl(new FireAnimation(LED_START, LED_COUNT));
 }
 
 public void setColorFlow(){
+  // TODO: Create this control request in the constructor and use it here
   RGBWColor colorFlowColor = new RGBWColor(255, 0, 0); //red
+
+  // TODO: Create this control request in the constructor and modify it (like you're doing) here
   candle.setControl(
     new ColorFlowAnimation(LED_START, LED_COUNT).withColor(colorFlowColor));
 }
@@ -61,6 +66,7 @@ public void setTwinkle() {
 
   twinkleIndex = (twinkleIndex+1) % colors.length;
 
+  // TODO: Create this control request in the constructor and modify it here. ledEnd appears to be a constant.
   candle.setControl(
     new TwinkleAnimation(LED_START, ledEnd)
       .withColor(color));
@@ -69,6 +75,7 @@ public void setTwinkle() {
 public void setLarson() {
   int ledEnd = LED_START + LED_COUNT - 1;
 
+  // TODO: Create this control request in the constructor and modify it here
   candle.setControl(
     new LarsonAnimation(LED_START, ledEnd)
       .withColor(new RGBWColor(255, 0, 255)) //magenta

@@ -14,9 +14,13 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.StatusSignalCollection;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
@@ -41,6 +45,11 @@ public class Yeeter extends SubsystemBase {
   //private final DoubleSubscriber feedForward = DogLog.tunable("Yeeter/feedForward", 5.0);
 
   private Follower followerRequest = new Follower(Constants.Yeeter.YEETER_MOTOR1_ID, MotorAlignmentValue.Opposed);
+
+  // Signals that we use
+  private StatusSignalCollection signalCollection;
+  private StatusSignal<AngularVelocity> motor1Velocity, motor2Velocity;
+  private StatusSignal<Current> motor1StatorCurrent, motor2StatorCurrent;
 
   /** Creates a new FlywheelShooter. */
   public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
@@ -118,6 +127,13 @@ public class Yeeter extends SubsystemBase {
     motor1.getConfigurator().apply(talonFXConfigs);
     motor2.getConfigurator().apply(talonFXConfigs);
     populateTreeMap();
+
+    // Setup the signals and signal collection
+    motor1Velocity = motor1.getVelocity();
+    motor2Velocity = motor2.getVelocity();
+    motor1StatorCurrent = motor1.getStatorCurrent();
+    motor2StatorCurrent = motor2.getStatorCurrent();
+    signalCollection = new StatusSignalCollection(motor1Velocity, motor1StatorCurrent, motor2Velocity, motor2StatorCurrent);
   }
 
   /**
@@ -134,6 +150,7 @@ public class Yeeter extends SubsystemBase {
     double velocity = velocitySupplier.getAsDouble();
 
 
+    // TODO: Create this object in the constructor and modify it here.
     MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
     .withAcceleration(yeeterAcceleration.get()) ; 
     //.withFeedForward(0.12); //kS value ?
@@ -149,7 +166,7 @@ public class Yeeter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   public boolean reachedYeeterSpeed() {
-    double motorSpeed = motor1.getVelocity().getValueAsDouble();
+    double motorSpeed = motor1Velocity.getValueAsDouble();
     return reachedYeeterSpeed(motorSpeed);
   }
 
@@ -167,8 +184,9 @@ public class Yeeter extends SubsystemBase {
    * @return average velocity of both motors
    */
   public double getCurrentVelocity() {
-    double currentVelocity1 = motor1.getVelocity().getValueAsDouble();
-    double currentVelocity2 = Math.abs(motor2.getVelocity().getValueAsDouble());
+    // TODO: Since the motors are physically joined, we shouldn't need to take the average; we can just use one of the motor speeds
+    double currentVelocity1 = motor1Velocity.getValueAsDouble();
+    double currentVelocity2 = Math.abs(motor2Velocity.getValueAsDouble());
     double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
     return(averageVelocity);
   }
@@ -182,13 +200,13 @@ public class Yeeter extends SubsystemBase {
     motor2.setControl(followerRequest);
   }
 
-  /**
-   * @param motor
-   * @return velocity as double of motor
-   */
-  public double getMotorVelocity(TalonFX motor) {
-    return (motor.getVelocity().getValueAsDouble());
-  }
+  // /**
+  //  * @param motor
+  //  * @return velocity as double of motor
+  //  */
+  // public double getMotorVelocity(TalonFX motor) {
+  //   return (motor.getVelocity().getValueAsDouble());
+  // }
 
   // public void configDashboard(ShuffleboardTab tab) {
   //   //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
@@ -230,13 +248,20 @@ public class Yeeter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double motor1Speed = getMotorVelocity(motor1);
+    // Refresh all signals in the signal collection. 
+    // It would be even better if we had a different class that kept track of all of the signal objects we cared about
+    // (per CAN bus), and did a refresh on that collection. That way, all signals across all subsystems could be refreshed
+    // at once. If we built such a thing, we would plug it into Robot.periodic() *before* it runs the scheduler so that all
+    // signals would be refreshed before any of the subsystems or commands tried to use them.
+    signalCollection.refreshAll();
+
+    double motor1Speed = motor1Velocity.getValueAsDouble();
     DogLog.log("Yeeter/Speed1", motor1Speed);
-    DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
+    DogLog.log("Yeeter/Speed2", motor2Velocity.getValueAsDouble());
 
     if (Constants.Yeeter.verboseLogging) {
-      DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/stator current 1", motor1StatorCurrent.getValueAsDouble());
+      DogLog.log("Yeeter/stator current 2", motor2StatorCurrent.getValueAsDouble());
       DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed));
     }
   }

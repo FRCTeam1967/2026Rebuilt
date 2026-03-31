@@ -108,6 +108,7 @@ public class AlignTowerPose extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+      // TODO: We should create the zero ChassisSpeeds statically somewhere as a constant and use that here to avoid the instance creation
       swerve.setControl(request.withSpeeds(new ChassisSpeeds()));
   }
 
