@@ -143,6 +143,8 @@ public final class Constants {
         public static final int FEEDER_MOTOR_ID = 36;
         public static final double FEEDER_SPEED = 100.0; //-20 //-10
 
+        public static final double FEEDER_GEAR_RATIO = 5/1;
+
         public static final double PREP_FEEDER = -50.0; 
 
         public static final double INTAKE_FEEDER = -10.0; 

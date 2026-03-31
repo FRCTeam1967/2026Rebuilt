@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.RainbowAnimation;
+import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
@@ -27,13 +28,16 @@ private final CANdle candle = new CANdle(CANDLE_ID);
 public LED() {
   CANdleConfiguration cfg = new CANdleConfiguration();
   cfg.LED.StripType = StripTypeValue.RGB;
-  cfg.LED.BrightnessScalar = 0.5;
+  cfg.LED.BrightnessScalar = 0.25;
   candle.getConfigurator().apply(cfg);
-  setRainbow();
 }
 
 public void setRainbow() {
   candle.setControl(new RainbowAnimation(LED_START, LED_COUNT));
+}
+
+public void setBlack(){
+  candle.setControl(new SolidColor(LED_START, LED_COUNT));
 }
 
 public void setFire() {
@@ -54,7 +58,8 @@ public void setTwinkle() {
     new RGBWColor(0, 0, 255),   // Blue
     new RGBWColor(255, 0, 255), // Magenta
     new RGBWColor(128, 0, 128),  // Purple
-    new RGBWColor(255,0,0)  // Red
+    new RGBWColor(255,0,0),  // Red
+    new RGBWColor(0, 0, 0) //Black
   };
 
   RGBWColor color = colors[twinkleIndex];
