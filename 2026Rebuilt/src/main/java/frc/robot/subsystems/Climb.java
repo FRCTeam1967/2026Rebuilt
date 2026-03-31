@@ -267,7 +267,7 @@ public class Climb extends SubsystemBase {
     DogLog.log("Climb/top sensor", getTopSensor());
 
     if (Constants.Climb.verboseLogging) {
-      DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
+      // DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
 
     //setSafe();
@@ -317,4 +317,3 @@ public class Climb extends SubsystemBase {
   
   
 }
-
