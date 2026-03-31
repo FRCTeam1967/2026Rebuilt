@@ -21,7 +21,7 @@ public class Eater extends SubsystemBase {
   
   /** Creates a new Intake. */
   public Eater() {
-    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID, canbus);
+    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID);
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
@@ -41,7 +41,7 @@ public class Eater extends SubsystemBase {
   public void setMotor(double speed) {
     //motor.set(speed);
     motor.set(intakeSpeed.get());
-    // DogLog.log("Eater/intake desired speed", intakeSpeed.get());
+    DogLog.log("Eater/intake desired speed", intakeSpeed.get());
   }
   
   /**
@@ -55,7 +55,8 @@ public class Eater extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     if (Constants.Eater.verboseLogging) {
-      // DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
   }
 }
+
