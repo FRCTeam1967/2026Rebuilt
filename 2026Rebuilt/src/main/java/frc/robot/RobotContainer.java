@@ -96,7 +96,7 @@ public class RobotContainer {
         // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
         // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
 
-        private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed());
+        private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(true));
         
         public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 45).withColor(new RGBWColor(255, 0, 0));
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -292,22 +292,21 @@ public class RobotContainer {
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
             pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
             yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-            //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+            theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
 
 
         //SHOOTER
             m_operatorController.leftTrigger().whileTrue(
-                new SequentialCommandGroup( 
+               new SequentialCommandGroup(     
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
-                            //new ConditionalCommand(new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION), null, null)
-                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                             //new RunCommand (() -> candle.setControl(yellowBlink))
                         ),
                         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                         new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed()),
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
                             
                             // new ParallelCommandGroup( //green
                             //     new SequentialCommandGroup(
@@ -324,12 +323,17 @@ public class RobotContainer {
                             new ParallelCommandGroup(
                                 new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                                 new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
 
+                                new SequentialCommandGroup(
+                                    new WaitCommand(1), 
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                )
                             )
                         )
                     )
-                )
+                    //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+               )
             ); //TODO: add defense mode while the robot is shooting
 
             // eject shooter
@@ -344,15 +348,34 @@ public class RobotContainer {
         //SHUTTLING
             m_operatorController.leftBumper().whileTrue(
                 new SequentialCommandGroup(
-                    new RunninTheHood(theHood, Constants.Hood.HOOD_ANGLE).withTimeout(3), //added timeout in case hood doesnt move so that they can still shuttle
-                    new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                    new SequentialCommandGroup( 
+                    new ParallelCommandGroup(
+                        new ParallelCommandGroup(
+                            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                            //new RunCommand (() -> candle.setControl(yellowBlink))
+                        ),
 
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
+                        new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                            
+                            new ParallelCommandGroup(
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                new SequentialCommandGroup(
+                                    new WaitCommand(2), 
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                )
+
+                            )
+                        )
+                    )
                 )
-            );
+            )); 
 
             //hood back down
-            m_operatorController.y().whileTrue(
+            m_operatorController.povLeft().whileTrue(
                 //new SequentialCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
                     //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
@@ -372,15 +395,12 @@ public class RobotContainer {
             isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
-                new ParallelCommandGroup(
-                    new RunFeeder(feeder, 5),
-                    new RunCommand(()-> candle.setControl(whiteSolid))
-                )
+                new RunFeeder(feeder, -75)
             );
 
 
         //INTAKE
-            m_operatorController.rightTrigger().whileTrue(
+            m_operatorController.rightTrigger().and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
                     new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
@@ -391,18 +411,11 @@ public class RobotContainer {
 
             //eject
             m_operatorController.rightTrigger().and(m_operatorController.x()).whileTrue(
-                new ParallelCommandGroup( //wasnt there before
-                    new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED)
-                )
-            );
-
-            m_operatorController.x().whileTrue(
-                new ParallelCommandGroup(  
+                 new ParallelCommandGroup(  
                     new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
                     new RunCommand (() -> candle.setControl(whiteSolid))
                 )  
             );
-
 
         //CLIMB
             m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 

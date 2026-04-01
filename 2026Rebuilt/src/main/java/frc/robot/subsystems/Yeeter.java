@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
@@ -15,6 +16,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -58,6 +60,10 @@ public class Yeeter extends SubsystemBase {
     slot0Configs.kP = Constants.Yeeter.kP;
     slot0Configs.kI = Constants.Yeeter.kI;
     slot0Configs.kD = Constants.Yeeter.kD;
+
+     var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 75;
+    limitConfigs.StatorCurrentLimitEnable = true;
 
     // DogLog.tunable("Yeeter/kP", slot0Configs.kP, 
     //   newP -> {
@@ -148,18 +154,22 @@ public class Yeeter extends SubsystemBase {
   /**
    * @return true if current speed of yeeter is >= threshold speed
    */
-  public boolean reachedYeeterSpeed() {
+  public boolean reachedYeeterSpeed(boolean usingVision) {
     double motorSpeed = motor1.getVelocity().getValueAsDouble();
-    return reachedYeeterSpeed(motorSpeed);
+    return reachedYeeterSpeed(motorSpeed, usingVision);
   }
 
-  private boolean reachedYeeterSpeed(double currentMotorSpeed) {
+  private boolean reachedYeeterSpeed(double currentMotorSpeed, boolean usingVision) {
     // Since we're using a double supplier, the value we get here may be different than the value we got in setVelocity().
     //double necessarySpeed = Constants.Yeeter.YEETER_SPEED;
-    double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
+    if (usingVision){
+      double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
 
-    DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
-    return (Math.abs(currentMotorSpeed) >= necessarySpeed);
+      DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
+      return (Math.abs(currentMotorSpeed) >= necessarySpeed);
+    }else{
+      return (Math.abs(currentMotorSpeed) >= Constants.Yeeter.YEETER_SPEED);
+    }
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
 
@@ -237,7 +247,7 @@ public class Yeeter extends SubsystemBase {
     if (Constants.Yeeter.verboseLogging) {
       DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
       DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed));
+      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed, true));
     }
   }
 

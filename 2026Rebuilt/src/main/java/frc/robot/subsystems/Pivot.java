@@ -106,7 +106,7 @@ public class Pivot extends SubsystemBase {
 
     // Make sure the encoder configuration applied before using it to sync the motor
     // position below.
-    //absEncoder.getAbsolutePosition().waitForUpdate(0.02);
+    absEncoder.getAbsolutePosition().waitForUpdate(0.02);
 
 
     //simulation 

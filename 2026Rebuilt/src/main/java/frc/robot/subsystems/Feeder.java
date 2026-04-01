@@ -30,7 +30,7 @@ public class Feeder extends SubsystemBase {
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 75;
+    limitConfigs.StatorCurrentLimit = 100;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
@@ -65,7 +65,7 @@ public class Feeder extends SubsystemBase {
   }
   
   public boolean isStalling() {
-    return (motor.getSupplyCurrent().getValueAsDouble() > 40.0); //65
+    return (motor.getSupplyCurrent().getValueAsDouble() > 100.0); //65
   }
 
   /**
