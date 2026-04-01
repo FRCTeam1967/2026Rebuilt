@@ -192,14 +192,9 @@ public class RobotContainer {
 
             swerve.registerTelemetry(logger::telemeterize);
 
-            /* brake mode */
-            m_driverController.a().whileTrue(swerve.applyRequest(() -> brake));
+            /* defense mode */
+            m_driverController.leftBumper().whileTrue(swerve.applyRequest(() -> brake));
             
-            /* defense mode? */
-            m_driverController.b().whileTrue(swerve.applyRequest(() ->
-                point.withModuleDirection(new Rotation2d(-m_driverController.getLeftY(), -m_driverController.getLeftX()))
-            ));
-
             // m_driverController.x().whileTrue(
             //     new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
             //         new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
@@ -213,9 +208,7 @@ public class RobotContainer {
             m_driverController.povUp().and(m_driverController.y()).whileTrue(swerve.sysIdQuasistatic(Direction.kForward));
             m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
-            // reset the field-centric heading on left bumper press
-            //m_driverController.leftBumper().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));
-
+            
 
         //VISION
             // hub alignment but with localization
