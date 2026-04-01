@@ -170,12 +170,13 @@ public class TheHood extends SubsystemBase {
   @Override
   public void periodic() {
     //resetEncoder();
-    double position = hoodMotor.getPosition().getValueAsDouble();
-    DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
-    DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
-    DogLog.log("Hood/target", revsToMove);
-    DogLog.log("Hood/at Target?", isReached());
-    DogLog.log("Hood/Rotor Rotations", position);
+    // double position = hoodMotor.getPosition().getValueAsDouble();
+    // DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
+    // DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
+    // DogLog.log("Hood/target", revsToMove);
+    // DogLog.log("Hood/at Target?", isReached());
+    // DogLog.log("Hood/Rotor Rotations", position);
+    
     if (Constants.Hood.verboseLogging) {
       // DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
     }

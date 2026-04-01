@@ -19,7 +19,7 @@ public final class Constants {
         public static final double ACCELERATION = 300;     // placeholder
         public static final double JERK = 300;            // placeholder
 
-        public static final double kP = 1.6;  // placeholder
+        public static final double kP = 2.5;  // placeholder //TODO: test this, was originally 1.6
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
         public static final double kS = 0.12;  // placeholder
@@ -243,7 +243,7 @@ public final class Constants {
         /**
          * Enabling this will enable verbose logging across all subsystems
          */
-        public static boolean verboseLogging = true;
+        public static boolean verboseLogging = false;
 
         /**
          * Enabling this will start the CTRE signal logger.

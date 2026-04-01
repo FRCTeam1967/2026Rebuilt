@@ -119,7 +119,7 @@ public class RobotContainer {
         private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
         private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
 
-        private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
+        //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
 
 
     public RobotContainer() {
@@ -392,7 +392,7 @@ public class RobotContainer {
 
 
         //FEEDER
-            isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
+            //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
                 new RunFeeder(feeder, -75)
