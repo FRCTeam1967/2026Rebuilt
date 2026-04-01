@@ -74,7 +74,6 @@ public class RobotContainer {
         public final Yeeter yeeter = new Yeeter(this);
         public final TheHood theHood = new TheHood();
         public final Climb climb = new Climb();
-        public final LED ledSubsystem = new LED();
         public Autoes autoes = new Autoes(this);
 
         //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
