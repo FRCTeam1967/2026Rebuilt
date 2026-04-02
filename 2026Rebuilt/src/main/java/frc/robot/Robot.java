@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
 
     m_robotContainer.autoDone.onTrue(
-      new InstantCommand(() -> wonAuto(m_robotContainer.matchTab))
+      new InstantCommand(() -> m_robotContainer.wonAuto(m_robotContainer.matchTab))
     );
 
   }
