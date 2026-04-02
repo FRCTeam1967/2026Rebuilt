@@ -86,6 +86,3 @@
 //     Logger.recordOutput("Shooter/Mechanism3d", posedArray);
 //   }
 // }
-
-
-

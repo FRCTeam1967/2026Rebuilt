@@ -173,7 +173,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             startSimThread();
             headingController.enableContinuousInput(headingMin, headingMax);
         }
-        headingController.enableContinuousInput(headingMin, headingMax); 
+        headingController.enableContinuousInput(-Math.PI, Math.PI); 
     }
 
     /**
@@ -266,6 +266,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             DogLog.log("Drivetrain/Trajectory/commanded rot rate", rotationalRate);
         }
 
+        // Generate and apply the next speeds for the robot
         setControl(m_followRequest
             .withVelocityX(sample.vx + xController.calculate(pose.getX(), sample.x))
             .withVelocityY(sample.vy + yController.calculate(pose.getY(), sample.y))
