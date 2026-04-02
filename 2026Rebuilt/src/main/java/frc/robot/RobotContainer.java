@@ -88,6 +88,7 @@ public class RobotContainer {
         public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
         public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
         public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
+        public final Trigger autoDone = new Trigger(() -> DriverStation.isTeleop());
 
     //leds
         public final CANdle candle = new CANdle(23);
@@ -436,6 +437,29 @@ public class RobotContainer {
         .withSize(1, 1);
 
         //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
+    }
+
+    public void wonAuto(ShuffleboardTab tab) {
+        String gameData = DriverStation.getGameSpecificMessage();
+        Alliance ourAlliance = DriverStation.getAlliance().get();
+        Alliance winningAlliance = DriverStation.Alliance.Blue; //default
+
+        if(gameData.length() > 0) {
+            switch (gameData.charAt(0)) {
+                case 'B' :
+                    winningAlliance = DriverStation.Alliance.Blue;
+                    break;
+                case 'R' :
+                    winningAlliance = DriverStation.Alliance.Red;
+                    break;
+                default :
+                //This is corrupt data //TODO: what do we do here?
+                break;
+            }
+        }
+
+        boolean whoWon = ourAlliance.equals(winningAlliance);
+        tab.addBoolean("won?", () -> whoWon);
     }
 
     public boolean getInRange(double position) {
