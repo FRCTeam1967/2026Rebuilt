@@ -110,11 +110,6 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
-
-    m_robotContainer.autoDone.onTrue(
-      new InstantCommand(() -> m_robotContainer.wonAuto(m_robotContainer.matchTab))
-    );
-
   }
 
   @Override
