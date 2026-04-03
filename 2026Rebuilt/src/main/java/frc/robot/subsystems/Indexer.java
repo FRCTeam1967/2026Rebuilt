@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Indexer extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
+  private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
 
   /** Creates a new Indexer. */
   public Indexer() {
@@ -58,9 +59,7 @@ public class Indexer extends SubsystemBase {
   }
 
   public void setVelocity(double speed) {
-    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
-
-    motor.setControl(request);
+    motor.setControl(motionMagicRequest.withVelocity(speed));
   }
   
   /**

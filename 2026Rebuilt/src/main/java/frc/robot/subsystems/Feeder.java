@@ -20,6 +20,7 @@ import frc.robot.RobotContainer;
 public class Feeder extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
+  private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
 
   /** Creates a new Feeder. */
   public Feeder() {
@@ -60,8 +61,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void setVelocity(double speed) {
-    MotionMagicVelocityVoltage request = new MotionMagicVelocityVoltage(speed);
-    motor.setControl(request);
+    motor.setControl(motionMagicRequest.withVelocity(speed));
   }
   
   public boolean isStalling() {
