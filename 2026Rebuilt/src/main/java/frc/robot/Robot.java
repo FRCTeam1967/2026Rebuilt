@@ -40,6 +40,7 @@ public class Robot extends TimedRobot {
       .withCaptureConsole(Constants.Logging.captureConsole)
       .withCaptureDs(Constants.Logging.captureDS)
       .withCaptureNt(Constants.Logging.captureNT)
+      .withNtPublish(false)
       .withLogExtras(Constants.Logging.enableExtras);
     DogLog.setOptions(options);
     

@@ -33,9 +33,11 @@ public class Telemetry {
         SignalLogger.setPath("/u/logs");
         SignalLogger.start();
 
-        /* Set up the module state Mechanism2d telemetry */
-        for (int i = 0; i < 4; ++i) {
-            SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
+        if (Constants.Logging.CTRE.enableNTPublishing) {
+            /* Set up the module state Mechanism2d telemetry */
+            for (int i = 0; i < 4; ++i) {
+                SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
+            }
         }
     }
 
