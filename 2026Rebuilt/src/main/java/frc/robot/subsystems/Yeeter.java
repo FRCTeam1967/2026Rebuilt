@@ -42,6 +42,7 @@ public class Yeeter extends SubsystemBase {
   private final DoubleSubscriber mmAcceleration = DogLog.tunable("Yeeter/mmAcceleration", Constants.Yeeter.ACCELERATION);
   //private final DoubleSubscriber feedForward = DogLog.tunable("Yeeter/feedForward", 5.0);
 
+  private MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(0);
   private Follower followerRequest = new Follower(Constants.Yeeter.YEETER_MOTOR1_ID, MotorAlignmentValue.Opposed);
 
   /** Creates a new FlywheelShooter. */
@@ -138,16 +139,9 @@ public class Yeeter extends SubsystemBase {
   public void setVelocity(DoubleSupplier velocitySupplier, double acceleration) {
 
     double velocity = velocitySupplier.getAsDouble();
-
-
-    MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(velocity)
-    .withAcceleration(yeeterAcceleration.get()) ; 
-    //.withFeedForward(0.12); //kS value ?
-
-
     DogLog.log("Yeeter/target speed (set)", velocity);
 
-    motor1.setControl(torqueRequest);
+    motor1.setControl(torqueRequest.withVelocity(velocity).withAcceleration(yeeterAcceleration.get()));
     motor2.setControl(followerRequest); 
   }
 

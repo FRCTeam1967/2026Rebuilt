@@ -56,6 +56,9 @@ public class Pivot extends SubsystemBase {
   private CANcoder absEncoder;
   private double revsToMove;
 
+  private DynamicMotionMagicVoltage slowRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
+  private DynamicMotionMagicVoltage fastRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
+
   //simulation
   // private SingleJointedArmSim armSim;
   // private Mechanism2d mech2d = new Mechanism2d(1, 1);
@@ -170,11 +173,9 @@ public class Pivot extends SubsystemBase {
   public void moveTo(double rotations, boolean isSlow){
     revsToMove = rotations*Constants.Pivot.GEAR_RATIO;
     if (isSlow) {
-      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
-      motor.setControl(request);
+      motor.setControl(slowRequest.withPosition(revsToMove));
     } else {
-      DynamicMotionMagicVoltage request = new DynamicMotionMagicVoltage(revsToMove, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
-      motor.setControl(request);
+      motor.setControl(fastRequest.withPosition(revsToMove));
     }
   }
 
