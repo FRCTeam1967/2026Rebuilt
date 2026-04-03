@@ -213,8 +213,7 @@ public class RobotContainer {
             //check for winning auto
             autoDone.and(() -> !hasAlreadyUpdatedIfWeWonAuto).whileTrue(
                 new SequentialCommandGroup(    
-                    new InstantCommand(() -> wonAuto(matchTab)),
-                    new InstantCommand(() -> updateWonAuto())
+                    new InstantCommand(() -> wonAuto(matchTab))
                 )
             );
 
@@ -456,11 +455,14 @@ public class RobotContainer {
             switch (gameData.charAt(0)) {
                 case 'B' :
                     winningAlliance = DriverStation.Alliance.Blue;
+                    updateWonAuto();
                     break;
                 case 'R' :
                     winningAlliance = DriverStation.Alliance.Red;
+                    updateWonAuto();
                     break;
                 default :
+                    hasAlreadyUpdatedIfWeWonAuto = false;
                 //This is corrupt data //TODO: what do we do here?
                 break;
             }
