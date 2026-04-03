@@ -25,7 +25,7 @@ public class Eater extends SubsystemBase {
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 30;
+    limitConfigs.StatorCurrentLimit = 40;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     var motorConfigs = new MotorOutputConfigs();

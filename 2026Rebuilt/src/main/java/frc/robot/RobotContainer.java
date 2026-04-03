@@ -293,7 +293,7 @@ public class RobotContainer {
                new SequentialCommandGroup(     
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
-                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                             //new RunCommand (() -> candle.setControl(yellowBlink))
                         ),
                         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
@@ -319,8 +319,7 @@ public class RobotContainer {
 
                                 new SequentialCommandGroup(
                                     new WaitCommand(1), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                    new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                                 )
                             )
                         )
