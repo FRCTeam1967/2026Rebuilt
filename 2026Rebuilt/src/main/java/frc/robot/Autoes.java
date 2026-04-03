@@ -43,21 +43,21 @@ public class Autoes {
   private final AutoFactory autoFactory;
   private final int disSensorID = 24;
   private final RobotContainer m_robotContainer; 
-  private final CANrange disSensor = new CANrange(disSensorID);
+  //private final CANrange disSensor = new CANrange(disSensorID);
   // Write these configs to the CANrange
 
   public Autoes(RobotContainer container) {
     m_robotContainer = container;
     var drive = m_robotContainer.swerve;
 
-    CANrangeConfiguration config = new CANrangeConfiguration();
+    //CANrangeConfiguration config = new CANrangeConfiguration();
 
-    config.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // If CANrange has a signal strength of at least 2000, it is a valid measurement.
-    config.ProximityParams.ProximityThreshold = 0.1; // If CANrange detects an object within 0.1 meters, it will trigger the "isDetected" signal.
+    // config.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // If CANrange has a signal strength of at least 2000, it is a valid measurement.
+    // config.ProximityParams.ProximityThreshold = 0.1; // If CANrange detects an object within 0.1 meters, it will trigger the "isDetected" signal.
 
-    config.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz; // Make the CANrange update as fast as possible at 100 Hz. This requires short-range mode.
+    // config.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz; // Make the CANrange update as fast as possible at 100 Hz. This requires short-range mode.
 
-    disSensor.getConfigurator().apply(config);
+    // disSensor.getConfigurator().apply(config);
 
     autoFactory = new AutoFactory(
       drive::getPose, // A function that returns the current robot pose
@@ -84,12 +84,12 @@ public class Autoes {
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-    tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
+    //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
 
-  public double getDisSensor() {
-    return disSensor.getDistance(true).getValueAsDouble();
-  }
+  // public double getDisSensor() {
+  //   return disSensor.getDistance(true).getValueAsDouble();
+  // }
 
   
   

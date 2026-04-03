@@ -59,7 +59,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
-    DogLog.log("dis sensor", autoes.getDisSensor());
+    //DogLog.log("dis sensor", autoes.getDisSensor());
   }
 
   /*
