@@ -90,6 +90,8 @@ public class RobotContainer {
         public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
         public final Trigger autoDone = new Trigger(() -> DriverStation.isTeleop());
 
+        private boolean hasAlreadyUpdatedIfWeWonAuto = false;
+
     //leds
         public final CANdle candle = new CANdle(23);
         private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
@@ -208,7 +210,12 @@ public class RobotContainer {
             m_driverController.povUp().and(m_driverController.y()).whileTrue(swerve.sysIdQuasistatic(Direction.kForward));
             m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
-            
+            //check for winning auto
+            autoDone.and(() -> !hasAlreadyUpdatedIfWeWonAuto).whileTrue(
+                new SequentialCommandGroup(    
+                    new InstantCommand(() -> wonAuto(matchTab))
+                )
+            );
 
         //VISION
             // hub alignment but with localization
@@ -447,11 +454,14 @@ public class RobotContainer {
             switch (gameData.charAt(0)) {
                 case 'B' :
                     winningAlliance = DriverStation.Alliance.Blue;
+                    updateWonAuto();
                     break;
                 case 'R' :
                     winningAlliance = DriverStation.Alliance.Red;
+                    updateWonAuto();
                     break;
                 default :
+                    hasAlreadyUpdatedIfWeWonAuto = false;
                 //This is corrupt data //TODO: what do we do here?
                 break;
             }
@@ -462,6 +472,10 @@ public class RobotContainer {
         tab.addBoolean("won?", () -> whoWon)
             .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
             .withSize(2, 1);
+    }
+
+    private void updateWonAuto() {
+        hasAlreadyUpdatedIfWeWonAuto = true;
     }
 
     public boolean getInRange(double position) {
