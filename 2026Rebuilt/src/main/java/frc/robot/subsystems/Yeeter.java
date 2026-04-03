@@ -168,7 +168,7 @@ public class Yeeter extends SubsystemBase {
       DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
       return (Math.abs(currentMotorSpeed) >= necessarySpeed);
     }else{
-      return (Math.abs(currentMotorSpeed) >= Constants.Yeeter.YEETER_SPEED);
+      return (Math.abs(currentMotorSpeed) >= Constants.Yeeter.YEETER_AUTO_SPEED);
     }
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
@@ -241,7 +241,7 @@ public class Yeeter extends SubsystemBase {
   @Override
   public void periodic() {
     double motor1Speed = getMotorVelocity(motor1);
-    // DogLog.log("Yeeter/Speed1", motor1Speed);
+     DogLog.log("Yeeter/Speed1", motor1Speed);
     // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
 
     if (Constants.Yeeter.verboseLogging) {
