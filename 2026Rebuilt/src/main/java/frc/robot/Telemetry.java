@@ -30,7 +30,7 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
-        SignalLogger.setPath("/u/logs");
+        // SignalLogger.setPath("/lv/logs");
         SignalLogger.start();
 
         if (Constants.Logging.CTRE.enableNTPublishing) {

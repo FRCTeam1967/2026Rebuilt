@@ -625,14 +625,19 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     trenchToCenter.active().onTrue(
       new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION), 
-            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),//wasnt there before
-            new PrintCommand("intake started running")
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
       )
     );
     trenchToCenter.done().onTrue(intakeMore1.cmd());
     intakeMore1.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new ParallelCommandGroup(
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+      )
     );
     intakeMore1.done().onTrue(goBack1.cmd());
 
@@ -640,7 +645,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       Commands.sequence( 
           new ParallelCommandGroup(
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                   //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
               //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
@@ -654,9 +659,8 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
                       new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
                       new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                        new WaitCommand(0.5), 
+                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                   )
 
                   )
@@ -673,7 +677,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       Commands.sequence( 
           new ParallelCommandGroup(
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                   //new RunCommand (() -> candle.setControl(yellowBlink))
               ),
               //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
@@ -688,15 +692,14 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
                       new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
                       new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                        new WaitCommand(0.5), 
+                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                       )
 
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+      ).withTimeout(5)); 
 
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
