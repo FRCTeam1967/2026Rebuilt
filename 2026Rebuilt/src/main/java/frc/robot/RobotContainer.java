@@ -428,13 +428,13 @@ public class RobotContainer {
         tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
         .withSize(3, 2);
 
-        tab.addBoolean("LL isInRange", () -> getInRange(LimelightHelpers.getTY("limelight-front")))
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(6, 1)
-        .withSize(1, 1);
+        // tab.addBoolean("LL isInRange", () -> getInRange(LimelightHelpers.getTY("limelight-front")))
+        // .withWidget(BuiltInWidgets.kBooleanBox).withPosition(6, 1)
+        // .withSize(1, 1);
 
-        tab.addBoolean("LL isAligned", () -> isAligned(LimelightHelpers.getTX("limelight-front")))
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
-        .withSize(1, 1);
+        // tab.addBoolean("LL isAligned", () -> isAligned(LimelightHelpers.getTX("limelight-front")))
+        // .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
+        // .withSize(1, 1);
 
         //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
     }
@@ -459,7 +459,10 @@ public class RobotContainer {
         }
 
         boolean whoWon = ourAlliance.equals(winningAlliance);
-        tab.addBoolean("won?", () -> whoWon);
+
+        tab.addBoolean("won?", () -> whoWon)
+            .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
+            .withSize(2, 1);
     }
 
     public boolean getInRange(double position) {
