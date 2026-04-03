@@ -318,7 +318,7 @@ public class RobotContainer {
                                 new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
 
                                 new SequentialCommandGroup(
-                                    new WaitCommand(1), 
+                                    new WaitCommand(0.5), 
                                     new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                                 )
                             )
