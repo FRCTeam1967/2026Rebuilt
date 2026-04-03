@@ -65,7 +65,7 @@ public class Feeder extends SubsystemBase {
   }
   
   public boolean isStalling() {
-    return (motor.getSupplyCurrent().getValueAsDouble() > 100.0); //65
+    return (motor.getSupplyCurrent().getValueAsDouble() > 50.0); //65
   }
 
   /**
