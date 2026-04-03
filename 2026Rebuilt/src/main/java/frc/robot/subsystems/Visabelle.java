@@ -113,9 +113,9 @@ public class Visabelle extends SubsystemBase {
     tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
         .withSize(3, 2);
 
-    tab.addBoolean("LL isAligned", this.getIsAligned())
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
-        .withSize(1, 1);
+    // tab.addBoolean("LL isAligned", this.getIsAligned())
+    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
+    //     .withSize(1, 1);
   }
 
   @Override
