@@ -88,9 +88,9 @@ public class RobotContainer {
         public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
         public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
         public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
-        public final Trigger autoDone = new Trigger(() -> DriverStation.isTeleop());
-
+        
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
+        public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
 
     //leds
         public final CANdle candle = new CANdle(23);
@@ -211,11 +211,7 @@ public class RobotContainer {
             m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
             //check for winning auto
-            autoDone.and(() -> !hasAlreadyUpdatedIfWeWonAuto).whileTrue(
-                new SequentialCommandGroup(    
-                    new InstantCommand(() -> wonAuto(matchTab))
-                )
-            );
+            updateWinAuto.whileFalse(new RunCommand(() -> wonAuto(matchTab)));
 
         //VISION
             // hub alignment but with localization
