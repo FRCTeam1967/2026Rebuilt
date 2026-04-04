@@ -11,6 +11,9 @@ import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+import dev.doglog.DogLog;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.cameraserver.CameraServer;
@@ -296,13 +299,13 @@ public class RobotContainer {
                new SequentialCommandGroup(     
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
-                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                            DogLog.time("Shoot/Yeeter", new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION)) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                             //new RunCommand (() -> candle.setControl(yellowBlink))
                         ),
                         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                         new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+                            DogLog.time("Shoot/WaitForSpeed", new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true))),
                             
                             // new ParallelCommandGroup( //green
                             //     new SequentialCommandGroup(
@@ -314,15 +317,15 @@ public class RobotContainer {
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
                             //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
-                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                            DogLog.time("Shoot/Feeder", new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5)),
                             
                             new ParallelCommandGroup(
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                DogLog.time("Shoot/Feeder2", new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)),
+                                DogLog.time("Shoot/Indexer", new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)),
 
                                 new SequentialCommandGroup(
-                                    new WaitCommand(0.5), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                    DogLog.time("Shoot/Wait", new WaitCommand(0.5)), 
+                                    DogLog.time("Shoot/Pivot", new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true))
                                 )
                             )
                         )
