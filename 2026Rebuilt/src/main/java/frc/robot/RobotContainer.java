@@ -293,7 +293,7 @@ public class RobotContainer {
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
-               new SequentialCommandGroup(     
+                new SequentialCommandGroup( 
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
                             new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
@@ -328,7 +328,7 @@ public class RobotContainer {
                         )
                     )
                     //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
-               )
+                )
             ); //TODO: add defense mode while the robot is shooting
 
             // eject shooter
@@ -377,10 +377,17 @@ public class RobotContainer {
                                         new MovePivot(pivot, Constants.Pivot.JITTER_POS_TWO, false),
                                         new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
 
-                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false)
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_FOUR, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_FOUR, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
 
-
-
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_SIX, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_SIX, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25)
                                     )
                                 )
                             )

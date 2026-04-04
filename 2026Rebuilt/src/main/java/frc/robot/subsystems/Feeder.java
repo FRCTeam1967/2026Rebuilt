@@ -61,7 +61,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void setVelocity(double speed) {
-    motor.setControl(motionMagicRequest.withVelocity(speed));
+    motor.setControl(motionMagicRequest.withVelocity(speed).withEnableFOC(true));
   }
   
   public boolean isStalling() {
