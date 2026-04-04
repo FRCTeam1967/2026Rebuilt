@@ -458,7 +458,8 @@ public class RobotContainer {
                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
                     new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
                     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                    new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
+                    new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
+                    //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
                 )
             );
 
