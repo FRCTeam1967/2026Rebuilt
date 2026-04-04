@@ -880,7 +880,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
                     new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
                     new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                    new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER) 
       )
     );
     trenchToCenter.done().onTrue(intake1.cmd());
@@ -890,7 +890,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
                     new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
                     new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                    new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
       ));    
       intake1.done().onTrue(shoot1.cmd());
 
@@ -928,7 +928,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
               new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
               new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
               new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-              new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
           )
       )
     );
@@ -939,7 +939,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
               new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
               new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-              new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
       ));
           intake2.done().onTrue(shoot2.cmd());
 
@@ -1124,15 +1124,19 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     );
 
     trenchNeutral.active().onTrue(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-      );
+      new ParallelCommandGroup(
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false),
+        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+        new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+    ));
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
       new ParallelCommandGroup(
           new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
           new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
       ));
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
@@ -1149,15 +1153,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
               new SequentialCommandGroup(
                   new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
                   
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
-
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                  
 
                   new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                   
@@ -1181,7 +1177,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
           new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-          new ConditionalCommand(new RunFeeder(m_robotContainer.feeder, 0), new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER), ()-> m_robotContainer.feeder.isStalling()) 
+          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
       ));
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
