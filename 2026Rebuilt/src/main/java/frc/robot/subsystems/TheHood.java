@@ -8,6 +8,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -47,7 +48,8 @@ public class TheHood extends SubsystemBase {
     request = (new MotionMagicVoltage(revsToMove));
     maintainRequest = (new MotionMagicVoltage(currentPos));
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
-    ccdConfigs.MagnetSensor.MagnetOffset =0.241455078125; //-0.408935546875
+    ccdConfigs.MagnetSensor.MagnetOffset = 
+    -0.402099609375;//=0.241455078125; //-0.408935546875
     //ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -152,7 +154,7 @@ public class TheHood extends SubsystemBase {
    * log value of absolute encoder to doglog
    */
   public void logRequest(){
-    // DogLog.log("HoodRequest", Constants.Hood.HOOD_ANGLE);
+     //DogLog.log("HoodRequest", Constants.Hood.HOOD_ANGLE);
   }
 
   /**
@@ -170,9 +172,9 @@ public class TheHood extends SubsystemBase {
   @Override
   public void periodic() {
     //resetEncoder();
-    // double position = hoodMotor.getPosition().getValueAsDouble();
-    // DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
-    // DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
+     double position = hoodMotor.getPosition().getValueAsDouble();
+     DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
+     DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
     // DogLog.log("Hood/target", revsToMove);
     // DogLog.log("Hood/at Target?", isReached());
     // DogLog.log("Hood/Rotor Rotations", position);

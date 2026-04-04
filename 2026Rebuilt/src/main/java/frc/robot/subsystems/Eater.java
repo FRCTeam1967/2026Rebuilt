@@ -39,8 +39,8 @@ public class Eater extends SubsystemBase {
    * @param speed - sets motor to speed
    */
   public void setMotor(double speed) {
-    //motor.set(speed);
-    motor.set(intakeSpeed.get());
+    motor.set(speed);
+    //motor.set(intakeSpeed.get());
     // DogLog.log("Eater/intake desired speed", intakeSpeed.get());
   }
 

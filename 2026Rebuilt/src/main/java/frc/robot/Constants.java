@@ -16,14 +16,14 @@ public final class Constants {
         public static final int HOOD_CANCODER_ID = 21;     
 
         public static final double CRUISE_VELOCITY = 500;  // placeholder
-        public static final double ACCELERATION = 300;     // placeholder
-        public static final double JERK = 300;            // placeholder
+        public static final double ACCELERATION = 1000;     // placeholder
+        public static final double JERK = 550;//;            // placeholder
 
-        public static final double kP = 5;  // placeholder //TODO: test this, was originally 1.6
+        public static final double kP = 2.5;  // placeholder //TODO: test this, was originally 1.6
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
         public static final double kS = 0.12;  // placeholder
-        public static final double kV = 0.3;  // placeholder
+        public static final double kV = 1.2;  // placeholder
         public static final double kA = 0.0;  // placeholder
 
         public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot
@@ -114,6 +114,18 @@ public final class Constants {
         public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 75 * DEGREES_TO_REVS;
+        
+        public static final double JITTER_POS_ONE = 100 * DEGREES_TO_REVS;
+        public static final double JITTER_POS_TWO = 130 * DEGREES_TO_REVS;
+        
+        public static final double JITTER_POS_THREE = 120 * DEGREES_TO_REVS;
+        public static final double JITTER_POS_FOUR = 90 * DEGREES_TO_REVS;
+
+        public static final double JITTER_POS_FIVE = 100 * DEGREES_TO_REVS;
+        public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
+
+
+    
     }
 
     public static class Eater{

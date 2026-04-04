@@ -206,9 +206,9 @@ public class Yeeter extends SubsystemBase {
     speedTable.put(1.524+1.02235, 63.5); //5ft //TESTED
     speedTable.put(1.676+1.02235, 64.5); //5.5ft //UNTESTED
     speedTable.put(1.9812+1.02235, 66.5); //6.5ft //TESTED
-    speedTable.put(2.1366+1.02235, 68.5);//7ft //UNTESTED
-    speedTable.put(2.286+1.02235, 69.0); //7.5ft UNTESTED
-    speedTable.put(2.4384+1.02235, 69.5); //8ft //TESTED
+    speedTable.put(2.1366+1.02235, 69.0);//7ft //UNTESTED
+    speedTable.put(2.286+1.02235, 69.5); //7.5ft UNTESTED
+    speedTable.put(2.4384+1.02235, 70.0); //8ft //TESTED
     speedTable.put(2.5908+1.02235,70.0); //8.5ft //78 UNTESTED
     speedTable.put(2.7432+1.02235, 70.5); //9ft UNTESTED
     speedTable.put(2.8956+1.02235, 71.5); //9.5ft UNTESTED

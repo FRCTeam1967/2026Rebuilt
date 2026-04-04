@@ -292,7 +292,7 @@ public class RobotContainer {
 
 
         //SHOOTER
-            m_operatorController.leftTrigger().whileTrue(
+            m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
                new SequentialCommandGroup(     
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
@@ -340,9 +340,60 @@ public class RobotContainer {
             // );
 
 
+            //modified if we're stuck
+            m_operatorController.leftTrigger().and(m_operatorController.povRight()).whileTrue(
+                new SequentialCommandGroup(     
+                        new ParallelCommandGroup(
+                            new ParallelCommandGroup(
+                                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunCommand (() -> candle.setControl(yellowBlink))
+                            ),
+                            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+
+                            new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+                                
+                                // new ParallelCommandGroup( //green
+                                //     new SequentialCommandGroup(
+                                //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                                //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                                //     )
+                                // ),
+
+                                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                                //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(0.5), 
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_TWO, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_TWO, false),
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
+
+                                        new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false)
+
+
+
+                                    )
+                                )
+                            )
+                        )
+                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                )
+                ); //TODO: add defense mode while the robot is shooting
+
+
+
         //SHUTTLING
             m_operatorController.leftBumper().whileTrue(
-                new SequentialCommandGroup(
+                new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                     new ParallelCommandGroup(
@@ -390,7 +441,7 @@ public class RobotContainer {
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
-                new RunFeeder(feeder, -75)
+                new RunFeeder(feeder, -100) //75
             );
 
 
@@ -411,6 +462,14 @@ public class RobotContainer {
                     new RunCommand (() -> candle.setControl(whiteSolid))
                 )  
             );
+            
+            // m_operatorController.povRight().whileTrue(
+            //      new ParallelCommandGroup(  
+            //         new RunEater(eater, 100),
+            //         new RunCommand (() -> candle.setControl(whiteSolid))
+            //     )  
+            // );
+
 
         //CLIMB
             m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
