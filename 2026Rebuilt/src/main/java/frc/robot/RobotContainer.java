@@ -292,7 +292,7 @@ public class RobotContainer {
 
 
         //SHOOTER
-            m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
+            m_operatorController.leftTrigger().and(m_operatorController.povRight()).whileTrue(
                 new SequentialCommandGroup( 
                     new ParallelCommandGroup(
                         new ParallelCommandGroup(
@@ -341,7 +341,7 @@ public class RobotContainer {
 
 
             //modified if we're stuck
-            m_operatorController.leftTrigger().and(m_operatorController.povRight()).whileTrue(
+            m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
@@ -480,7 +480,7 @@ public class RobotContainer {
 
 
         //CLIMB
-            m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
+            //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
             m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
             m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
     }
