@@ -136,7 +136,7 @@ public final class Constants {
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final int INDEXER_SPEED = 90;
+        public static final int INDEXER_SPEED = 40;
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
@@ -160,7 +160,7 @@ public final class Constants {
 
         public static final double PREP_FEEDER = -50.0; 
 
-        public static final double INTAKE_FEEDER = -10.0; 
+        public static final double INTAKE_FEEDER = -20.0; 
 
         public static final double kP = 5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
