@@ -287,7 +287,8 @@ public class RobotContainer {
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
             pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
-            yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
+            //yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
+            yeeter.setDefaultCommand(new RunYeeter(yeeter, ()-> Constants.Yeeter.RESTING_SPEED, Constants.Yeeter.YEETER_ACCELERATION));
             theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
 
 
@@ -295,24 +296,13 @@ public class RobotContainer {
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
                 new SequentialCommandGroup( 
                     new ParallelCommandGroup(
-                        new ParallelCommandGroup(
-                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                            //new RunCommand (() -> candle.setControl(yellowBlink))
-                        ),
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
                         new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
-                            
-                            // new ParallelCommandGroup( //green
-                            //     new SequentialCommandGroup(
-                            //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                            //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                            //     )
-                            // ),
+                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + 4.0), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // TODO: test timeout
 
-                            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                            //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.ACCELERATION)
+                        ),
+                        new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                             new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                             
@@ -327,10 +317,10 @@ public class RobotContainer {
                             )
                         )
                     )
-                    //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
                 )
-            ); //TODO: add defense mode while the robot is shooting
+            ); 
 
+            
             // eject shooter
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
             //     new ParallelCommandGroup(
@@ -351,7 +341,7 @@ public class RobotContainer {
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), 
                                 
                                 // new ParallelCommandGroup( //green
                                 //     new SequentialCommandGroup(

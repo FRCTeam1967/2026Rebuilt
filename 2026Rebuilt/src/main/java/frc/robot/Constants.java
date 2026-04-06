@@ -69,6 +69,7 @@ public final class Constants {
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
         public static final double YEETER_SPEED = 75.0; //81; //rotations per second
+        public static final double RESTING_SPEED = 60.0;
         public static final double YEETER_ACCELERATION = 500.0; //500
         public static final double YEETER_AUTO_SPEED = 65;
 

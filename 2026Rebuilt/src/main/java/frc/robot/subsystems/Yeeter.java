@@ -157,12 +157,12 @@ public class Yeeter extends SubsystemBase {
     // Since we're using a double supplier, the value we get here may be different than the value we got in setVelocity().
     //double necessarySpeed = Constants.Yeeter.YEETER_SPEED;
     if (usingVision){
-      double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub());
+      double necessarySpeed = getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + 4.0; //added + 4.0 to make it rev up to a faster speed to allow for the first 3 balls to make it
 
       DogLog.log("Yeeter/target speed (is reached)", necessarySpeed);
       return (Math.abs(currentMotorSpeed) >= necessarySpeed);
     }else{
-      return (Math.abs(currentMotorSpeed) >= Constants.Yeeter.YEETER_AUTO_SPEED);
+      return (Math.abs(currentMotorSpeed) >= Constants.Yeeter.YEETER_SPEED);
     }
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }

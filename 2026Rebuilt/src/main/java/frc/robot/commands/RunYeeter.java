@@ -35,7 +35,7 @@ public class RunYeeter extends Command {
   
    @Override
   public void end(boolean interrupted) {
-    yeeter.stopMotor();
+    //yeeter.stopMotor();
   }
 
  // Returns true when the command should end.
