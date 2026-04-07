@@ -297,7 +297,7 @@ public class RobotContainer {
                 new SequentialCommandGroup( 
                     new ParallelCommandGroup(
                         new SequentialCommandGroup(
-                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + 4.0), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // TODO: test timeout
+                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // TODO: test timeout
 
                             new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.ACCELERATION)
                         ),
