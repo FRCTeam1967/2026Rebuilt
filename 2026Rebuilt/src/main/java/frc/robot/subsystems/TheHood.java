@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -18,10 +19,13 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BulkCANSignalUpdater.CANBusType;
 
 // WELCOME TO DA HOOD
 
@@ -38,6 +42,18 @@ public class TheHood extends SubsystemBase {
   private InterpolatingDoubleTreeMap angleTable;
   private MotionMagicVoltage request;
   private MotionMagicVoltage maintainRequest;
+
+  /**
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<Angle> motorPositionSignal;
+  private StatusSignal<Angle> encoderAbsPositionSignal;
+  private double motorPosition;
+  private double encoderAbsPosition;
 
   public TheHood() {
     hoodMotor = new TalonFX(Constants.Hood.HOOD_MOTOR_ID);
@@ -82,6 +98,8 @@ public class TheHood extends SubsystemBase {
 
     setRelToAbs();
     populateTreeMap();
+
+    createSignals();
   }
 
   /**
@@ -115,7 +133,7 @@ public class TheHood extends SubsystemBase {
    * @return position of absolute encoder
    */
   public double getAbsPos() {
-    return (absEncoder.getAbsolutePosition().getValueAsDouble());
+    return encoderAbsPosition;
   }
 
   /**
@@ -161,7 +179,7 @@ public class TheHood extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with current position of motor
    */
   public void maintainPosition() {
-    currentPos = hoodMotor.getPosition().getValueAsDouble();
+    currentPos = motorPosition;
     hoodMotor.setControl(maintainRequest.withPosition(currentPos));
   }
 
@@ -171,9 +189,10 @@ public class TheHood extends SubsystemBase {
 
   @Override
   public void periodic() {
+    updateInputs();
+
     //resetEncoder();
-     double position = hoodMotor.getPosition().getValueAsDouble();
-     DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
+     DogLog.log("Hood/Position (deg)", ((motorPosition/Constants.Hood.GEAR_RATIO)*360));
      DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
     // DogLog.log("Hood/target", revsToMove);
     // DogLog.log("Hood/at Target?", isReached());
@@ -182,5 +201,22 @@ public class TheHood extends SubsystemBase {
     if (Constants.Hood.verboseLogging) {
       // DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
     }
+  }
+
+  private void createSignals() {
+    motorPositionSignal = hoodMotor.getPosition();
+    motorPositionSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    encoderAbsPositionSignal = absEncoder.getAbsolutePosition();
+    encoderAbsPositionSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(CANBusType.RIO, motorPositionSignal, encoderAbsPositionSignal);
+    signalUpdater.optimizeDevices(hoodMotor, absEncoder);
+  }
+
+  private void updateInputs() {
+    motorPosition = motorPositionSignal.getValueAsDouble();
+    encoderAbsPosition = encoderAbsPositionSignal.getValueAsDouble();
   }
 }

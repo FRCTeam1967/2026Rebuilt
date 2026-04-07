@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
@@ -23,6 +24,7 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -64,6 +66,15 @@ public class Climb extends SubsystemBase {
   private Pose3d poses;
   private Rotation3d rotation;
 
+  /** 
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<Angle> positionSignal;
+  double position;
 
   public Climb() {
     motor = new TalonFX(Constants.Climb.MOTOR_ID);
@@ -102,8 +113,10 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
-    
+
+    createSignals();
   }
+
     /* 
     if (RobotBase.isSimulation()) {
       motorSim = motor.getSimState();
@@ -207,7 +220,7 @@ public class Climb extends SubsystemBase {
    * @return true if motor's current position is within error threshold of target height
    */
   public boolean atHeight(){
-    double currentPosition = motor.getPosition().getValueAsDouble();
+    double currentPosition = position;
     return Math.abs(rotations - currentPosition) < Constants.Climb.ERROR_THRESHOLD;
 
     /*
@@ -258,6 +271,8 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
+    updateInputs();
+
     // double rotorPosition = motor.getPosition().getValueAsDouble();
     // DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
     // DogLog.log("Climb/target rotations", rotations);
@@ -315,5 +330,18 @@ public class Climb extends SubsystemBase {
   }
   */
   
+  private void createSignals() {
+    positionSignal = motor.getPosition();
+    positionSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(BulkCANSignalUpdater.CANBusType.RIO, positionSignal);
+    signalUpdater.optimizeDevices(motor);
+  }
+
+  private void updateInputs() {
+    position = positionSignal.getValueAsDouble();
+  }
+
   
 }

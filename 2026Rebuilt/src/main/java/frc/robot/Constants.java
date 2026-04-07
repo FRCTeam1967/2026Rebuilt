@@ -284,4 +284,22 @@ public final class Constants {
     
         }
     }
+
+    public static final class CANUpdateFrequencies {
+        // Should CAN traffic be optimized
+        public static final boolean optimize = false;
+
+        // Frequency to use for signals that are critical to operation. They should be updated
+        // at least once per loop iteraction (50Hz). Ideally 100Hz, so we're guaranteed to 
+        // have an update between loop iterations.
+        public static final double criticalSignal = 100.0;
+
+        // Frequency to use for signals that we use in operation, but aren't critical to the
+        // operation of the robot. Things like current monitoring would fall in this bucket.
+        // Try to update them once per loop. (50Hz)
+        public static final double nonCriticalSignal = 50.0;
+
+        // Signals that are used only for telemetry or non-operational purposes.
+        public static final double auxiliarySignal = 10.0;
+    }
 }
