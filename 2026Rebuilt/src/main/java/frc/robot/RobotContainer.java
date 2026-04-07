@@ -296,41 +296,45 @@ public class RobotContainer {
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
-                new SequentialCommandGroup( 
-                    new ParallelCommandGroup(
+                new ParallelCommandGroup (
+                    new SequentialCommandGroup( 
                         new ParallelCommandGroup(
-                            new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                            //new RunCommand (() -> candle.setControl(yellowBlink))
-                        ),
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
-                        new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
-                            
-                            // new ParallelCommandGroup( //green
-                            //     new SequentialCommandGroup(
-                            //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                            //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                            //     )
-                            // ),
-
-                            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                            //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
-
-                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                            
                             new ParallelCommandGroup(
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunCommand (() -> candle.setControl(yellowBlink))
+                            ),
+                            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
-                                new SequentialCommandGroup(
-                                    new WaitCommand(0.5), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                            new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+                                
+                                // new ParallelCommandGroup( //green
+                                //     new SequentialCommandGroup(
+                                //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
+                                //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
+                                //     )
+                                // ),
+
+                                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
+                                //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+
+                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(0.5), 
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                    )
                                 )
                             )
                         )
-                    )
-                    //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                    ),
+
+                    new RunCommand(() -> visabelle.oscillate(), swerve)
                 )
             ); //TODO: add defense mode while the robot is shooting
 

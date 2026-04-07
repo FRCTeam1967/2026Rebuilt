@@ -5,12 +5,23 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;  
+import frc.robot.LimelightHelpers;
+import frc.robot.generated.TunerConstants;
 import frc.robot.Constants;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.function.BooleanSupplier;
+
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -18,6 +29,8 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Visabelle extends SubsystemBase {
+  private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+  private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
   private double maxAngularRate;
   private SwerveOnTheseBows swerve;
   private Translation2d hubPose;
@@ -40,6 +53,27 @@ public class Visabelle extends SubsystemBase {
       //invert since tx is positive when the target is to the right of the crosshair
       targetingAngularVelocity *= -1.0;
       return targetingAngularVelocity;
+  }
+
+  private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
+      .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+  public void oscillate() {
+      swerve.setControl(
+          driveAtAngle
+            .withTargetDirection(new Rotation2d(this.getAngleToHub() + 2))
+            .withVelocityX(0)
+            .withVelocityY(0)
+            .withMaxAbsRotationalRate(MaxAngularRate)
+      );
+      swerve.setControl(
+          driveAtAngle
+            .withTargetDirection(new Rotation2d(this.getAngleToHub() - 2))
+            .withVelocityX(0)
+            .withVelocityY(0)
+            .withMaxAbsRotationalRate(MaxAngularRate)
+      );
   }
 
   private Translation2d getHubPose() {
