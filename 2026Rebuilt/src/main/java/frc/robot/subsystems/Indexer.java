@@ -75,8 +75,12 @@ public class Indexer extends SubsystemBase {
     return (motor.getDeviceTemp().getValueAsDouble() > 32.0);
   }
 
+  public boolean hasNotOverheated() {
+    return (motor.getDeviceTemp().getValueAsDouble() < 65.0); // 150 F
+  }
+
   public void configDashboard(ShuffleboardTab tab) {
-    tab.addBoolean("Indexer hasOverheated", () -> this.getHasOverheated())
+    tab.addBoolean("Indexer hasOverheated", () -> this.hasNotOverheated())
         .withWidget(BuiltInWidgets.kBooleanBox).withPosition(8, 1)
         .withSize(1, 1);
   }

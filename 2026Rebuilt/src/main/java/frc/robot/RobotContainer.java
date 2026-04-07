@@ -133,6 +133,9 @@ public class RobotContainer {
         //pivot.configDashboard(matchTab);
         //configLLTab(limelightTab, fieldTab);
         //climb.configDashboard(fieldTab);
+        feeder.configDashboard(matchTab);
+        indexer.configDashboard(matchTab);
+        eater.configDashboard(matchTab);
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
