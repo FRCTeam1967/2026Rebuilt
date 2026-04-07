@@ -11,6 +11,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import dev.doglog.DogLog;                             
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -68,6 +70,16 @@ public class Feeder extends SubsystemBase {
     return (motor.getSupplyCurrent().getValueAsDouble() > 50.0); //65
   }
 
+  public boolean getHasOverheated() {
+    return (motor.getDeviceTemp().getValueAsDouble() > 32.0);
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addBoolean("Feeder hasOverheated", () -> this.getHasOverheated())
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(8, 1)
+        .withSize(1, 1);
+  }
+
   /**
    * stops motor
    */
@@ -81,5 +93,6 @@ public class Feeder extends SubsystemBase {
     if (Constants.Feeder.verboseLogging) {
       DogLog.log("Feeder/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
+    DogLog.log("Feeder/device temperature", motor.getDeviceTemp().getValueAsDouble());
   }
 }

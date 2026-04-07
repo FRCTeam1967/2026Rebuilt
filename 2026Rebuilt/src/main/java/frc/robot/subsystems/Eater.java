@@ -13,6 +13,8 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Eater extends SubsystemBase {
   private TalonFX motor;
@@ -48,6 +50,15 @@ public class Eater extends SubsystemBase {
     return (motor.getSupplyCurrent().getValueAsDouble() > 75.0); 
   }
 
+  public boolean getHasOverheated() {
+    return (motor.getDeviceTemp().getValueAsDouble() > 32.0);
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addBoolean("Intake hasOverheated", () -> this.getHasOverheated())
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(8, 1)
+        .withSize(1, 1);
+  }
   
   /**
    * stops motor
@@ -62,5 +73,6 @@ public class Eater extends SubsystemBase {
     if (Constants.Eater.verboseLogging) {
       // DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
+    DogLog.log("Eater/device temperature", motor.getDeviceTemp().getValueAsDouble());
   }
 }

@@ -15,6 +15,8 @@ import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Indexer extends SubsystemBase {
   private TalonFX motor;
@@ -68,6 +70,16 @@ public class Indexer extends SubsystemBase {
   public void stopMotor(){
     motor.stopMotor();
   }
+
+  public boolean getHasOverheated() {
+    return (motor.getDeviceTemp().getValueAsDouble() > 32.0);
+  }
+
+  public void configDashboard(ShuffleboardTab tab) {
+    tab.addBoolean("Indexer hasOverheated", () -> this.getHasOverheated())
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(8, 1)
+        .withSize(1, 1);
+  }
   
   @Override
   public void periodic() {
@@ -75,5 +87,6 @@ public class Indexer extends SubsystemBase {
     if (Constants.Indexer.verboseLogging) {
       DogLog.log("Indexer/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
+    DogLog.log("Indexer/device temperature", motor.getDeviceTemp().getValueAsDouble());
   }
 }
