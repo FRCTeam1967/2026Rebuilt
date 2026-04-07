@@ -311,8 +311,18 @@ public class RobotContainer {
                                 new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
 
                                 new SequentialCommandGroup(
-                                    new WaitCommand(0.5), 
+                                    new WaitCommand(1.0), 
                                     new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                )
+                            ).withTimeout(5),
+
+                            new ParallelCommandGroup(
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+
+                                new SequentialCommandGroup(
+                                    new RunCommand(() -> indexer.stopMotor(), indexer).withTimeout(1.0),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                                 )
                             )
                         )
@@ -446,9 +456,9 @@ public class RobotContainer {
             m_operatorController.rightTrigger().and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-                    new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED),
-                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                    new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
+                    new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                    //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                    //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
                     //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
                 )
             );

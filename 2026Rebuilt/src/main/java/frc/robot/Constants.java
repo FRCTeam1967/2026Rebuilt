@@ -89,7 +89,7 @@ public final class Constants {
         public static final double kS = 0.25;
         public static final double kV = 0.12;
         public static final double kA = 0.01;
-        public static final double kP = 5;
+        public static final double kP = 7;
         public static final int kI = 0;
         public static final int kD = 0;
 
@@ -115,7 +115,7 @@ public final class Constants {
         public static final boolean verboseLogging = false || Logging.verboseLogging;
         public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 75 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 90 * DEGREES_TO_REVS;
         
         public static final double JITTER_POS_ONE = 100 * DEGREES_TO_REVS;
         public static final double JITTER_POS_TWO = 130 * DEGREES_TO_REVS;
@@ -125,9 +125,6 @@ public final class Constants {
 
         public static final double JITTER_POS_FIVE = 100 * DEGREES_TO_REVS;
         public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
-
-
-    
     }
 
     public static class Eater{
@@ -138,7 +135,7 @@ public final class Constants {
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final int INDEXER_SPEED = 40;
+        public static final double INDEXER_SPEED = 57;
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
