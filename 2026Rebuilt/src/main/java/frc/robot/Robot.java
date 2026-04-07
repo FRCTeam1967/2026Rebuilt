@@ -9,8 +9,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.subsystems.BulkCANSignalUpdater;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.hardware.ParentDevice;
+import com.ctre.phoenix6.hardware.traits.CommonDevice;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -54,6 +57,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    // Update signals before calling the scheduler so we have the latest values
+    BulkCANSignalUpdater.getInstance().refreshAll();
+
     CommandScheduler.getInstance().run(); 
     //DogLog.log("yeeter Speed1", m_robotContainer.yeeter.getMotorVelocity());
     //DogLog.log("dis sensor", autoes.getDisSensor());

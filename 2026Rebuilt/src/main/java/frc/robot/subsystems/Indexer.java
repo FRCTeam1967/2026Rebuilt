@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,12 +15,25 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BulkCANSignalUpdater.CANBusType;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
   private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
+
+  /**
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<Current> statorCurrentSignal;
+  private double statorCurrent;
+
 
   /** Creates a new Indexer. */
   public Indexer() {
@@ -50,6 +64,7 @@ public class Indexer extends SubsystemBase {
     motor.getConfigurator().apply(talonFXConfigs);
     motor.getConfigurator().apply(limitConfigs);
 
+    createSignals();
   }
 
   /**
@@ -73,9 +88,24 @@ public class Indexer extends SubsystemBase {
   
   @Override
   public void periodic() {
+    updateInputs();
+
     // This method will be called once per scheduler run
     if (Constants.Indexer.verboseLogging) {
-      DogLog.log("Indexer/stator current", motor.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Indexer/stator current", statorCurrent);
     }
+  }
+
+  private void createSignals() {
+    statorCurrentSignal = motor.getStatorCurrent();
+    statorCurrentSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.nonCriticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(CANBusType.RIO, statorCurrentSignal);
+    signalUpdater.optimizeDevices(motor);
+  }
+
+  private void updateInputs() {
+    statorCurrent = statorCurrentSignal.getValueAsDouble();
   }
 }

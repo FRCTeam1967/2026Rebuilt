@@ -22,7 +22,7 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import dev.doglog.DogLog;
 
 import com.ctre.phoenix6.CANBus;
-
+import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BulkCANSignalUpdater.CANBusType;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -46,6 +47,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
+
 import com.ctre.phoenix6.hardware.CANcoder;
 
 
@@ -58,6 +62,16 @@ public class Pivot extends SubsystemBase {
 
   private DynamicMotionMagicVoltage slowRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
   private DynamicMotionMagicVoltage fastRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
+
+  /**
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<Angle> positionSignal;
+  private double position;
 
   //simulation
   // private SingleJointedArmSim armSim;
@@ -136,6 +150,8 @@ public class Pivot extends SubsystemBase {
     // StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
     //   .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
     setRelToAbs();
+
+    createSignals();
   }
 
   /**
@@ -146,7 +162,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public boolean isReached() {
-    double currentPos = motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO*360;
+    double currentPos = position/Constants.Pivot.GEAR_RATIO*360;
     return isReached(currentPos);
   }
   
@@ -221,7 +237,7 @@ public class Pivot extends SubsystemBase {
    * creates and sets a MotionMagicVoltage request with current position of motor
    */
   public void maintainPosition() {
-    double currentPos = motor.getPosition().getValueAsDouble();
+    double currentPos = position;
     motor.setControl(request.withPosition(currentPos));
   }
 /* 
@@ -275,6 +291,8 @@ public class Pivot extends SubsystemBase {
   // }
 
   public void periodic() {
+    updateInputs();
+
     // This method will be called once per scheduler run
     //tab.addNumber("current pivot pos degrees", () -> (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
     // double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
@@ -289,5 +307,18 @@ public class Pivot extends SubsystemBase {
     if (Constants.Pivot.verboseLogging) {
       //DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
+  }
+
+  private void createSignals() {
+    positionSignal = motor.getPosition();
+    positionSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(CANBusType.CANIVORE, positionSignal);
+    signalUpdater.optimizeDevices(motor);
+  }
+
+  private void updateInputs() {
+    position = positionSignal.getValueAsDouble();
   }
 }

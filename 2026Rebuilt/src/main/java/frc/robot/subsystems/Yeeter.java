@@ -15,15 +15,22 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Visabelle;
+import frc.robot.subsystems.BulkCANSignalUpdater.CANBusType;
+
 //heloo
 import java.util.function.DoubleSupplier;
 
@@ -44,6 +51,18 @@ public class Yeeter extends SubsystemBase {
 
   private MotionMagicVelocityTorqueCurrentFOC torqueRequest = new MotionMagicVelocityTorqueCurrentFOC(0);
   private Follower followerRequest = new Follower(Constants.Yeeter.YEETER_MOTOR1_ID, MotorAlignmentValue.Opposed);
+
+  /**
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<AngularVelocity> motorVelocitySignal1, motorVelocitySignal2;
+  private StatusSignal<Current> motorStatorCurrentSignal1, motorStatorCurrentSignal2;
+  private double motorVelocity1, motorVelocity2;
+  private double motorStatorCurrent1, motorStatorCurrent2;
 
   /** Creates a new FlywheelShooter. */
   public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
@@ -129,6 +148,8 @@ public class Yeeter extends SubsystemBase {
     motor2.getConfigurator().apply(limitConfigs);
 
     populateTreeMap();
+
+    createSignals();
   }
 
   /**
@@ -152,9 +173,8 @@ public class Yeeter extends SubsystemBase {
   /**
    * @return true if current speed of yeeter is >= threshold speed
    */
-  
-   public boolean reachedYeeterSpeed(boolean usingVision) {
-    double motorSpeed = motor1.getVelocity().getValueAsDouble();
+  public boolean reachedYeeterSpeed(boolean usingVision) {
+    double motorSpeed = motorVelocity1;
     return reachedYeeterSpeed(motorSpeed, usingVision);
   }
 
@@ -178,8 +198,8 @@ public class Yeeter extends SubsystemBase {
    * @return average velocity of both motors
    */
   public double getCurrentVelocity() {
-    double currentVelocity1 = motor1.getVelocity().getValueAsDouble();
-    double currentVelocity2 = Math.abs(motor2.getVelocity().getValueAsDouble());
+    double currentVelocity1 = motorVelocity1;
+    double currentVelocity2 = Math.abs(motorVelocity2);
     double averageVelocity = (currentVelocity1 + currentVelocity2)/2;
     return(averageVelocity);
   }
@@ -191,22 +211,6 @@ public class Yeeter extends SubsystemBase {
     DogLog.log("Yeeter/target speed", 0);
     motor1.stopMotor();
     motor2.setControl(followerRequest);
-  }
-
-  /**
-   * @param motor
-   * @return velocity as double of motor
-   */
-  public double getMotorVelocity(TalonFX motor) {
-    return (motor.getVelocity().getValueAsDouble());
-  }
-
-    /**
-   * @param motor
-   * @return velocity as double of motor1
-   */
-  public double getMotorVelocity() {
-    return (motor1.getVelocity().getValueAsDouble());
   }
 
   // public void configDashboard(ShuffleboardTab tab) {
@@ -250,18 +254,45 @@ public class Yeeter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double motor1Speed = getMotorVelocity(motor1);
+    updateInputs();
+
+    double motor1Speed = motorVelocity1;
     DogLog.log("Yeeter/Speed1", motor1Speed);
-    // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
+    // DogLog.log("Yeeter/Speed2", motorVelocity2);
 
     if (Constants.Yeeter.verboseLogging) {
-      DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Yeeter/stator current 1", motorStatorCurrent1);
+      DogLog.log("Yeeter/stator current 2", motorStatorCurrent2);
       DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed, true));
     }
   }
 
   @Override
   public void simulationPeriodic() {
+  }
+
+  private void createSignals() {
+    motorVelocitySignal1 = motor1.getVelocity();
+    motorVelocitySignal1.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    motorVelocitySignal2 = motor2.getVelocity();
+    motorVelocitySignal1.setUpdateFrequency(Constants.CANUpdateFrequencies.criticalSignal);
+
+    motorStatorCurrentSignal1 = motor1.getStatorCurrent();
+    motorStatorCurrentSignal1.setUpdateFrequency(Constants.CANUpdateFrequencies.nonCriticalSignal);
+
+    motorStatorCurrentSignal2 = motor2.getStatorCurrent();
+    motorStatorCurrentSignal2.setUpdateFrequency(Constants.CANUpdateFrequencies.nonCriticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(CANBusType.RIO, motorVelocitySignal1, motorVelocitySignal2, motorStatorCurrentSignal1, motorStatorCurrentSignal2);
+    signalUpdater.optimizeDevices(motor1, motor2);
+  }
+
+  private void updateInputs() {
+    motorVelocity1 = motorVelocitySignal1.getValueAsDouble();
+    motorVelocity2 = motorVelocitySignal2.getValueAsDouble();
+    motorStatorCurrent1 = motorStatorCurrentSignal1.getValueAsDouble();
+    motorStatorCurrent2 = motorStatorCurrentSignal2.getValueAsDouble();
   }
 }

@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -12,15 +13,28 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
-import dev.doglog.DogLog;                             
+import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.BulkCANSignalUpdater.CANBusType;
 
 public class Feeder extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
   private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
+
+  /**
+   * Signals and their local values. It is the responsibility of init() to create and register the
+   * signals we care about. And it is the responsibility of periodic() to call updateInputs() which
+   * is responsible for updating the values associated with each signal. No other part of the subsystem
+   * should fetch a signal from the motor, nor look at the value of the signal directly. The rest of the
+   * subsystem should exclusively use the value that updateInputs() updates.
+   */
+  private StatusSignal<Current> supplyCurrentSignal, statorCurrentSignal;
+  private double supplyCurrent, statorCurrent;
+
 
   /** Creates a new Feeder. */
   public Feeder() {
@@ -52,6 +66,8 @@ public class Feeder extends SubsystemBase {
     motor.getConfigurator().apply(limitConfigs);
 
     //DogLog.log("feeder speed", motor.getVelocity().getValueAsDouble());
+
+    createSignals();
   }
 
   /**
@@ -66,7 +82,7 @@ public class Feeder extends SubsystemBase {
   }
   
   public boolean isStalling() {
-    return (motor.getSupplyCurrent().getValueAsDouble() > 50.0); //65
+    return (supplyCurrent > 50.0); //65
   }
 
   /**
@@ -78,9 +94,28 @@ public class Feeder extends SubsystemBase {
 
   @Override
   public void periodic() {
+    updateInputs();
+
     // This method will be called once per scheduler run
     if (Constants.Feeder.verboseLogging) {
-      DogLog.log("Feeder/stator current", motor.getStatorCurrent().getValueAsDouble());
+      DogLog.log("Feeder/stator current", statorCurrent);
     }
+  }
+
+  private void createSignals() {
+    statorCurrentSignal = motor.getStatorCurrent();
+    statorCurrentSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.nonCriticalSignal);
+
+    supplyCurrentSignal = motor.getSupplyCurrent();
+    supplyCurrentSignal.setUpdateFrequency(Constants.CANUpdateFrequencies.nonCriticalSignal);
+
+    BulkCANSignalUpdater signalUpdater = BulkCANSignalUpdater.getInstance();
+    signalUpdater.registerSignals(CANBusType.RIO, statorCurrentSignal, supplyCurrentSignal);
+    signalUpdater.optimizeDevices(motor);
+  }
+
+  private void updateInputs() {
+    statorCurrent = statorCurrentSignal.getValueAsDouble();
+    supplyCurrent = supplyCurrentSignal.getValueAsDouble();
   }
 }
