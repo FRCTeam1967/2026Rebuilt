@@ -296,7 +296,7 @@ public class RobotContainer {
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
-                new ParallelCommandGroup (
+                //new ParallelCommandGroup (
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
@@ -332,11 +332,20 @@ public class RobotContainer {
                             )
                         )
                         //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
-                    ),
+                    )
 
-                    new RunCommand(() -> visabelle.oscillate(), swerve)
-                )
+                    //new RunCommand(() -> visabelle.oscillate(), swerve)
+                //)
             ); //TODO: add defense mode while the robot is shooting
+            
+            m_driverController.leftBumper().whileTrue(
+                new RunCommand(() ->
+                    new SequentialCommandGroup(
+                        visabelle.turnRight().withTimeout(0.5),
+                        visabelle.turnLeft().withTimeout(0.5)
+                    ), swerve
+                )
+            );
 
             // eject shooter
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(

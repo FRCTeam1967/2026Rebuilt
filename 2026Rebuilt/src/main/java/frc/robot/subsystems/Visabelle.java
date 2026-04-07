@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
@@ -59,21 +60,24 @@ public class Visabelle extends SubsystemBase {
       .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-  public void oscillate() {
-      swerve.setControl(
-          driveAtAngle
-            .withTargetDirection(new Rotation2d(this.getAngleToHub() + 2))
+  public Command turnRight() {
+    return run(() -> 
+        swerve.applyRequest(() -> driveAtAngle
+            .withTargetDirection(new Rotation2d(this.getAngleToHub() + 12))
             .withVelocityX(0)
             .withVelocityY(0)
-            .withMaxAbsRotationalRate(MaxAngularRate)
-      );
-      swerve.setControl(
-          driveAtAngle
-            .withTargetDirection(new Rotation2d(this.getAngleToHub() - 2))
+        )
+    );
+  }
+  
+  public Command turnLeft() {
+    return run(() -> 
+        swerve.applyRequest(() -> driveAtAngle
+            .withTargetDirection(new Rotation2d(this.getAngleToHub() - 12))
             .withVelocityX(0)
             .withVelocityY(0)
-            .withMaxAbsRotationalRate(MaxAngularRate)
-      );
+        )
+    );
   }
 
   private Translation2d getHubPose() {
