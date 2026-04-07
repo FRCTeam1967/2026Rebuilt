@@ -294,6 +294,7 @@ public class RobotContainer {
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
+            //    new ParallelCommandGroup( 
                 new SequentialCommandGroup( 
                     new ParallelCommandGroup(
                         new SequentialCommandGroup(
@@ -314,20 +315,26 @@ public class RobotContainer {
                                     new WaitCommand(1.0), 
                                     new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
                                 )
-                            ).withTimeout(5),
-
-                            new ParallelCommandGroup(
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-
-                                new SequentialCommandGroup(
-                                    new RunCommand(() -> indexer.stopMotor(), indexer).withTimeout(1.0),
-                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                                )
                             )
                         )
                     )
-                )
+                //)
+                // new RunCommand(()->
+                //     new SequentialCommandGroup(
+                //         swerve.applyRequest(() ->
+                //             drive.withVelocityX(0) // Drive forward with negative Y (forward)
+                //                 .withVelocityY(0.5*MaxSpeed) // Drive left with negative X (left)
+                //                 .withRotationalRate(0) // Drive counterclockwise with negative X (left)
+                //         ).withTimeout(0.5),
+                //     swerve.applyRequest(() ->
+                //             drive.withVelocityX(0) // Drive forward with negative Y (forward)
+                //                 .withVelocityY(-0.5*MaxSpeed) // Drive left with negative X (left)
+                //                 .withRotationalRate(0) // Drive counterclockwise with negative X (left)
+                //         ).withTimeout(0.5),
+                //     ), swerve)
+                //)
+                
+            )
             ); 
 
             

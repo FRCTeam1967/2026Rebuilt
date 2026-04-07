@@ -44,7 +44,7 @@ public class Indexer extends SubsystemBase {
     motionMagicConfigs.MotionMagicJerk = Constants.Indexer.JERK;
     
     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 40;
+    limitConfigs.StatorCurrentLimit = 10;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     motor.getConfigurator().apply(talonFXConfigs);
