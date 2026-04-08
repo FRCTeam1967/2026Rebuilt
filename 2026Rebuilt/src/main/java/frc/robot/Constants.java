@@ -68,7 +68,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 75.0; //81; //rotations per second
+        public static final double YEETER_SPEED = 72.5; //81; //rotations per second
         public static final double RESTING_SPEED = 60.0;
         public static final double YEETER_ACCELERATION = 500.0; //500
         public static final double YEETER_AUTO_SPEED = 65;
@@ -115,7 +115,7 @@ public final class Constants {
         public static final boolean verboseLogging = false || Logging.verboseLogging;
         public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 90 * DEGREES_TO_REVS;
+        public static final double SLIGHTLY_UP_FROM_DOWN = 50 * DEGREES_TO_REVS;
         
         public static final double JITTER_POS_ONE = 100 * DEGREES_TO_REVS;
         public static final double JITTER_POS_TWO = 130 * DEGREES_TO_REVS;

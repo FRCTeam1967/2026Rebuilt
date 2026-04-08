@@ -28,7 +28,7 @@ private final CANdle candle = new CANdle(CANDLE_ID);
 public LED() {
   CANdleConfiguration cfg = new CANdleConfiguration();
   cfg.LED.StripType = StripTypeValue.RGB;
-  cfg.LED.BrightnessScalar = 0.25;
+  cfg.LED.BrightnessScalar = 0.5;
   candle.getConfigurator().apply(cfg);
 }
 

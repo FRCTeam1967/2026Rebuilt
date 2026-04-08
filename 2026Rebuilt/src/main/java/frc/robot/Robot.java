@@ -49,12 +49,13 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer = new RobotContainer();
-     autoes = m_robotContainer.autoes;
+    autoes = m_robotContainer.autoes;
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    DogLog.log("yeeter Speed1", m_robotContainer.yeeter.getMotorVelocity());
     //DogLog.log("dis sensor", autoes.getDisSensor());
   }
 

@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -100,7 +101,7 @@ public class RobotContainer {
 
         private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(true));
         
-        public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 45).withColor(new RGBWColor(255, 0, 0));
+        public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
         
         private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
@@ -112,10 +113,10 @@ public class RobotContainer {
         private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
         private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
 
-        private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0));
+        private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
         private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
         
-        private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0));
+        private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         private final Trigger isEaterStalling = new Trigger(() -> eater.isStalling());
         
         private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
@@ -294,49 +295,38 @@ public class RobotContainer {
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
-            //    new ParallelCommandGroup( 
-                new SequentialCommandGroup( 
-                    new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // TODO: test timeout
+                new ParallelCommandGroup( 
+                    new SequentialCommandGroup( 
+                        new ParallelCommandGroup(
+                            new SequentialCommandGroup(
+                                new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-                            new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.ACCELERATION)
-                        ),
-                        new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                                new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                            ),
+                            new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                            
-                            new ParallelCommandGroup(
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
 
-                                new SequentialCommandGroup(
-                                    new WaitCommand(1.0), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(1.0), 
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                                        new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                                    )
                                 )
                             )
                         )
                     )
-                //)
-                // new RunCommand(()->
-                //     new SequentialCommandGroup(
-                //         swerve.applyRequest(() ->
-                //             drive.withVelocityX(0) // Drive forward with negative Y (forward)
-                //                 .withVelocityY(0.5*MaxSpeed) // Drive left with negative X (left)
-                //                 .withRotationalRate(0) // Drive counterclockwise with negative X (left)
-                //         ).withTimeout(0.5),
-                //     swerve.applyRequest(() ->
-                //             drive.withVelocityX(0) // Drive forward with negative Y (forward)
-                //                 .withVelocityY(-0.5*MaxSpeed) // Drive left with negative X (left)
-                //                 .withRotationalRate(0) // Drive counterclockwise with negative X (left)
-                //         ).withTimeout(0.5),
-                //     ), swerve)
-                //)
-                
-            )
-            ); 
-
+                    // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+                    //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+                )
+            );
             
             // eject shooter
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(

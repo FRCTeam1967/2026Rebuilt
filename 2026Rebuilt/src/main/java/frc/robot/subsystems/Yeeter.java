@@ -194,6 +194,14 @@ public class Yeeter extends SubsystemBase {
     return (motor.getVelocity().getValueAsDouble());
   }
 
+    /**
+   * @param motor
+   * @return velocity as double of motor1
+   */
+  public double getMotorVelocity() {
+    return (motor1.getVelocity().getValueAsDouble());
+  }
+
   // public void configDashboard(ShuffleboardTab tab) {
   //   //tab.addDouble(“FlywheelSpeed”, () -> getMotorVelocity(flywheelMotor1));
   //   // tab.addDouble("YeeterSpeed1", () -> getMotorVelocity(motor1));
@@ -204,17 +212,18 @@ public class Yeeter extends SubsystemBase {
   private void populateTreeMap() {
     //distance from hub (m), shooter speeds
     speedTable.put(1.524+1.02235, 63.5); //5ft //TESTED
-    speedTable.put(1.676+1.02235, 64.5); //5.5ft //UNTESTED
-    speedTable.put(1.9812+1.02235, 66.5); //6.5ft //TESTED
-    speedTable.put(2.1366+1.02235, 69.0);//7ft //UNTESTED
-    speedTable.put(2.286+1.02235, 69.5); //7.5ft UNTESTED
-    speedTable.put(2.4384+1.02235, 70.0); //8ft //TESTED
-    speedTable.put(2.5908+1.02235,70.0); //8.5ft //78 UNTESTED
-    speedTable.put(2.7432+1.02235, 70.5); //9ft UNTESTED
-    speedTable.put(2.8956+1.02235, 71.5); //9.5ft UNTESTED
-    speedTable.put(3.048+1.02235, 72.5); //10ft TESTED
-    speedTable.put(3.2004+1.02235, 73.0); //10.5 //78 UNTESTED
-    speedTable.put(3.3528+1.02235, 73.5); //11ft // UNTESTED
+    speedTable.put(1.676+1.02235, 64.5); //5.5ft //TESTED
+    speedTable.put(1.8288+1.02235, 65.0); //6ft //TESTED
+    speedTable.put(1.9812+1.02235, 67.0); //6.5ft //TESTED
+    speedTable.put(2.1366+1.02235, 69.5);//7ft //TESTED
+    speedTable.put(2.286+1.02235, 70.0); //7.5ft //TESTED
+    speedTable.put(2.4384+1.02235, 70.5); //8ft //TESTED
+    speedTable.put(2.5908+1.02235,71.0); //8.5ft //TESTED
+    speedTable.put(2.7432+1.02235, 72.5); //9ft //TESTED
+    speedTable.put(2.8956+1.02235, 73.5); //9.5ft TESTED
+    speedTable.put(3.048+1.02235, 72.5); //10ft unTESTED
+    // speedTable.put(3.2004+1.02235, 73.0); //10.5 //78 UNTESTED
+    // speedTable.put(3.3528+1.02235, 73.5); //11ft // UNTESTED
     // speedTable.put(3.3288, 68.0); //6 feet
     // speedTable.put(3.9384, 75.0); //8 feet
   }
@@ -235,7 +244,7 @@ public class Yeeter extends SubsystemBase {
   @Override
   public void periodic() {
     double motor1Speed = getMotorVelocity(motor1);
-     DogLog.log("Yeeter/Speed1", motor1Speed);
+    DogLog.log("Yeeter/Speed1", motor1Speed);
     // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
 
     if (Constants.Yeeter.verboseLogging) {
