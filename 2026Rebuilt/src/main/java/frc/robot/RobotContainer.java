@@ -260,7 +260,7 @@ public class RobotContainer {
 
         //LEDS
             isDisabled.whileTrue(new RunCommand(() -> candle.setControl(janksterRed)).ignoringDisable(true));
-
+            isDisabled.whileTrue(new RunCommand(() -> candle.setControl(janksterWhite)).ignoringDisable(true));
             //seeing any tag
             seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
