@@ -95,7 +95,7 @@ public class Visabelle extends SubsystemBase {
   }
 
   public boolean isAligned() {
-    return (getAngleToHub() <= 0.0872665); //5 degrees to radians
+    return (getAngleToHub() <= 0.174533); //5 degrees to radians
   }
 
   public BooleanSupplier getIsAligned() {

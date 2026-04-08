@@ -445,7 +445,10 @@ public class RobotContainer {
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
-                new RunFeeder(feeder, -100) //75
+                new ParallelCommandGroup(
+                    new RunFeeder(feeder, -100),
+                    new RunCommand (() -> candle.setControl(whiteSolid)) //75
+                )
             );
 
 
@@ -536,17 +539,5 @@ public class RobotContainer {
 
     private void updateWonAuto() {
         hasAlreadyUpdatedIfWeWonAuto = true;
-    }
-
-    public boolean getInRange(double position) {
-        double target = 0.0;
-        double threshold = 5.0;
-        return position <=  (target + threshold) && position >= (target - threshold);
-    }
-  
-    public boolean isAligned(double position) {
-        double target = 0.0;
-        double threshold = 5.0;
-        return position <= (target + threshold) && position >= (target - threshold);
     }
 }

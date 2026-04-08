@@ -801,6 +801,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     path3.done().onTrue(
       Commands.sequence( 
         new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(2),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -994,6 +995,154 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           ),
           new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
+          trenchToCenter.cmd(),
+          new PrintCommand("auto start")
+      )
+    );
+
+    trenchToCenter.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER) 
+      )
+    );
+    trenchToCenter.done().onTrue(intake1.cmd());
+    
+    intake1.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+      ));    
+      intake1.done().onTrue(shoot1.cmd());
+
+  
+    shoot1.done().onTrue(
+      Commands.sequence( 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
+      goBack.active().onTrue(
+      new ParallelCommandGroup(
+          new ParallelCommandGroup(
+              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+              new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+          )
+      )
+    );
+    goBack.done().onTrue(intake2.cmd());
+    
+    intake2.active().onTrue(
+      new ParallelCommandGroup(
+          new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+              new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+              new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+      ));
+          intake2.done().onTrue(shoot2.cmd());
+
+  
+    shoot2.done().onTrue(
+      Commands.sequence( 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
+      
+    return routine;
+  }
+  private AutoRoutine dtn2xBumpDelay() {
+    AutoRoutine routine = autoFactory.newRoutine("DT Neutral Zone Distance Sensor");
+
+    AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
+    AutoTrajectory intake1  = routine.trajectory("DT_N_fuelBranch1");
+    AutoTrajectory shoot1 = routine.trajectory("bumpN_DTShoot1");
+    AutoTrajectory goBack = routine.trajectory("bumpShoot_DT_N");
+    AutoTrajectory intake2 = routine.trajectory("bumpDT_N_fuelBranch2");
+    AutoTrajectory shoot2 = routine.trajectory("bumpN_DTShoot2");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchToCenter.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          new WaitCommand(2.5),
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
       )
