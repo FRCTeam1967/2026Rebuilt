@@ -30,6 +30,7 @@ import frc.robot.commands.AimHub;
 import frc.robot.commands.AlignTowerPose;
 import frc.robot.commands.MoveClimbHalfwayDown;
 import frc.robot.commands.MoveClimbUp;
+import frc.robot.commands.MoveClimbtoZero;
 import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunYeeter;
@@ -78,6 +79,8 @@ public class Autoes {
     // autoChooserLOL.addRoutine("DT Neutral Score (dissensor)", this::dtnDisSensor);
     autoChooserLOL.addRoutine("DT Neutral Bump 2 Cycle", this::dtn2xBump);
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
+    autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
+    autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -128,41 +131,40 @@ public class Autoes {
     //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
     // );
     score.done().onTrue(
-       Commands.sequence( 
-                new ParallelCommandGroup(
-                    new ParallelCommandGroup(
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
-                    ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+       Commands.sequence(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-                    new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
-                        new ParallelCommandGroup(
-                            new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                            new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                            new SequentialCommandGroup(
-                                  new WaitCommand(1), 
-                                  new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                            )
-                        )
-                    )
-                )
-            ));
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
     return routine;
   }
   
@@ -201,29 +203,39 @@ public class Autoes {
    
     turnAndShoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                          new WaitCommand(1), 
-                          new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
     return routine;
   }
 
@@ -261,30 +273,39 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                          new WaitCommand(1), 
-                          new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                          new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
 
     return routine;
   }
@@ -322,37 +343,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true))),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
-      ); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
 
     return routine;
   }
@@ -393,33 +416,41 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     hubToO.done().onTrue(Shoot.cmd());
    
     Shoot.done().onTrue(
-      Commands.sequence( 
-          new ParallelCommandGroup(
+      Commands.sequence(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle), 
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  )
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
-      ).andThen(TrenchNeutral.cmd()));
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      )
+      .andThen(TrenchNeutral.cmd()));
     
 
     TrenchNeutral.done().onTrue(
@@ -433,40 +464,38 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  )
-
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
       )); 
 
     return routine;
@@ -509,37 +538,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
-      ).andThen(TrenchNeutral.cmd()));
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      )
+      .andThen(TrenchNeutral.cmd()));
 
      TrenchNeutral.done().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
@@ -553,37 +585,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
 
     return routine;
   }
@@ -643,30 +677,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack1.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-                  )
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
           )
-      ).withTimeout(5).andThen(shootToCenter.cmd()));
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      )
+      .andThen(shootToCenter.cmd()));
 
     shootToCenter.done().onTrue(intakeMore2.cmd());
     intakeMore2.active().onTrue(
@@ -675,31 +719,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
           )
-      ).withTimeout(5)); 
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
 
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
@@ -709,6 +761,80 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     // //  //write intake for fuel traj if true 
     // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
 
+    return routine;
+  }
+  private AutoRoutine dtndisrupt() {
+    AutoRoutine routine = autoFactory.newRoutine("DTNDISRUPT");
+
+    AutoTrajectory path1 = routine.trajectory("DT_Ndisrupt");
+    AutoTrajectory path2  = routine.trajectory("DT_Ndisrupt1");
+    AutoTrajectory path3 = routine.trajectory("DT_Ndisrupt2");
+    
+
+    double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
+
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          path1.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          path1.cmd(),
+          new PrintCommand("auto start")
+      )
+    );
+
+    path1.done().onTrue(path2.cmd());
+
+    path2.done().onTrue(path3.cmd());
+    path3.done().onTrue(
+      Commands.sequence( 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
+
+    
     return routine;
   }
 
@@ -761,38 +887,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootFirstCondition.done().onTrue(
       Commands.sequence( 
-          new AimHub(m_robotContainer, m_robotContainer.visabelle),
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
     
 
     intakeMore.active().onTrue(
@@ -802,43 +929,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore.done().onTrue(shootSecondCondition.cmd());
 
     shootSecondCondition.done().onTrue(
-     Commands.sequence( 
-          new AimHub(m_robotContainer, m_robotContainer.visabelle),
-          new ParallelCommandGroup(
+      Commands.sequence( 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
 
     return routine;
   }
@@ -897,31 +1021,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot1.done().onTrue(
       Commands.sequence( 
-          new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(()-> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
           )
-        ).withTimeout(5).andThen(goBack.cmd())
-      );
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
       goBack.active().onTrue(
       new ParallelCommandGroup(
           new ParallelCommandGroup(
@@ -946,30 +1078,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot2.done().onTrue(
       Commands.sequence( 
-          new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(()-> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
           )
-        ).withTimeout(5)); 
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
       
     return routine;
   }
@@ -1020,32 +1161,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      Commands.sequence( 
-          new ParallelCommandGroup(
-              new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+    Commands.sequence( 
+      new AimHub(m_robotContainer, m_robotContainer.visabelle),
+      new ParallelCommandGroup( 
+        new SequentialCommandGroup( 
+            new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                    new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                      )
+                    new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                ),
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  )
-              )
-          ).withTimeout(5)
-      ).andThen(goBack.cmd())
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                    
+                    new ParallelCommandGroup(
+                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.0), 
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                        )
+                    )
+                )
+            )
+        )
+        // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+        //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+      ).withTimeout(6)
+    ).andThen(goBack.cmd())
     );
 
     goBack.done().onTrue(intake2.cmd());
@@ -1054,33 +1203,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     );
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
-      Commands.sequence( 
-          new ParallelCommandGroup(
+      Commands.sequence(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle), 
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                 
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
-          ).withTimeout(5)
-      )); 
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     // Trigger atNeutral = trenchToCenter.done();
@@ -1141,34 +1297,41 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      Commands.sequence( 
-          new ParallelCommandGroup(
-              new ParallelCommandGroup(
-                  new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(()-> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+    Commands.sequence( 
+      new AimHub(m_robotContainer, m_robotContainer.visabelle),
+      new ParallelCommandGroup( 
+        new SequentialCommandGroup( 
+            new ParallelCommandGroup(
+                new SequentialCommandGroup(
+                    new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  
+                    new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                ),
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-                      )
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                    
+                    new ParallelCommandGroup(
+                        new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                        new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  )
-              )
-          )
-      ).withTimeout(5).andThen(goBack.cmd())
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.0), 
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                            new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                            new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                        )
+                    )
+                )
+            )
+        )
+        // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+        //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+      ).withTimeout(6)
+    )
+      .andThen(goBack.cmd())
     );
 
     goBack.done().onTrue(intake2.cmd());
@@ -1182,40 +1345,39 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(()-> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(0.5), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
           )
-      ).withTimeout(5)); 
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      ));
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     // Trigger atNeutral = trenchToCenter.done();
@@ -1228,7 +1390,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-      AutoTrajectory shootFromABitBack = routine.trajectory("H_Score");
+    AutoTrajectory shootFromABitBack = routine.trajectory("H_Score");
     AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
     double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
 
@@ -1260,62 +1422,61 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         //  )
       )
     ); 
-
-    // WITH EVENT MARKER
-    shootFromABitBack.atPose("Deploy Eater", 1.0, Math.PI/4).onTrue(
-      Commands.sequence(
-        new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(3),
-        Commands.parallel(
-        new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED), 
-        new RunIndexer(m_robotContainer.indexer, 10.0))
-      ).withTimeout(3)
+    shootFromABitBack.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER) 
+      )
     );
 
     shootFromABitBack.done().onTrue(
       Commands.sequence( 
-          new ParallelCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
               new ParallelCommandGroup(
-                  new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                  //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-              //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-              new SequentialCommandGroup(
-                  new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                  
-                  // new ParallelCommandGroup( //green
-                  //     new SequentialCommandGroup(
-                  //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                  //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                  //     )
-                  // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                  //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                  //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                  
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-                      new SequentialCommandGroup(
-                        new WaitCommand(1), 
-                        new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                        new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION).asProxy() // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
                       )
-
                   )
               )
-          ).withTimeout(5)
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
       )
-      .andThen(hubTowerShoot.cmd()));
-    hubTowerShoot.done().onTrue(
-      new SequentialCommandGroup(
-        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3),
-        new AlignTowerPose(m_robotContainer.swerve),
-        new MoveClimbHalfwayDown(m_robotContainer.climb, -4)
-      )
-    );
+        .andThen(hubTowerShoot.cmd())
+      );
+      hubTowerShoot.active().onTrue(
+        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3)
+      );
+      hubTowerShoot.done().onTrue(
+        new SequentialCommandGroup(
+          new AlignTowerPose(m_robotContainer.swerve),
+          new MoveClimbtoZero(m_robotContainer.climb, 15)
+        )
+      );
 
     // WITHOUT EVENT MARKER
     // shootFromABitBack.active().onTrue(
@@ -1381,39 +1542,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     driveBack.done().onTrue(
       Commands.sequence( 
-        new ParallelCommandGroup(
-            new ParallelCommandGroup(
-            new RunYeeter(m_robotContainer.yeeter, () -> m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                        //new RunCommand (() -> candle.setControl(yellowBlink))
-              ),
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
+        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-            new SequentialCommandGroup(
-                new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)),
-                        
-                        // new ParallelCommandGroup( //green
-                        //     new SequentialCommandGroup(
-                        //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                        //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                        //     )
-                        // ),
+                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                        //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                        //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                        
-                  new ParallelCommandGroup(
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED)
-                  ) 
-              ),
-
-              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-            ).withTimeout(3),
-                
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-           ).andThen(scoreClimb.cmd()));
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      )
+           .andThen(scoreClimb.cmd()));
     return routine;
   }
 private AutoRoutine dt_tw() {
