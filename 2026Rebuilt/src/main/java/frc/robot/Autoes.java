@@ -1632,11 +1632,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         .andThen(hubTowerShoot.cmd())
       );
       hubTowerShoot.active().onTrue(
-        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(3)
+        new MoveClimbUp(m_robotContainer.climb, -15)
       );
       hubTowerShoot.done().onTrue(
         new SequentialCommandGroup(
-          new AlignTowerPose(m_robotContainer.swerve),
+          new MoveClimbUp(m_robotContainer.climb, -15),
+          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
           new MoveClimbtoZero(m_robotContainer.climb, 15)
         )
       );
