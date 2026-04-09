@@ -132,7 +132,7 @@ public class Autoes {
     // );
     score.done().onTrue(
        Commands.sequence(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -203,7 +203,7 @@ public class Autoes {
    
     turnAndShoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -273,7 +273,7 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -343,7 +343,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -417,7 +417,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle), 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5), 
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -464,7 +464,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -538,7 +538,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
    
     Shoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -585,7 +585,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBackShoot.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -677,7 +677,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack1.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -719,7 +719,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -814,7 +814,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     
     path3.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(2),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
@@ -902,7 +902,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootFirstCondition.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -945,7 +945,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootSecondCondition.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1036,7 +1036,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot1.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1093,7 +1093,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot2.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1184,7 +1184,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot1.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1241,7 +1241,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
   
     shoot2.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1325,7 +1325,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
     Commands.sequence( 
-      new AimHub(m_robotContainer, m_robotContainer.visabelle),
+      new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
       new ParallelCommandGroup( 
         new SequentialCommandGroup( 
             new ParallelCommandGroup(
@@ -1367,7 +1367,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       Commands.sequence(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle), 
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5), 
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1461,7 +1461,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
     Commands.sequence( 
-      new AimHub(m_robotContainer, m_robotContainer.visabelle),
+      new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
       new ParallelCommandGroup( 
         new SequentialCommandGroup( 
             new ParallelCommandGroup(
@@ -1508,7 +1508,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1596,7 +1596,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootFromABitBack.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -1705,7 +1705,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     driveBack.done().onTrue(
       Commands.sequence( 
-        new AimHub(m_robotContainer, m_robotContainer.visabelle),
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
