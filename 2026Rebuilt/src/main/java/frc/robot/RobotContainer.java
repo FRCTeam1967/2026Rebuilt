@@ -253,14 +253,19 @@ public class RobotContainer {
                         new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
                         new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
                     ),
-                    () -> ally.get() == Alliance.Blue
+                    () -> ally.get() == Alliance.Red
                 )
             ));
 
 
         //LEDS
-            isDisabled.whileTrue(new RunCommand(() -> candle.setControl(janksterRed)).ignoringDisable(true));
-            isDisabled.whileTrue(new RunCommand(() -> candle.setControl(janksterWhite)).ignoringDisable(true));
+            isDisabled.whileTrue(
+                new RepeatCommand(
+                    new SequentialCommandGroup(
+                        new RunCommand(() -> candle.setControl(janksterRed)).withTimeout(0.5),
+                        new RunCommand(() -> candle.setControl(janksterWhite)).withTimeout(0.5)
+            )));
+
             //seeing any tag
             seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));

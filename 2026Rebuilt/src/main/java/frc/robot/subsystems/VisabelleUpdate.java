@@ -250,8 +250,8 @@ public class VisabelleUpdate extends SubsystemBase {
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
     // DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
     // DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
-    // DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
-    // DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
+    DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
+    DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
     //logging all the tags we can see
     if (mt2_front != null && mt2_front.tagCount > 0) {
