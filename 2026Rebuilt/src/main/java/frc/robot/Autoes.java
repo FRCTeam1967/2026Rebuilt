@@ -1553,7 +1553,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory shootFromABitBack = routine.trajectory("H_Score");
+    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot");
     AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
     double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
 
