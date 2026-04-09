@@ -794,10 +794,28 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("auto start")
       )
     );
+    path1.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+      )
+    );
 
     path1.done().onTrue(path2.cmd());
 
+    path2.active().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                    new RunFeeder(m_robotContainer.feeder, Constants.Feeder.INTAKE_FEEDER)
+      )
+    );
+
     path2.done().onTrue(path3.cmd());
+    
     path3.done().onTrue(
       Commands.sequence( 
         new AimHub(m_robotContainer, m_robotContainer.visabelle),
