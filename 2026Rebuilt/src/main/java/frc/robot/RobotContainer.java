@@ -320,16 +320,20 @@ public class RobotContainer {
                                     new SequentialCommandGroup(
                                         new WaitCommand(1.0), 
                                         new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                                        new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+                                        new ParallelCommandGroup(
+                                            new SequentialCommandGroup(
+                                                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                                new MovePivot(pivot, Constants.Pivot.SAFE, false)    
+                                            ),
+                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                        )
                                     )
                                 )
                             )
                         )
                     )
-                    // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
-                    //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
                 )
             );
             
@@ -417,11 +421,7 @@ public class RobotContainer {
                             
                             new ParallelCommandGroup(
                                 new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                                new SequentialCommandGroup(
-                                    new WaitCommand(2), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-                                )
+                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
 
                             )
                         )
@@ -440,29 +440,38 @@ public class RobotContainer {
                 new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
-                    new ParallelCommandGroup(
                         new ParallelCommandGroup(
-                            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                            //new RunCommand (() -> candle.setControl(yellowBlink))
-                        ),
-
-                        new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
-                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                            
                             new ParallelCommandGroup(
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                                new SequentialCommandGroup(
-                                    new WaitCommand(2), 
-                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
-                                )
+                                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunCommand (() -> candle.setControl(yellowBlink))
+                            ),
 
+                            new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(1.0), 
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+                                        new ParallelCommandGroup(
+                                            new SequentialCommandGroup(
+                                                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                                new MovePivot(pivot, Constants.Pivot.SAFE, false)
+                                            ),
+                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                        )
+                                    )
+                                )
                             )
                         )
                     )
                 )
-            )); 
+            ); 
 
             //hood back down
             m_operatorController.povLeft().whileTrue(

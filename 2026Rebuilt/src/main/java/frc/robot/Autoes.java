@@ -133,12 +133,6 @@ public class Autoes {
     ));
   }
 
-  // public double getDisSensor() {
-  //   return disSensor.getDistance(true).getValueAsDouble();
-  // }
-
-  
-  
   private AutoRoutine hubScore() {
     AutoRoutine routine = autoFactory.newRoutine("HUBSCORE");
     AutoTrajectory goBack = routine.trajectory("ShootFromABitBack");
