@@ -15,15 +15,15 @@ public final class Constants {
         public static final int HOOD_MOTOR_ID = 19;        
         public static final int HOOD_CANCODER_ID = 21;     
 
-        public static final double CRUISE_VELOCITY = 500;  // placeholder
-        public static final double ACCELERATION = 1000;     // placeholder
+        public static final double CRUISE_VELOCITY = 750;  // TODO: test if this sped it up, originally 500
+        public static final double ACCELERATION = 1500;     // TODO: test, originally 1000
         public static final double JERK = 550;//;            // placeholder
 
-        public static final double kP = 2.5;  // placeholder //TODO: test this, was originally 1.6
+        public static final double kP = 2.5;  // placeholder 
         public static final double kI = 0.0;  // placeholder
         public static final double kD = 0.0;  // placeholder
-        public static final double kS = 0.12;  // placeholder
-        public static final double kV = 1.2;  // placeholder
+        public static final double kS = 0.2;  // placeholder
+        public static final double kV = 0.7;  // placeholder
         public static final double kA = 0.0;  // placeholder
 
         public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot

@@ -399,7 +399,42 @@ public class RobotContainer {
                 ); //TODO: add defense mode while the robot is shooting
 
 
+        //SHUTTLE WHILE INTAKING
+        m_operatorController.y().whileTrue(
+        new ParallelCommandGroup(
+            new ParallelCommandGroup(
+                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                new SequentialCommandGroup( 
+                    new ParallelCommandGroup(
+                        new ParallelCommandGroup(
+                            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                            //new RunCommand (() -> candle.setControl(yellowBlink))
+                        ),
 
+                        new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                            
+                            new ParallelCommandGroup(
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                new SequentialCommandGroup(
+                                    new WaitCommand(2), 
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true)
+                                )
+
+                            )
+                        )
+                    )
+                )
+            ),
+            new ParallelCommandGroup(
+                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+            )
+        )  
+    );
+    
         //SHUTTLING
             m_operatorController.leftBumper().whileTrue(
                 new ParallelCommandGroup(
