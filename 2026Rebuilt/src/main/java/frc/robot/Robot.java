@@ -120,8 +120,7 @@ public class Robot extends TimedRobot {
   public void teleopExit() {}
 
   @Override
-  public void testInit() {
-  }
+  public void testInit() {}
 
   @Override
   public void testPeriodic() {}

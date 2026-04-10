@@ -271,7 +271,7 @@ public class RobotContainer {
             //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
             //aligned with tag
-            isAligned.and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
+            isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
             //shooter speed reached
@@ -288,7 +288,7 @@ public class RobotContainer {
                 .and(isEaterStalling.negate())
                 .and(seeTag.negate())
                 .and(isDisabled.negate())
-            ).whileTrue(new RunCommand(()-> candle.clearAllAnimations()));
+            ).whileTrue(new RunCommand(()-> candle.setControl(black)));
         
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
@@ -436,13 +436,51 @@ public class RobotContainer {
     );
     
         //SHUTTLING
-            m_operatorController.leftBumper().whileTrue(
+            m_operatorController.leftBumper().and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
                                 new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunCommand (() -> candle.setControl(yellowBlink))
+                            ),
+
+                            new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(1.0), 
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+                                        new ParallelCommandGroup(
+                                            new SequentialCommandGroup(
+                                                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                                new MovePivot(pivot, Constants.Pivot.SAFE, false)
+                                            ),
+                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            ); 
+
+             //SHUTTLING FURTHER
+            m_operatorController.leftBumper().and(m_operatorController.x()).whileTrue(
+                new ParallelCommandGroup(
+                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                    new SequentialCommandGroup( 
+                        new ParallelCommandGroup(
+                            new ParallelCommandGroup(
+                                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_FAR_SHUTTLE, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
