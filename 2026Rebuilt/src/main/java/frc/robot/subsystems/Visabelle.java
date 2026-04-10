@@ -103,19 +103,22 @@ public class Visabelle extends SubsystemBase {
   }
 
   public void configDashboard(ShuffleboardTab tab) {
-    HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
-    CameraServer.addCamera(httpCamera1);
-    tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
-        .withSize(3, 2);
+    // HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
+    // CameraServer.addCamera(httpCamera1);
+    // tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
+    //     .withSize(3, 2);
 
-    HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
-    CameraServer.addCamera(httpCamera2);
-    tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
-        .withSize(3, 2);
+    // HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
+    // CameraServer.addCamera(httpCamera2);
+    // tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
+    //     .withSize(3, 2);
+    tab.addBoolean("front-limelight valid target?", () -> LimelightHelpers.getTV("limelight-front"))
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(3, 0)
+        .withSize(1, 1);
 
-    // tab.addBoolean("LL isAligned", this.getIsAligned())
-    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
-    //     .withSize(1, 1);
+    tab.addBoolean("back-limelight valid target?", () -> LimelightHelpers.getTV("limelight-back"))
+        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(4, 0)
+        .withSize(1, 1);
   }
 
   @Override

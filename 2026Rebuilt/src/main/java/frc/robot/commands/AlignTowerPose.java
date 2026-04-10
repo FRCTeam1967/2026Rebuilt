@@ -36,7 +36,7 @@ public class AlignTowerPose extends Command {
       
   final StructPublisher<Pose2d> towerPublisher = NetworkTableInstance.getDefault().getTable("alignment").getStructTopic("tower", Pose2d.struct).publish();  
   
-  private static final double kP_translational = 1.00; //0.85
+  private static final double kP_translational = 2.5; //0.85
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
 

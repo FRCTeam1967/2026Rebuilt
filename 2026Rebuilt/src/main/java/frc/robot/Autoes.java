@@ -83,6 +83,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
     autoChooserLOL.addRoutine("Tower Test", this::towerTest);
+    autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -898,7 +899,53 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       );
     return routine;
   }
+private AutoRoutine dtnClimb() {
+    AutoRoutine routine = autoFactory.newRoutine("DTNCLIMB");
+    AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
+    AutoTrajectory intake = routine.trajectory("DT_N_fuelBranch1");
+    AutoTrajectory goBack = routine.trajectory("N_DTShoot1");
+    AutoTrajectory climb = routine.trajectory("DT_Shoot_Climb");
+    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
 
+    routine.active().onTrue(
+      Commands.sequence(
+        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+        //step one: set gyro to starting heading (flips for alliance)
+        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+        new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+        trenchToCenter.resetOdometry(),
+        new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+        //step three: set LL heading to gyro (aka starting) heading
+        //if we can see a tag then run step 3 & path else just run path
+        trenchToCenter.cmd()
+      )
+    ); 
+    trenchToCenter.active().onTrue(
+      intakeSequence()
+    );
+
+    trenchToCenter.done().onTrue(intake.cmd()
+      );
+    intake.active().onTrue(intakeSequence());
+    intake.done().onTrue(goBack.cmd());
+    goBack.done().onTrue(shootSequence().andThen(climb.cmd()));
+      climb.active().onTrue(
+        new MoveClimbUp(m_robotContainer.climb, -15)
+      );
+      climb.done().onTrue(
+        new SequentialCommandGroup(
+          new MoveClimbUp(m_robotContainer.climb, -15),
+          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          new MoveClimbtoZero(m_robotContainer.climb, 15)
+        )
+      );
+    return routine;
+  }
 private AutoRoutine towerTest() {
   AutoRoutine routine = autoFactory.newRoutine("TWtest");
   AutoTrajectory path1 = routine.trajectory("towertest");

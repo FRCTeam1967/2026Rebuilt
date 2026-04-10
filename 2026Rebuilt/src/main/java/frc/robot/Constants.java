@@ -73,7 +73,7 @@ public final class Constants {
         public static final double YEETER_ACCELERATION = 500.0; //500
         public static final double YEETER_AUTO_SPEED = 65;
         public static final double YEETER_SPEED_ADDITION = 4.0;
-        public static final double YEETER_FAR_SHUTTLE = 90;
+        public static final double YEETER_FAR_SHUTTLE = 100;
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
         //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
@@ -136,7 +136,7 @@ public final class Constants {
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final double INDEXER_SPEED = 95;
+        public static final double INDEXER_SPEED = 100;
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
