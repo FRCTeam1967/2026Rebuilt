@@ -80,7 +80,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
     autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
     autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
-     autoChooserLOL.addRoutine("Depot Trench Bump Delay Auto", this::dtn2xBumpDelay);
+     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
