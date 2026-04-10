@@ -80,6 +80,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
     autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
     autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
+     autoChooserLOL.addRoutine("Depot Trench Bump Delay Auto", this::dtn2xBumpDelay);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -606,8 +607,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake1.done().onTrue(shoot1.cmd());
 
     shoot1.done().onTrue(
-      shootSequence()
-        .andThen(goBack.cmd()));
+      shootSequence().andThen(goBack.cmd()));
     
     goBack.done().onTrue(intake2.cmd());
     
@@ -663,7 +663,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       intake1.done().onTrue(shoot1.cmd());
 
   
-    shoot1.done().onTrue(shootSequence());
+    shoot1.done().onTrue(shootSequence().andThen(goBack.cmd()));
       goBack.active().onTrue(
       intakeSequence()
     );
