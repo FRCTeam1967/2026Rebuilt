@@ -80,7 +80,8 @@ public class Autoes {
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
     autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
     autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
-     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
+    autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
+    autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -457,6 +458,65 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     AutoTrajectory path4 = routine.trajectory("DT_Ndisrupt3");
     AutoTrajectory path5 = routine.trajectory("DT_Ndisrupt4");
     AutoTrajectory path6 = routine.trajectory("DT_Ndisrupt5");
+    
+
+    double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
+
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          path1.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          path1.cmd(),
+          new PrintCommand("auto start")
+      )
+    );
+    path1.active().onTrue(
+      intakeSequence());
+
+    path1.done().onTrue(path2.cmd());
+
+    path2.active().onTrue(
+      intakeSequence()
+    );
+
+    path2.done().onTrue(path3.cmd());
+    
+    path3.done().onTrue(shootSequence().andThen(path4.cmd()));
+
+    path4.active().onTrue(intakeSequence());
+
+    path4.done().onTrue(path5.cmd());
+
+    path5.active().onTrue(intakeSequence());
+    
+    path5.done().onTrue(path6.cmd());
+
+    path6.done().onTrue(shootSequence());
+
+    return routine;
+  }
+  private AutoRoutine otdisrupt() {
+    AutoRoutine routine = autoFactory.newRoutine("OTDISRUPT");
+
+    AutoTrajectory path1 = routine.trajectory("OT_disrupt");
+    AutoTrajectory path2  = routine.trajectory("OT_disrupt1");
+    AutoTrajectory path3 = routine.trajectory("OT_disrupt2");
+    AutoTrajectory path4 = routine.trajectory("OT_disrupt3");
+    AutoTrajectory path5 = routine.trajectory("OT_disrupt4");
+    AutoTrajectory path6 = routine.trajectory("OT_disrupt5");
     
 
     double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
