@@ -479,31 +479,26 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           ),
           new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
-          path1.cmd(),
-          new PrintCommand("auto start")
+          path1.cmd()
       )
     );
+
     path1.active().onTrue(
-      intakeSequence());
-
+     intakeSequence());
+    
     path1.done().onTrue(path2.cmd());
-
     path2.active().onTrue(
-      intakeSequence()
+      intakeSequence());
+    path2.done().onTrue(path3.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
+
+    path3.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
+      shootSequence().andThen(path4.cmd())
     );
 
-    path2.done().onTrue(path3.cmd());
-    
-    path3.done().onTrue(shootSequence().andThen(path4.cmd()));
-
-    path4.active().onTrue(intakeSequence());
-
     path4.done().onTrue(path5.cmd());
-
-    path5.active().onTrue(intakeSequence());
-    
+    path5.active().onTrue(
+      intakeSequence());
     path5.done().onTrue(path6.cmd());
-
     path6.done().onTrue(shootSequence());
 
     return routine;
@@ -854,12 +849,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       intakeSequence());
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(shootSequence());
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atNeutral = trenchToCenter.done();
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // //  //write intake for fuel traj if true 
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
 
     return routine;
   }
@@ -908,4 +897,40 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       );
     return routine;
   }
+
+private AutoRoutine towerTest() {
+  AutoRoutine routine = autoFactory.newRoutine("TWtest");
+  AutoTrajectory path1 = routine.trajectory("towertest");
+  double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
+
+  routine.active().onTrue(
+    Commands.sequence(
+      new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+      //step one: set gyro to starting heading (flips for alliance)
+      new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+      new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+      path1.resetOdometry(),
+      new InstantCommand(
+          () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          0, 0, 0, 0, 0)
+        ),
+      //step three: set LL heading to gyro (aka starting) heading
+      //if we can see a tag then run step 3 & path else just run path
+      path1.cmd()
+    )
+  ); 
+  path1.active().onTrue(
+    new MoveClimbUp(m_robotContainer.climb, -15)
+  );
+    path1.done().onTrue(
+      new SequentialCommandGroup(
+        new MoveClimbUp(m_robotContainer.climb, -15),
+        new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+        new MoveClimbtoZero(m_robotContainer.climb, 15)
+      )
+    );
+  return routine;
+}
 }
