@@ -453,6 +453,9 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     AutoTrajectory path1 = routine.trajectory("DT_Ndisrupt");
     AutoTrajectory path2  = routine.trajectory("DT_Ndisrupt1");
     AutoTrajectory path3 = routine.trajectory("DT_Ndisrupt2");
+    AutoTrajectory path4 = routine.trajectory("DT_Ndisrupt3");
+    AutoTrajectory path5 = routine.trajectory("DT_Ndisrupt4");
+    AutoTrajectory path6 = routine.trajectory("DT_Ndisrupt5");
     
 
     double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
@@ -489,7 +492,17 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     path2.done().onTrue(path3.cmd());
     
-    path3.done().onTrue(shootSequence());
+    path3.done().onTrue(shootSequence().andThen(path4.cmd()));
+
+    path4.active().onTrue(intakeSequence());
+
+    path4.done().onTrue(path5.cmd());
+
+    path5.active().onTrue(intakeSequence());
+    
+    path5.done().onTrue(path6.cmd());
+
+    path6.done().onTrue(shootSequence());
 
     return routine;
   }
@@ -592,18 +605,16 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
      
     intake1.done().onTrue(shoot1.cmd());
 
-    shoot1.done().onTrue(shootSequence().andThen(goBack.cmd()));
-
-    goBack.active().onTrue(
-      intakeSequence());
+    shoot1.done().onTrue(
+      shootSequence()
+        .andThen(goBack.cmd()));
     
     goBack.done().onTrue(intake2.cmd());
     
-    intake2.active().onTrue(
+    intake2.active().whileTrue(
       intakeSequence());
     
     intake2.done().onTrue(shoot2.cmd());
-
   
     shoot2.done().onTrue(shootSequence());
       
@@ -768,6 +779,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     trenchNeutral.active().onTrue(
      intakeSequence());
+    
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
       intakeSequence());
@@ -778,7 +790,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     );
 
     goBack.done().onTrue(intake2.cmd());
-    intake2.active().whileTrue(
+    intake2.active().onTrue(
       intakeSequence());
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(shootSequence());
