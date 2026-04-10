@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.FireAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
@@ -95,11 +96,13 @@ public class RobotContainer {
 
     //leds
         public final CANdle candle = new CANdle(23);
-        private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
+        private final StrobeAnimation yellowBlink = new StrobeAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
+
+        //private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
         // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
         // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
 
-        private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(true));
+        private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(false));
         
         public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -267,11 +270,11 @@ public class RobotContainer {
             )));
 
             //seeing any tag
-            seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate())
+            seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
             //aligned with tag
-            isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
+            isAligned.and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
             //shooter speed reached
@@ -288,7 +291,7 @@ public class RobotContainer {
                 .and(isEaterStalling.negate())
                 .and(seeTag.negate())
                 .and(isDisabled.negate())
-            ).whileTrue(new RunCommand(()-> candle.setControl(black)));
+            ).whileTrue(new RunCommand(()-> candle.clearAllAnimations()));
         
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));

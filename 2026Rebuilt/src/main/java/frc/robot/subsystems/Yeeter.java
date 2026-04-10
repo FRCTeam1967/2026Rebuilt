@@ -148,7 +148,8 @@ public class Yeeter extends SubsystemBase {
   /**
    * @return true if current speed of yeeter is >= threshold speed
    */
-  public boolean reachedYeeterSpeed(boolean usingVision) {
+  
+   public boolean reachedYeeterSpeed(boolean usingVision) {
     double motorSpeed = motor1.getVelocity().getValueAsDouble();
     return reachedYeeterSpeed(motorSpeed, usingVision);
   }
@@ -166,6 +167,8 @@ public class Yeeter extends SubsystemBase {
     }
     //return (Math.abs(motor1.getVelocity().getValueAsDouble()) >= (getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())));
   }
+
+  
 
   /**
    * @return average velocity of both motors

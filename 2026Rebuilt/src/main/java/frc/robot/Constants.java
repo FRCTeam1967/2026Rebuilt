@@ -15,8 +15,8 @@ public final class Constants {
         public static final int HOOD_MOTOR_ID = 19;        
         public static final int HOOD_CANCODER_ID = 21;     
 
-        public static final double CRUISE_VELOCITY = 750;  // TODO: test if this sped it up, originally 500
-        public static final double ACCELERATION = 1500;     // TODO: test, originally 1000
+        public static final double CRUISE_VELOCITY = 500;  // TODO: test if this sped it up, originally 500
+        public static final double ACCELERATION = 1000;     // TODO: test, originally 1000
         public static final double JERK = 550;//;            // placeholder
 
         public static final double kP = 2.5;  // placeholder 
@@ -68,7 +68,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 72.5; //81; //rotations per second
+        public static final double YEETER_SPEED = 65.0; //81; //rotations per second
         public static final double RESTING_SPEED = 60.0;
         public static final double YEETER_ACCELERATION = 500.0; //500
         public static final double YEETER_AUTO_SPEED = 65;
@@ -135,7 +135,7 @@ public final class Constants {
 
     public static class Indexer{
         public static final int INDEXER_MOTOR_ID = 12;
-        public static final double INDEXER_SPEED = 57;
+        public static final double INDEXER_SPEED = 95;
 
         public static final double kP = 1.5; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
