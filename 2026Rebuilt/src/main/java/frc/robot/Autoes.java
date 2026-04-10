@@ -82,6 +82,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
+    autoChooserLOL.addRoutine("Tower Test", this::towerTest);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
