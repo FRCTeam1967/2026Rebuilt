@@ -263,15 +263,12 @@ public class RobotContainer {
 
         //LEDS
             isDisabled.whileTrue(
-                new RepeatCommand(
-                    new SequentialCommandGroup(
-                        new RunCommand(() -> candle.setControl(janksterRed)).withTimeout(0.5),
-                        new RunCommand(() -> candle.setControl(janksterWhite)).withTimeout(0.5)
-            )));
+                new RunCommand(() -> candle.setControl(redSolid)).withTimeout(0.5)
+            );
 
             //seeing any tag
-            seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
-                .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
+            // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
+            //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
             //aligned with tag
             isAligned.and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
