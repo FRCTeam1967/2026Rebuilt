@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -92,7 +91,7 @@ public class RobotContainer {
         public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
         
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
-        public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
+        public final Trigger updateWinAuto = new Trigger(() -> !hasAlreadyUpdatedIfWeWonAuto && DriverStation.isTeleopEnabled());
 
     //leds
         public final CANdle candle = new CANdle(23);
@@ -127,6 +126,10 @@ public class RobotContainer {
 
         //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
 
+        // Hub tracking
+        boolean whoWon = false;
+        private final HubTracker hubTracker = new HubTracker();
+
 
     public RobotContainer() {
         configureBindings();
@@ -145,6 +148,14 @@ public class RobotContainer {
         //for vision servoing
         driveAtAngle.HeadingController.setPID(5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+
+        // Hub tracking
+        matchTab.addBoolean("won?", () -> whoWon)
+            .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
+            .withSize(2, 1);
+        matchTab.addBoolean("Knows who won", ()->hasAlreadyUpdatedIfWeWonAuto);
+        matchTab.addDouble("Hub Remaining", () -> hubTracker.timeUntilInactive());
+        matchTab.addDouble("Next Hub Active", () -> hubTracker.timeUntilActive());
     }
     
 
@@ -215,7 +226,7 @@ public class RobotContainer {
             m_driverController.povUp().and(m_driverController.x()).whileTrue(swerve.sysIdQuasistatic(Direction.kReverse));
 
             //check for winning auto
-            updateWinAuto.whileFalse(new RunCommand(() -> wonAuto(matchTab)));
+            updateWinAuto.whileTrue(new RunCommand(() -> wonAuto()).withName("CheckAutoWinnder"));
 
         //VISION
             // hub alignment but with localization
@@ -594,7 +605,7 @@ public class RobotContainer {
         //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
     }
 
-    public void wonAuto(ShuffleboardTab tab) {
+    public void wonAuto() {
         String gameData = DriverStation.getGameSpecificMessage();
         Alliance ourAlliance = DriverStation.getAlliance().get();
         Alliance winningAlliance = DriverStation.Alliance.Blue; //default
@@ -603,11 +614,11 @@ public class RobotContainer {
             switch (gameData.charAt(0)) {
                 case 'B' :
                     winningAlliance = DriverStation.Alliance.Blue;
-                    updateWonAuto();
+                    hasAlreadyUpdatedIfWeWonAuto = true;
                     break;
                 case 'R' :
                     winningAlliance = DriverStation.Alliance.Red;
-                    updateWonAuto();
+                    hasAlreadyUpdatedIfWeWonAuto = true;
                     break;
                 default :
                     hasAlreadyUpdatedIfWeWonAuto = false;
@@ -616,14 +627,10 @@ public class RobotContainer {
             }
         }
 
-        boolean whoWon = ourAlliance.equals(winningAlliance);
-
-        tab.addBoolean("won?", () -> whoWon)
-            .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
-            .withSize(2, 1);
+        whoWon = ourAlliance.equals(winningAlliance);
     }
 
-    private void updateWonAuto() {
-        hasAlreadyUpdatedIfWeWonAuto = true;
+    public void startHubTracking() {
+        hubTracker.startHubTracking();
     }
 }
