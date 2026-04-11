@@ -130,6 +130,43 @@ public class Autoes {
       );
   }
 
+      private SequentialCommandGroup shootSequenceConstant() {
+    return new SequentialCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(1.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      );
+  }
+
   private SequentialCommandGroup intakeSequence() {
     return new SequentialCommandGroup(new ParallelCommandGroup(
       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
@@ -843,14 +880,14 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequence().andThen(goBack.cmd())
+      shootSequenceConstant().andThen(goBack.cmd())
     );
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().onTrue(
       intakeSequence());
     intake2.done().onTrue(shoot2.cmd());
-    shoot2.done().onTrue(shootSequence());
+    shoot2.done().onTrue(shootSequenceConstant());
 
     return routine;
   }
