@@ -84,6 +84,7 @@ public class Autoes {
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
     autoChooserLOL.addRoutine("Tower Test", this::towerTest);
     autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
+    autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -801,6 +802,73 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     return routine;
   }
+
+  private AutoRoutine otnClimb() {
+    AutoRoutine routine = autoFactory.newRoutine("OTNClimb");
+
+    AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
+    AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
+    AutoTrajectory shoot1 = routine.trajectory("N_OTShoot1");
+    AutoTrajectory goBack = routine.trajectory("OT_ShootClimb");
+  
+
+    double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
+    
+    routine.active().onTrue(
+      Commands.sequence(
+          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+          //step one: set gyro to starting heading (flips for alliance)
+          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+          new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+          trenchNeutral.resetOdometry(),
+
+          //step three: set LL heading to gyro (aka starting) heading
+          new InstantCommand(
+            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+            0, 0, 0, 0, 0)
+          ),
+          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          
+          trenchNeutral.cmd()
+      )
+    );
+
+    trenchNeutral.done().onTrue(
+      new ParallelCommandGroup(
+            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
+      )
+    );
+    trenchNeutral.done().onTrue(intake1.cmd());
+    intake1.active().onTrue(
+      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+    );
+    intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
+
+    shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
+      shootSequence()
+      .andThen(goBack.cmd())
+    );
+
+    goBack.done().onTrue(
+      new SequentialCommandGroup(
+          new MoveClimbUp(m_robotContainer.climb, -15),
+          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          new MoveClimbtoZero(m_robotContainer.climb, 15)
+        )
+    );
+    
+    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
+    //the hopper is full, so we should continue with the rest of the auto and go shoot
+    // Trigger atNeutral = trenchToCenter.done();
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
+    // //  //write intake for fuel traj if true 
+    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
+
+    return routine;
+  }
+
   private AutoRoutine otn2xBump() {
     AutoRoutine routine = autoFactory.newRoutine("OTN2X");
 
