@@ -127,6 +127,8 @@ public class RobotContainer {
 
         //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
 
+        private final HubTracker hubTracker = new HubTracker();
+
 
     public RobotContainer() {
         configureBindings();
@@ -145,6 +147,9 @@ public class RobotContainer {
         //for vision servoing
         driveAtAngle.HeadingController.setPID(5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
         driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+
+        matchTab.addDouble("Hub Remaining", () -> hubTracker.timeUntilInactive());
+        matchTab.addDouble("Next Hub Active", () -> hubTracker.timeUntilActive());
     }
     
 
@@ -625,5 +630,9 @@ public class RobotContainer {
 
     private void updateWonAuto() {
         hasAlreadyUpdatedIfWeWonAuto = true;
+    }
+
+    public void startHubTracking() {
+        hubTracker.startHubTracking();
     }
 }
