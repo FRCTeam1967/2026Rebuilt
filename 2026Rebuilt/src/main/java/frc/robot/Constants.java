@@ -236,7 +236,9 @@ public final class Constants {
         public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
 
         public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
+        public static final Pose2d RED_TOWER_FLIPPED = new Pose2d(15.506, 5.27229, Rotation2d.kZero);
         public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
+        public static final Pose2d BLUE_TOWER_FLIPPED = new Pose2d(1.034, 2.83, Rotation2d.kPi);
         
         public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
 

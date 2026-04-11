@@ -237,7 +237,21 @@ public class RobotContainer {
             );
 
             //align to tower
-            m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
+            m_driverController.leftTrigger().and(m_driverController.x().negate()).whileTrue(
+                new SequentialCommandGroup(
+                    new RunCommand(() -> visabelleUpdate.unFlip()),
+                    new AlignTowerPose(swerve)
+                )
+            );
+
+            m_driverController.leftTrigger().and(m_driverController.x()).whileTrue(
+                new SequentialCommandGroup(
+                    new RunCommand(() -> visabelleUpdate.flip()),
+                    new AlignTowerPose(swerve)
+                )
+            );
+            
+
 
             // yaw setter --> 0 faces hub 
             m_driverController.x().onTrue(new SequentialCommandGroup(

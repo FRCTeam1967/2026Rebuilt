@@ -48,6 +48,8 @@ public class VisabelleUpdate extends SubsystemBase {
   double backAmbiguity;
   double deviation;
 
+  private boolean shouldFlip = false;
+
   // used for timestamp of previous periodic loop
   // double frontTimestamp;
   // double backTimestamp;
@@ -192,15 +194,35 @@ public class VisabelleUpdate extends SubsystemBase {
     return eucDist <= MAX_DISTANCE;
   }
 
+  //method - return true if want flipped (trigger this with left trigger + X)
+
+  public void flip() {
+    shouldFlip = true;
+  }
+
+  public void unFlip() {
+    shouldFlip = false;
+  }
+
   @Override
   public void periodic() {
     // TODO: see if we can move this to disabled periodic (bc why not?)
     if (!isTowerPoseSet){
       if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
-            towerPose = Constants.Visabelle.RED_TOWER;
+            if (shouldFlip == false) {
+              towerPose = Constants.Visabelle.RED_TOWER;
+            }
+            else {
+              towerPose = Constants.Visabelle.RED_TOWER_FLIPPED;
+            }
         } else {
-            towerPose = Constants.Visabelle.BLUE_TOWER;
+            if (shouldFlip == false) {
+              towerPose = Constants.Visabelle.BLUE_TOWER;
+            }
+            else {
+              towerPose = Constants.Visabelle.BLUE_TOWER_FLIPPED;
+            }
         }
         isTowerPoseSet = true;
       }
