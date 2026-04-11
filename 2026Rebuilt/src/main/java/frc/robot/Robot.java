@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
       .withCaptureConsole(Constants.Logging.captureConsole)
       .withCaptureDs(Constants.Logging.captureDS)
       .withCaptureNt(Constants.Logging.captureNT)
-      .withNtPublish(true)
+      .withNtPublish(false)
       .withLogExtras(Constants.Logging.enableExtras);
     DogLog.setOptions(options);
     
@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
-    DogLog.log("yeeter Speed1", m_robotContainer.yeeter.getMotorVelocity());
+    //DogLog.log("yeeter Speed1", m_robotContainer.yeeter.getMotorVelocity());
     //DogLog.log("dis sensor", autoes.getDisSensor());
   }
 

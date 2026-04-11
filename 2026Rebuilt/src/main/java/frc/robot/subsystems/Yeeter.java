@@ -62,8 +62,8 @@ public class Yeeter extends SubsystemBase {
     slot0Configs.kI = Constants.Yeeter.kI;
     slot0Configs.kD = Constants.Yeeter.kD;
 
-     var limitConfigs = new CurrentLimitsConfigs();
-    limitConfigs.StatorCurrentLimit = 75;
+    var limitConfigs = new CurrentLimitsConfigs();
+    limitConfigs.StatorCurrentLimit = 60;
     limitConfigs.StatorCurrentLimitEnable = true;
 
     // DogLog.tunable("Yeeter/kP", slot0Configs.kP, 
@@ -124,6 +124,10 @@ public class Yeeter extends SubsystemBase {
 
     motor1.getConfigurator().apply(talonFXConfigs);
     motor2.getConfigurator().apply(talonFXConfigs);
+
+    motor1.getConfigurator().apply(limitConfigs);
+    motor2.getConfigurator().apply(limitConfigs);
+
     populateTreeMap();
   }
 

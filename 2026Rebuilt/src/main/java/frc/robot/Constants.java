@@ -32,8 +32,8 @@ public final class Constants {
         //public static final double MAX_DEG = 86.0;
 
         public static final double HOOD_HOLD_DEG = 30.0;
-        public static final double HOOD_MAX = 320 * Constants.Hood.DEGREES_TO_REVS; //57 //30
-        public static final double HOOD_MIN = 7 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+        public static final double HOOD_MAX = 480 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+        public static final double HOOD_MIN = 206 * Constants.Hood.DEGREES_TO_REVS; //57 //30
         public static final double HOOD_TOLERANCE_DEG = 5.00;
         public static final double HOOD_ANGLE = 280.0 * Constants.Hood.DEGREES_TO_REVS;
 

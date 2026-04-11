@@ -50,7 +50,7 @@ public class TheHood extends SubsystemBase {
     ccdConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //change for hood testing
     ccdConfigs.MagnetSensor.MagnetOffset = 
     -0.402099609375;//=0.241455078125; //-0.408935546875
-    //ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+    ccdConfigs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
 
     var talonFXConfigs = new TalonFXConfiguration();
 
