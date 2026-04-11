@@ -857,8 +857,9 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot");
-    AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
+    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot_new");
+    AutoTrajectory hubTowerShoot = routine.trajectory("towertest");
+    //AutoTrajectory climbAdjust = routine.trajectory("Climb_Adjust");
     double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
 
     routine.active().onTrue(
@@ -894,6 +895,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new SequentialCommandGroup(
           new MoveClimbUp(m_robotContainer.climb, -15),
           new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          //climbAdjust.cmd(),
           new MoveClimbtoZero(m_robotContainer.climb, 15)
         )
       );
