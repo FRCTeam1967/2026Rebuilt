@@ -13,6 +13,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -95,7 +96,11 @@ public class Autoes {
 
   private SequentialCommandGroup shootSequence() {
     return new SequentialCommandGroup(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+        (m_robotContainer.swerve.applyRequest(() ->
+            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.visabelle.getAngleToHub()))
+                .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
+        ).withTimeout(0.5),        
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -844,6 +849,8 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
     AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
     AutoTrajectory shoot1 = routine.trajectory("bumpN_OTShoot1");
+    AutoTrajectory wait1 = routine.trajectory("OTbumpShootWait1");
+    AutoTrajectory wait2 = routine.trajectory("OTbumpShootWait2");
     AutoTrajectory goBack = routine.trajectory("bumpShoot_OT_N");
     AutoTrajectory intake2 = routine.trajectory("bumpOT_N_fuelBranch2");
     AutoTrajectory shoot2 = routine.trajectory("bumpN_OTShoot2");
@@ -879,15 +886,18 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       intakeSequence());
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
-    shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequenceConstant().andThen(goBack.cmd())
-    );
+    shoot1.done().onTrue(
+      new WaitCommand(0.5).andThen(
+      wait1.cmd()));
+    wait1.done().onTrue(shootSequence().andThen(goBack.cmd()));
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().onTrue(
       intakeSequence());
     intake2.done().onTrue(shoot2.cmd());
-    shoot2.done().onTrue(shootSequenceConstant());
+    shoot2.done().onTrue(
+      new WaitCommand(0.5).andThen(wait2.cmd()));
+    wait2.done().onTrue(shootSequence());
 
     return routine;
   }

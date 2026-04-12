@@ -47,16 +47,16 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 public class RobotContainer {
     //drivetrain
         public final SwerveOnTheseBows swerve = TunerConstants.createDrivetrain();
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+        public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+        public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
         private final Telemetry logger = new Telemetry(MaxSpeed);
     
         /* Setting up bindings for necessary control of the swerve drive platform */
-        private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+        public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
         
-            private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
+        public final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
             .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         
@@ -82,8 +82,8 @@ public class RobotContainer {
         //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     //control
-        private final CommandXboxController m_driverController = new CommandXboxController(0);
-        private final CommandXboxController m_operatorController = new CommandXboxController(1);
+        public final CommandXboxController m_driverController = new CommandXboxController(0);
+        public final CommandXboxController m_operatorController = new CommandXboxController(1);
 
         private Optional<Alliance> ally; 
     
