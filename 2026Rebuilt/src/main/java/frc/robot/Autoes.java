@@ -119,7 +119,7 @@ public class Autoes {
                           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
                           new SequentialCommandGroup(
-                              new WaitCommand(1.0), 
+                              new WaitCommand(2.0), 
                               new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                               new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
                               new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
