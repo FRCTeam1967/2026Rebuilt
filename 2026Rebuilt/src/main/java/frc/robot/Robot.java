@@ -106,6 +106,7 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
+    m_robotContainer.startHubTracking();
   }
 
   @Override
