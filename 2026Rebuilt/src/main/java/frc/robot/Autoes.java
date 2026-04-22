@@ -13,6 +13,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -96,7 +97,11 @@ public class Autoes {
 
   private SequentialCommandGroup shootSequence() {
     return new SequentialCommandGroup(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+        (m_robotContainer.swerve.applyRequest(() ->
+            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.visabelle.getAngleToHub()))
+                .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
+        ).withTimeout(0.5),        
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -107,6 +112,43 @@ public class Autoes {
                   ),
                   new SequentialCommandGroup(
                       new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+                      new ParallelCommandGroup(
+                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+                          new SequentialCommandGroup(
+                              new WaitCommand(2.0), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                          )
+                      )
+                  )
+              )
+          )
+          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+        ).withTimeout(6)
+      );
+  }
+
+      private SequentialCommandGroup shootSequenceConstant() {
+    return new SequentialCommandGroup(
+        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+        new ParallelCommandGroup( 
+          new SequentialCommandGroup( 
+              new ParallelCommandGroup(
+                  new SequentialCommandGroup(
+                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                  ),
+                  new SequentialCommandGroup(
+                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -875,6 +917,8 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
     AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
     AutoTrajectory shoot1 = routine.trajectory("bumpN_OTShoot1");
+    AutoTrajectory wait1 = routine.trajectory("OTbumpShootWait1");
+    AutoTrajectory wait2 = routine.trajectory("OTbumpShootWait2");
     AutoTrajectory goBack = routine.trajectory("bumpShoot_OT_N");
     AutoTrajectory intake2 = routine.trajectory("bumpOT_N_fuelBranch2");
     AutoTrajectory shoot2 = routine.trajectory("bumpN_OTShoot2");
@@ -910,23 +954,27 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       intakeSequence());
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
-    shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequence().andThen(goBack.cmd())
-    );
+    shoot1.done().onTrue(
+      new WaitCommand(0.5).andThen(
+      wait1.cmd()));
+    wait1.done().onTrue(shootSequence().andThen(goBack.cmd()));
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().onTrue(
       intakeSequence());
     intake2.done().onTrue(shoot2.cmd());
-    shoot2.done().onTrue(shootSequence());
+    shoot2.done().onTrue(
+      new WaitCommand(0.5).andThen(wait2.cmd()));
+    wait2.done().onTrue(shootSequence());
 
     return routine;
   }
 
   private AutoRoutine htw() {
     AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot");
-    AutoTrajectory hubTowerShoot = routine.trajectory("H_TW");
+    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot_new");
+    AutoTrajectory hubTowerShoot = routine.trajectory("towertest");
+    //AutoTrajectory climbAdjust = routine.trajectory("Climb_Adjust");
     double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
 
     routine.active().onTrue(
@@ -962,6 +1010,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new SequentialCommandGroup(
           new MoveClimbUp(m_robotContainer.climb, -15),
           new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          //climbAdjust.cmd(),
           new MoveClimbtoZero(m_robotContainer.climb, 15)
         )
       );

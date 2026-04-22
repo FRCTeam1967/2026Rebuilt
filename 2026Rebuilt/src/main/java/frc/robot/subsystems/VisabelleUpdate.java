@@ -58,26 +58,31 @@ public class VisabelleUpdate extends SubsystemBase {
 
   public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
     if (estimate == null) {
+      DogLog.log("VisabelleUpdate/reject reason", "no PoseEstimate");
         return true;
     }
 
     if (estimate.tagCount == 0) {
+        DogLog.log("VisabelleUpdate/reject reason", "no PoseEstimate tag");
         return true;
     }
 
     if (estimate.avgTagDist > Constants.Visabelle.DIST_THRESHOLD) {
+        DogLog.log("VisabelleUpdate/reject reason", "too far");
         return true;
     }
 
     if (estimate.rawFiducials.length >= 1) {
       if (estimate.rawFiducials[0].ambiguity > 0.8) {
+        DogLog.log("VisabelleUpdate/reject reason", "ambiguity too high");
         return true;
       }
     }
 
     // angular velocity
     if (swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() > 360.0) {
-        return true;
+    DogLog.log("VisabelleUpdate/reject reason", "angular velocity too high");  
+      return true;
     }
 
     // speed
@@ -86,6 +91,7 @@ public class VisabelleUpdate extends SubsystemBase {
     double linearVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
     if (linearVelocity > 5.0) { // TODO: tune
+        DogLog.log("VisabelleUpdate/reject reason", "linear velocity too high"); 
         return true;    
     }
 
