@@ -299,7 +299,7 @@ public class RobotContainer {
 
 
         //SHOOTER
-            // m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
+            // m_Controller.leftTrigger().and(m_operatorController.povRight().noperatoregate()).whileTrue(
             //     new ParallelCommandGroup( 
             //         new SequentialCommandGroup( 
             //             new ParallelCommandGroup(
@@ -524,7 +524,7 @@ public class RobotContainer {
         //PIVOT
             //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
             // m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
-            m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
+            //m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
 
         //FEEDER
