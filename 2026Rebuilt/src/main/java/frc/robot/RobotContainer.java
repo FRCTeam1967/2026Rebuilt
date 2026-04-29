@@ -299,43 +299,46 @@ public class RobotContainer {
 
 
         //SHOOTER
-            // m_Controller.leftTrigger().and(m_operatorController.povRight().noperatoregate()).whileTrue(
-            //     new ParallelCommandGroup( 
-            //         new SequentialCommandGroup( 
-            //             new ParallelCommandGroup(
-            //                 new SequentialCommandGroup(
-            //                     new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-            //                     new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-            //                 ),
-            //                 new SequentialCommandGroup(
-            //                     new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
-
-            //                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                                
-            //                     new ParallelCommandGroup(
-            //                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-            //                         new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-
-            //                         new SequentialCommandGroup(
-            //                             new WaitCommand(1.0), 
-            //                             new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-            //                             new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-            //                             new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
-            //                             new ParallelCommandGroup(
-            //                                 new SequentialCommandGroup(
-            //                                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-            //                                     new MovePivot(pivot, Constants.Pivot.SAFE, false)    
-            //                                 ),
-            //                                 new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
-            //                             )
-            //                         )
-            //                     )
-            //                 )
-            //             )
-            //         )
-            //     )
-            // );
+        m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
+            new ParallelCommandGroup( 
+                new SequentialCommandGroup( 
+                    new ParallelCommandGroup(
+                        new SequentialCommandGroup(
+                            new RunYeeter(yeeter, () -> (Constants.Yeeter.YEETER_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION
+                            ).withTimeout(3),
+                            new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION
+                            )
+                        ),
+                        new SequentialCommandGroup(
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+        
+                            new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                            
+                            new ParallelCommandGroup(
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        
+                                new SequentialCommandGroup(
+                                    new WaitCommand(1.0), 
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                                    new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                    new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+        
+                                    new ParallelCommandGroup(
+                                        new SequentialCommandGroup(
+                                            new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                            new MovePivot(pivot, Constants.Pivot.SAFE, false)    
+                                        ),
+                                        new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
             
             // eject shooter
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
@@ -440,43 +443,43 @@ public class RobotContainer {
             //     )
             // ); 
 
-        //SHUTTLING (SHORT)
-            m_operatorController.leftBumper().whileTrue(
-                new ParallelCommandGroup(
-                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
-                    new SequentialCommandGroup( 
-                        new ParallelCommandGroup(
-                            new ParallelCommandGroup(
-                                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                                //new RunCommand (() -> candle.setControl(yellowBlink))
-                            ),
+        // //SHUTTLING (SHORT)
+        //     m_operatorController.leftBumper().whileTrue(
+        //         new ParallelCommandGroup(
+        //             new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+        //             new SequentialCommandGroup( 
+        //                 new ParallelCommandGroup(
+        //                     new ParallelCommandGroup(
+        //                         new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+        //                         //new RunCommand (() -> candle.setControl(yellowBlink))
+        //                     ),
 
-                            new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
-                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+        //                     new SequentialCommandGroup(
+        //                         new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+        //                         new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
-                                new ParallelCommandGroup(
-                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                                    new SequentialCommandGroup(
-                                        new WaitCommand(1.0), 
-                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                        new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
-                                        new ParallelCommandGroup(
-                                            new SequentialCommandGroup(
-                                                new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                                new MovePivot(pivot, Constants.Pivot.SAFE, false)
-                                            ),
-                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            ); 
+        //                         new ParallelCommandGroup(
+        //                             new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+        //                             new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+        //                             new SequentialCommandGroup(
+        //                                 new WaitCommand(1.0), 
+        //                                 new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+        //                                 new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+        //                                 new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+        //                                 new ParallelCommandGroup(
+        //                                     new SequentialCommandGroup(
+        //                                         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+        //                                         new MovePivot(pivot, Constants.Pivot.SAFE, false)
+        //                                     ),
+        //                                     new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+        //                                 )
+        //                             )
+        //                         )
+        //                     )
+        //                 )
+        //             )
+        //         )
+        //     ); 
 
         // //SHUTTLE WHILE INTAKING
         //     m_operatorController.leftBumper().and(m_operatorController.rightTrigger()).and(m_operatorController.x().negate()).whileTrue(
@@ -524,7 +527,7 @@ public class RobotContainer {
         //PIVOT
             //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
             // m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
-            //m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
+            m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
 
         //FEEDER
