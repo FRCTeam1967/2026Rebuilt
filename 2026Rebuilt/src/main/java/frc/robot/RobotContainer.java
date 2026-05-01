@@ -311,7 +311,7 @@ public class RobotContainer {
                             )
                         ),
                         new SequentialCommandGroup(
-                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)),
+                            new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
         
                             new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                             
