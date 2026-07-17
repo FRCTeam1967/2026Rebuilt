@@ -248,18 +248,18 @@ public class Yeeter extends SubsystemBase {
     return speed;
   }
 
-  @Override
-  public void periodic() {
-    double motor1Speed = getMotorVelocity(motor1);
-    DogLog.log("Yeeter/Speed1", motor1Speed);
-    // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
+  // @Override
+  // public void periodic() {
+  //   double motor1Speed = getMotorVelocity(motor1);
+  //   // DogLog.log("Yeeter/Speed1", motor1Speed);
+  //   // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
 
-    if (Constants.Yeeter.verboseLogging) {
-      DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
-      DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed, true));
-    }
-  }
+  // //   if (Constants.Yeeter.verboseLogging) {
+  // //     DogLog.log("Yeeter/stator current 1", motor1.getStatorCurrent().getValueAsDouble());
+  // //     DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
+  // //     DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed, true));
+  // //   }
+  // // }
 
   @Override
   public void simulationPeriodic() {
