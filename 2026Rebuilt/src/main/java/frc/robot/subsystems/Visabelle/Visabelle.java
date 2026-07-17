@@ -142,7 +142,8 @@ public class Visabelle extends SubsystemBase {
       this.getDisFromHub();
   
       inputs = new VisionIOInputs();
-    io.readInputs(inputs);
+    
+    //io.readInputs(inputs);
     this.getDisFromHub();
   }
 }

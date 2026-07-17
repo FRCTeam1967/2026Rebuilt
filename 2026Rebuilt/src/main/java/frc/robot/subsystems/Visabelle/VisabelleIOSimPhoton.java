@@ -45,7 +45,7 @@ public class VisabelleIOSimPhoton extends VisabelleUpdate implements VisabelleIO
 
         SimCameraProperties prop = new SimCameraProperties();
         prop.setCalibration(kResWidth, kResHeight, Rotation2d.fromDegrees(97.7));
-        prop.setCalibError(0.35, 0.5);
+        prop.setCalibError(0.25, 0.10);
         prop.setFPS(45);
         prop.setAvgLatencyMs(20);
         prop.setLatencyStdDevMs(5);
@@ -229,5 +229,11 @@ public class VisabelleIOSimPhoton extends VisabelleUpdate implements VisabelleIO
         }
 
         table.getEntry("tv").setInteger(seesTarget ? 1 : 0);
+    }
+
+    @Override
+    public void periodic() {
+        readInputs(new VisionIOInputs());
+        super.periodic();
     }
 }

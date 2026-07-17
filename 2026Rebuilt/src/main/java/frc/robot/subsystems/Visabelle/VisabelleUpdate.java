@@ -33,7 +33,6 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
   //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
 
   private boolean isTowerPoseSet = false;
-
   //private int[] validIDs = new int[16];
 
   //private static final double AREA_THRESHOLD = 0.1;
@@ -50,6 +49,7 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
   double frontAmbiguity;
   double backAmbiguity;
   double deviation;
+  private boolean isFront = true;
 
   // used for timestamp of previous periodic loop
   // double frontTimestamp;
@@ -59,9 +59,24 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
     this.swerve = swerve;
   }
 
+  public boolean isPoseOnField(Pose2d poseEstimate) {
+    double x = poseEstimate.getX();
+    double y = poseEstimate.getY();
+    double fieldLength = Constants.Visabelle.kAprilTagLayout.getFieldLength();
+    double fieldWidth = Constants.Visabelle.kAprilTagLayout.getFieldWidth();
+
+    return (x >= 0.0 && x <= fieldLength) && (y >= 0.0 && y <= fieldWidth);
+  }
+
+  public boolean jumpedPose(Pose2d poseEstimate) {
+      Pose2d currentPose = swerve.getPose();
+      double dist = currentPose.getTranslation().getDistance(poseEstimate.getTranslation());
+      return dist > 0.5; // meters
+  }
+
   public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
     if (estimate == null) {
-      DogLog.log("VisabelleUpdate/reject reason", "no PoseEstimate");
+        DogLog.log("VisabelleUpdate/reject reason", "no PoseEstimate");
         return true;
     }
 
@@ -75,8 +90,18 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
         return true;
     }
 
+    if (!isPoseOnField(estimate.pose)) {
+        DogLog.log("VisabelleUpdate/reject reason", "off field");
+        return true;
+    }
+
+    if (jumpedPose(estimate.pose)) {
+        DogLog.log("VisabelleUpdate/reject reason", "pose jump");
+        return true;
+    }
+
     if (estimate.rawFiducials.length >= 1) {
-      if (estimate.rawFiducials[0].ambiguity > 0.8) {
+      if (estimate.rawFiducials[0].ambiguity > 0.5) { // 0.8
         DogLog.log("VisabelleUpdate/reject reason", "ambiguity too high");
         return true;
       }
@@ -84,7 +109,7 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
 
     // angular velocity
     if (swerve.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() > 360.0) {
-    DogLog.log("VisabelleUpdate/reject reason", "angular velocity too high");  
+      DogLog.log("VisabelleUpdate/reject reason", "angular velocity too high");  
       return true;
     }
 
@@ -148,7 +173,8 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
     //double deviation = 6.0 * Math.pow(ambiguity, 3); 
         //verify examples: 0.1	>> 0.006; 0.3	>> 0.162; 0.5 >> 0.75; 0.7 >> 2.06; 1.0	>> 6.0
 
-    double deviation = 0.75 * distance * Math.pow(ambiguity, 2); //!! best so far
+    //double deviation = 0.75 * distance * Math.pow(ambiguity, 2); //!! best so far
+    double deviation = Math.max(0.75 * distance * Math.pow(ambiguity, 2), 0.05); // minimum 0.05
         //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
         //(dist >> 2) 0.1 >> 0.015; 0.3 >> 0.135; 0.5 >> 0.375; 0.7 >> 0.735
         //(dist >> 4) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
@@ -157,7 +183,6 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
         //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
         //(dist >> 2) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
         //(dist >> 4) 0.1 >> 0.12; 0.3 >> 1.08; 0.5 >> 3.0; 0.7 >> 5.88
-
 
     //double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
         //(dist >> 2, tags >> 1) 0.1 >> 0.02; 0.3 >> 0.18; 0.5 >> 0.5; 0.7 >> 0.98
@@ -182,7 +207,8 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
       // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
       // double scale = distanceScale * tagScale * ambiguityScale;
 
-      double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
+      //double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
+      double deviation = Math.max(0.75 * distance * Math.pow(ambiguity, 2), 0.05); // minimum 0.05
 
       //DogLog.log("scale", deviation);
       //DogLog.log("LL name", name);
@@ -216,6 +242,9 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
         isTowerPoseSet = true;
       }
     }
+
+    DogLog.log("alignment/isTowerPoseSet", isTowerPoseSet);
+    DogLog.log("alignment/towerPose", towerPose);
 
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation("limelight-back", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
@@ -258,11 +287,14 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
 
     //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
+    DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
+    DogLog.log("VisabelleUpdate/reject front?", rejectUpdate(mt2_front));
+
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
+    DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
+    DogLog.log("VisabelleUpdate/reject back?", rejectUpdate(mt2_back));
     // DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
     // DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
-    DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
-    DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
     //logging all the tags we can see
     if (mt2_front != null && mt2_front.tagCount > 0) {
@@ -332,40 +364,69 @@ public class VisabelleUpdate extends SubsystemBase implements VisabelleIO {
     // accept both
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
       //if (mt2_front.tagCount > mt2_back.tagCount) {
+      boolean chooseFront;
+      double margin = 0.25;
+      double frontDeviation = getDeviation(mt2_front, true);
+      double backDeviation = getDeviation(mt2_back, false);
 
-      if (posesAreClose(mt2_front, mt2_back)) {
-        // add front
-        setStandardDevs(mt2_front, true);
-        swerve.addVisionMeasurement(
-          mt2_front.pose, 
-          mt2_front.timestampSeconds);
-
-        // add back
-        setStandardDevs(mt2_back, false);        
-        swerve.addVisionMeasurement(
-          mt2_back.pose, 
-          mt2_back.timestampSeconds);
-
-      }
-
+      // currently on front
+      if (isFront) {
+        chooseFront = !(backDeviation + margin < frontDeviation);
+      } 
+      // currently on back
       else {
-        if (getDeviation(mt2_front, true) < getDeviation(mt2_back, false)) {
-          setStandardDevs(mt2_front, true);
-          swerve.addVisionMeasurement(
-            mt2_front.pose, 
-            mt2_front.timestampSeconds);
-        }
-        else {
-          setStandardDevs(mt2_back, true);
-          swerve.addVisionMeasurement(
-            mt2_back.pose, 
-            mt2_back.timestampSeconds);
-        }
+        chooseFront = frontDeviation + margin < backDeviation;
       }
+
+      isFront = chooseFront;
+      DogLog.log("VisabelleUpdate/isFront", isFront);
+
+      if (chooseFront) {
+        setStandardDevs(mt2_front, true);
+        swerve.addVisionMeasurement(mt2_front.pose, mt2_front.timestampSeconds);
+      } else {
+        setStandardDevs(mt2_back, false);
+        swerve.addVisionMeasurement(mt2_back.pose, mt2_back.timestampSeconds);
+      }
+
+      //if (posesAreClose(mt2_front, mt2_back)) {
+        // front
+        // // add front
+        // setStandardDevs(mt2_front, true);
+        // swerve.addVisionMeasurement(
+        //   mt2_front.pose, 
+        //   mt2_front.timestampSeconds);
+
+        // // add back
+        // setStandardDevs(mt2_back, false);        
+        // swerve.addVisionMeasurement(
+        //   mt2_back.pose, 
+        //   mt2_back.timestampSeconds);
+      //}
+
+      // else {
+      //   if (getDeviation(mt2_front, true) < getDeviation(mt2_back, false)) {
+      //     setStandardDevs(mt2_front, true);
+      //     swerve.addVisionMeasurement(
+      //       mt2_front.pose, 
+      //       mt2_front.timestampSeconds);
+      //   }
+      //   else {
+      //     setStandardDevs(mt2_back, false);
+      //     swerve.addVisionMeasurement(
+      //       mt2_back.pose, 
+      //       mt2_back.timestampSeconds);
+      //   }
+      // }
         
         // DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
         // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
         // DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
+    }
+
+    // both are bad
+    else if (rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
+      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(9999999, 9999999,9999999));
     }
   }
 }
