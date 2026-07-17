@@ -5,7 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;  
+//import frc.robot.LimelightHelpers;  
 import frc.robot.Constants;
 import java.util.function.BooleanSupplier;
 import dev.doglog.DogLog;
@@ -28,19 +28,19 @@ public class Visabelle extends SubsystemBase {
     this.maxAngularRate = maxAngularRate;
   }
 
-  public double limelight_aim_proportional() {        
-      double kP = 0.02; //0.035
-      double targetingAngularVelocity = 0.0; 
-      // tx ranges from (-hfov/2) to (hfov/2) in degrees.
+  // public double limelight_aim_proportional() {        
+  //     double kP = 0.02; //0.035
+  //     double targetingAngularVelocity = 0.0; 
+  //     // tx ranges from (-hfov/2) to (hfov/2) in degrees.
 
-      targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
+  //     targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
 
-      // convert to radians per second for our drive method
-      targetingAngularVelocity *= maxAngularRate;
-      //invert since tx is positive when the target is to the right of the crosshair
-      targetingAngularVelocity *= -1.0;
-      return targetingAngularVelocity;
-  }
+  //     // convert to radians per second for our drive method
+  //     targetingAngularVelocity *= maxAngularRate;
+  //     //invert since tx is positive when the target is to the right of the crosshair
+  //     targetingAngularVelocity *= -1.0;
+  //     return targetingAngularVelocity;
+  // }
 
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
@@ -63,11 +63,11 @@ public class Visabelle extends SubsystemBase {
     Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
-    DogLog.log("Visabelle/dist from hub", eucDist);
+    // DogLog.log("Visabelle/dist from hub", eucDist);
     
-    if (Constants.Visabelle.verboseLogging) {
-      DogLog.log("Visabelle/target hub", hubPose);
-    }
+    // if (Constants.Visabelle.verboseLogging) {
+    //   DogLog.log("Visabelle/target hub", hubPose);
+    // }
     
     return eucDist;
   }
@@ -82,15 +82,15 @@ public class Visabelle extends SubsystemBase {
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
 
-    if (Constants.Visabelle.verboseLogging) {
-      DogLog.log("Visabelle/raw angle to hub", angle);
-    }
+    // if (Constants.Visabelle.verboseLogging) {
+    //   DogLog.log("Visabelle/raw angle to hub", angle);
+    // }
 
-    if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
-      angle += Math.PI;
-    }
+    // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+    //   angle += Math.PI;
+    // }
 
-    DogLog.log("Visabelle/angle to hub", angle);
+    // DogLog.log("Visabelle/angle to hub", angle);
     return (angle);
   }
 
@@ -112,13 +112,13 @@ public class Visabelle extends SubsystemBase {
     // CameraServer.addCamera(httpCamera2);
     // tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
     //     .withSize(3, 2);
-    tab.addBoolean("front-limelight valid target?", () -> LimelightHelpers.getTV("limelight-front"))
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(3, 0)
-        .withSize(1, 1);
+    // tab.addBoolean("front-limelight valid target?", () -> LimelightHelpers.getTV("limelight-front"))
+    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(3, 0)
+    //     .withSize(1, 1);
 
-    tab.addBoolean("back-limelight valid target?", () -> LimelightHelpers.getTV("limelight-back"))
-        .withWidget(BuiltInWidgets.kBooleanBox).withPosition(4, 0)
-        .withSize(1, 1);
+    // tab.addBoolean("back-limelight valid target?", () -> LimelightHelpers.getTV("limelight-back"))
+    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(4, 0)
+    //     .withSize(1, 1);
   }
 
   @Override

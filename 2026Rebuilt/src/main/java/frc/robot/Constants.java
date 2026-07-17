@@ -11,45 +11,45 @@ public final class Constants {
         public static final int kOperatorControllerPort = 1;
     }
 
-    public static class Hood {
-        public static final int HOOD_MOTOR_ID = 19;        
-        public static final int HOOD_CANCODER_ID = 21;     
+    // public static class Hood {
+    //     public static final int HOOD_MOTOR_ID = 19;        
+    //     public static final int HOOD_CANCODER_ID = 21;     
 
-        public static final double CRUISE_VELOCITY = 500;  // TODO: test if this sped it up, originally 500
-        public static final double ACCELERATION = 1000;     // TODO: test, originally 1000
-        public static final double JERK = 550;//;            // placeholder
+    //     public static final double CRUISE_VELOCITY = 500;  // TODO: test if this sped it up, originally 500
+    //     public static final double ACCELERATION = 1000;     // TODO: test, originally 1000
+    //     public static final double JERK = 550;//;            // placeholder
 
-        public static final double kP = 2.5;  // placeholder 
-        public static final double kI = 0.0;  // placeholder
-        public static final double kD = 0.0;  // placeholder
-        public static final double kS = 0.2;  // placeholder
-        public static final double kV = 0.7;  // placeholder
-        public static final double kA = 0.0;  // placeholder
+    //     public static final double kP = 2.5;  // placeholder 
+    //     public static final double kI = 0.0;  // placeholder
+    //     public static final double kD = 0.0;  // placeholder
+    //     public static final double kS = 0.2;  // placeholder
+    //     public static final double kV = 0.7;  // placeholder
+    //     public static final double kA = 0.0;  // placeholder
 
-        public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot
+    //     public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot
 
-        //public static final double MIN_DEG = 30.0;
-        //public static final double MAX_DEG = 86.0;
+    //     //public static final double MIN_DEG = 30.0;
+    //     //public static final double MAX_DEG = 86.0;
 
-        public static final double HOOD_HOLD_DEG = 30.0;
-        public static final double HOOD_MAX = 480 * Constants.Hood.DEGREES_TO_REVS; //57 //30
-        public static final double HOOD_MIN = 206 * Constants.Hood.DEGREES_TO_REVS; //57 //30
-        public static final double HOOD_TOLERANCE_DEG = 5.00;
-        public static final double HOOD_ANGLE = 280.0 * Constants.Hood.DEGREES_TO_REVS;
+    //     public static final double HOOD_HOLD_DEG = 30.0;
+    //     public static final double HOOD_MAX = 480 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+    //     public static final double HOOD_MIN = 206 * Constants.Hood.DEGREES_TO_REVS; //57 //30
+    //     public static final double HOOD_TOLERANCE_DEG = 5.00;
+    //     public static final double HOOD_ANGLE = 280.0 * Constants.Hood.DEGREES_TO_REVS;
 
-        public static final double DEGREES_TO_REVS = 1.0/360.0;
+    //     public static final double DEGREES_TO_REVS = 1.0/360.0;
 
-        public static final double OFFSET = 0.0; //-108.45703125
-        public static final double PERCENT_UP = 0.5;
+    //     public static final double OFFSET = 0.0; //-108.45703125
+    //     public static final double PERCENT_UP = 0.5;
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
+    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
+    // }
 
-    public static class LED {
-        public static final int CANDLE_ID = 23;
+    // public static class LED {
+    //     public static final int CANDLE_ID = 23;
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
+    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
+    // }
 
     public static class Yeeter {
         public static final int YEETER_MOTOR1_ID = 37; 
@@ -80,7 +80,7 @@ public final class Constants {
 
         public static final double GEAR_RATIO = 1.333; 
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
+        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Pivot{
@@ -113,7 +113,7 @@ public final class Constants {
         public static final double DEGREES_TO_REVS = 1.0/360.0;
         public static final double MAGNET_OFFSET = 0.043212890625;
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
+       // public static final boolean verboseLogging = false || Logging.verboseLogging;
         public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
         public static final double SAFE = 5 * DEGREES_TO_REVS;
         public static final double SLIGHTLY_UP_FROM_DOWN = 50 * DEGREES_TO_REVS;
@@ -131,7 +131,7 @@ public final class Constants {
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -100.0;
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
+        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Indexer{
@@ -149,7 +149,7 @@ public final class Constants {
         public static final double ACCELERATION = 100.0;   // placeholder
         public static final double JERK = 0.0;           // placeholder
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
+        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Feeder{
@@ -173,75 +173,75 @@ public final class Constants {
         public static final double ACCELERATION = 100.0;   // placeholder
         public static final double JERK = 0.0;           // placeholder
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
+        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
   
-    public static class Climb {
-        public static final double GEAR_RATIO = 27.5;
-        public static final double JERK = 600.0;
-        public static final double FEED_FORWARD = 0.0;
+    // public static class Climb {
+    //     public static final double GEAR_RATIO = 27.5;
+    //     public static final double JERK = 600.0;
+    //     public static final double FEED_FORWARD = 0.0;
 
-        public static final int MOTOR_ID = 9;
-        public static final int CRUISE_VELOCITY = 30;//10, 160
-        public static final int ACCELERATION = 210;//240
-        public static final int CURRENT_LIMIT = 40;
-        public static final int ERROR_THRESHOLD = 2;
-        public static final int UP_SPEED = 10;
-        public static final int DOWN_SPEED = -10;
+    //     public static final int MOTOR_ID = 9;
+    //     public static final int CRUISE_VELOCITY = 30;//10, 160
+    //     public static final int ACCELERATION = 210;//240
+    //     public static final int CURRENT_LIMIT = 40;
+    //     public static final int ERROR_THRESHOLD = 2;
+    //     public static final int UP_SPEED = 10;
+    //     public static final int DOWN_SPEED = -10;
 
-        public static final double kP = 3;//2
-        public static final int kI = 0; 
-        public static final int kD = 0; 
-        public static final double kS = 0.2; //0.12
-        public static final int kV = 0;
-        public static final int kA = 0;
+    //     public static final double kP = 3;//2
+    //     public static final int kI = 0; 
+    //     public static final int kD = 0; 
+    //     public static final double kS = 0.2; //0.12
+    //     public static final int kV = 0;
+    //     public static final int kA = 0;
 
-        public static final double MIN_HEIGHT_METERS = 0.0;
-        public static final double MAX_HEIGHT_METERS = 0.762;
-        public static final double SAFE_METERS = 0.01;
+    //     public static final double MIN_HEIGHT_METERS = 0.0;
+    //     public static final double MAX_HEIGHT_METERS = 0.762;
+    //     public static final double SAFE_METERS = 0.01;
 
-        public static final double METER_CONVERSION_FACTOR = 0.0254;
+    //     public static final double METER_CONVERSION_FACTOR = 0.0254;
 
-        public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //inches
-        public static final double CARRIAGE_MASS_KG = 3;
-        public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
-        public static final int BOTTOM_SENSOR_CHANNEL = 8;
-        public static final int TOP_SENSOR_CHANNEL = 9;
+    //     public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //inches
+    //     public static final double CARRIAGE_MASS_KG = 3;
+    //     public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
+    //     public static final int BOTTOM_SENSOR_CHANNEL = 8;
+    //     public static final int TOP_SENSOR_CHANNEL = 9;
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
+    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
+    // }
 
-    public static class Visabelle {
-        public static final double DEGREE_ERROR = 4.0;
-        public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
-        public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify
-        public static final double TARGET_HEIGHT_INCHES = 54; //need to verify
-        public static final double LIMELIGHT_ALIGN_LEFT_OFFSET = -0.156;//-0.125;//11.0812301635 //10.6631250381 //10.234612469perhaps in //-0.1175; // -0.125 //-0.1175; //-0.1256; //-0.1556 /-0.181 //-0.18129 //-0.10509 //-0.0889-0.0762 // -0.1200 //-0.14605
-        public static final double LIMELIGHT_ALIGN_RIGHT_OFFSET = 0.2;//0.18; //-11.5789194107 //-11.9671554656/0.15875; //0.17145 //0.1524 //0.1905; //0.18415; //0.1685 //0.1513 //0.2275-0.076 //0.2286, left, -.0658890 // 0.1885 // 0.1905
-        public static final double LIMELIGHT_ALIGN_Z_OFFSET = 0.0; //LimelightHelpers.setFiducial3DOffset("limelight", 0.0, 0.0, 0.001);
-        public static final double LIMELIGHT_ALIGN_CENTER_OFFSET = -0.1431036;
-        public static final double LIMELIGHT_AUTO_LEFT_OFFSET = -0.11;
-        public static final double LIMELIGHT_L4_LEFT_OFFSET = -0.1;
-        public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * TunerConstants.maxSpeed; //0.43 //0.425
-        public static final double ALIGNMENT_THRESHOLD = 1.0;
-        public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
-        public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA
-        public static final double ALIGNMENT_RIGHT_OFFSET = -9.2;//-11.86;//-0.8; //-1.0; //-1.1; //-13.1; //in LL degrees //TODO: test at EPA
-        public static final double ALIGNMENT_FORWARD_OFFSET = 0.0; //TODO: test at EPA //-5.16 center for left branch aligned
+public static class Visabelle {
+    //     public static final double DEGREE_ERROR = 4.0;
+    //     public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
+    //     public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify
+    //     public static final double TARGET_HEIGHT_INCHES = 54; //need to verify
+    //     public static final double LIMELIGHT_ALIGN_LEFT_OFFSET = -0.156;//-0.125;//11.0812301635 //10.6631250381 //10.234612469perhaps in //-0.1175; // -0.125 //-0.1175; //-0.1256; //-0.1556 /-0.181 //-0.18129 //-0.10509 //-0.0889-0.0762 // -0.1200 //-0.14605
+    //     public static final double LIMELIGHT_ALIGN_RIGHT_OFFSET = 0.2;//0.18; //-11.5789194107 //-11.9671554656/0.15875; //0.17145 //0.1524 //0.1905; //0.18415; //0.1685 //0.1513 //0.2275-0.076 //0.2286, left, -.0658890 // 0.1885 // 0.1905
+    //     public static final double LIMELIGHT_ALIGN_Z_OFFSET = 0.0; //LimelightHelpers.setFiducial3DOffset("limelight", 0.0, 0.0, 0.001);
+    //     public static final double LIMELIGHT_ALIGN_CENTER_OFFSET = -0.1431036;
+    //     public static final double LIMELIGHT_AUTO_LEFT_OFFSET = -0.11;
+    //     public static final double LIMELIGHT_L4_LEFT_OFFSET = -0.1;
+    //     public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * TunerConstants.maxSpeed; //0.43 //0.425
+    //     public static final double ALIGNMENT_THRESHOLD = 1.0;
+    //     public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
+    //     public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA
+    //     public static final double ALIGNMENT_RIGHT_OFFSET = -9.2;//-11.86;//-0.8; //-1.0; //-1.1; //-13.1; //in LL degrees //TODO: test at EPA
+    //     public static final double ALIGNMENT_FORWARD_OFFSET = 0.0; //TODO: test at EPA //-5.16 center for left branch aligned
 
-        public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
-        public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
+    //     public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
+    //     public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
 
         public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
         public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
 
-        public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
-        public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
+    //     public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
+    //     public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
         
-        public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
+    //     public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
 
-        public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
+    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
+    // }
 
     public static class Drivetrain {
         public static final boolean verboseLogging = true;
@@ -285,4 +285,5 @@ public final class Constants {
     
         }
     }
+}
 }

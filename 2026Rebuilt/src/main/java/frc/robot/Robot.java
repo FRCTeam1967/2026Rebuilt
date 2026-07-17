@@ -23,30 +23,30 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
   private Autoes autoes;
 
-  boolean enableLimelight = false;
+  //boolean enableLimelight = false;
 
-  private final StructPublisher<Pose2d> choreoPublisher;
+  //private final StructPublisher<Pose2d> choreoPublisher;
   //private final NetworkTableListener autoPublisher;
   
-  public Robot() {
-    choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
+  // public Robot() {
+  //   choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
    
-  }
+  // }
 
   @Override
   public void robotInit() {
-    DogLog.setEnabled(Constants.Logging.enabled);
-    DogLogOptions options = new DogLogOptions()
-      .withCaptureConsole(Constants.Logging.captureConsole)
-      .withCaptureDs(Constants.Logging.captureDS)
-      .withCaptureNt(Constants.Logging.captureNT)
-      .withNtPublish(false)
-      .withLogExtras(Constants.Logging.enableExtras);
-    DogLog.setOptions(options);
+    // DogLog.setEnabled(Constants.Logging.enabled);
+    // DogLogOptions options = new DogLogOptions()
+    //   .withCaptureConsole(Constants.Logging.captureConsole)
+    //   .withCaptureDs(Constants.Logging.captureDS)
+    //   .withCaptureNt(Constants.Logging.captureNT)
+    //   .withNtPublish(false)
+    //   .withLogExtras(Constants.Logging.enableExtras);
+    // DogLog.setOptions(options);
     
-    if (Constants.Logging.capturePDH) {
-      DogLog.setPdh(new PowerDistribution());
-    }
+    // if (Constants.Logging.capturePDH) {
+    //   DogLog.setPdh(new PowerDistribution());
+    // }
 
     m_robotContainer = new RobotContainer();
     autoes = m_robotContainer.autoes;
@@ -69,14 +69,14 @@ public class Robot extends TimedRobot {
    * 1khz update rate is utilized for frame-by-frame motion while the robot's IMU corrects for any drift over time.
    */
 
-  @Override
-  public void disabledInit() {
-    //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
-    LimelightHelpers.SetIMUMode("limelight-front", 0);
-    LimelightHelpers.SetThrottle("limelight-front", 200);
-    LimelightHelpers.SetIMUMode("limelight-back", 0);
-    LimelightHelpers.SetThrottle("limelight-back", 200);
-  }
+  // @Override
+  // // public void disabledInit() {
+  // //   //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
+  // //   LimelightHelpers.SetIMUMode("limelight-front", 0);
+  // //   LimelightHelpers.SetThrottle("limelight-front", 200);
+  // //   LimelightHelpers.SetIMUMode("limelight-back", 0);
+  //   LimelightHelpers.SetThrottle("limelight-back", 200);
+  // }
 
   @Override
   public void disabledPeriodic() {
@@ -85,13 +85,13 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledExit() {}
 
-  @Override
-  public void autonomousInit() {
-    LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
-    LimelightHelpers.SetThrottle("limelight-front", 0); //used to be 50
-    LimelightHelpers.SetIMUMode("limelight-back", 0);
-    LimelightHelpers.SetThrottle("limelight-back", 0); //used to be 50
-  }
+  // @Override
+  // public void autonomousInit() {
+  //   LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
+  //   LimelightHelpers.SetThrottle("limelight-front", 0); //used to be 50
+  //   LimelightHelpers.SetIMUMode("limelight-back", 0);
+  //   LimelightHelpers.SetThrottle("limelight-back", 0); //used to be 50
+  // }
 
   @Override
   public void autonomousPeriodic() {
@@ -101,12 +101,12 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousExit() {}
 
-  @Override
-  public void teleopInit() {
-    LimelightHelpers.SetThrottle("limelight-front", 0);
-    LimelightHelpers.SetThrottle("limelight-back", 0);
-    m_robotContainer.visabelleUpdate.setFirstVisionPose();
-  }
+  // @Override
+  // public void teleopInit() {
+  //   LimelightHelpers.SetThrottle("limelight-front", 0);
+  //   LimelightHelpers.SetThrottle("limelight-back", 0);
+  //   m_robotContainer.visabelleUpdate.setFirstVisionPose();
+  // }
 
   @Override
   public void teleopPeriodic() {
@@ -134,7 +134,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
-    m_robotContainer.climb.simulationPeriodic();
+    //m_robotContainer.climb.simulationPeriodic();
     m_robotContainer.pivot.simulationPeriodic();
   }
 }

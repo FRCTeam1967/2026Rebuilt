@@ -28,10 +28,10 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AimHub;
-import frc.robot.commands.AlignTowerPose;
-import frc.robot.commands.MoveClimbHalfwayDown;
-import frc.robot.commands.MoveClimbUp;
-import frc.robot.commands.MoveClimbtoZero;
+// import frc.robot.commands.AlignTowerPose;
+// import frc.robot.commands.MoveClimbHalfwayDown;
+// import frc.robot.commands.MoveClimbUp;
+// import frc.robot.commands.MoveClimbtoZero;
 import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunYeeter;
@@ -80,12 +80,12 @@ public class Autoes {
     autoChooserLOL.addRoutine("DT Neutral Bump 2 Cycle", this::dtn2xBump);
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
     autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
-    autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
+    //autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
-    autoChooserLOL.addRoutine("Tower Test", this::towerTest);
-    autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
-    autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
+    //autoChooserLOL.addRoutine("Tower Test", this::towerTest);
+    //autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
+    //autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -197,12 +197,12 @@ public class Autoes {
           goBack.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           goBack.cmd()
       )
@@ -233,11 +233,11 @@ public class Autoes {
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         otToO.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
+        // new InstantCommand(
+        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //     0, 0, 0, 0, 0)
+        //   ),
   
         otToO.cmd()
       )
@@ -266,11 +266,11 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToO.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
+        // new InstantCommand(
+        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //     0, 0, 0, 0, 0)
+        //   ),
   
         hubToO.cmd()
       )
@@ -300,11 +300,11 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToD.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
+        // new InstantCommand(
+        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //     0, 0, 0, 0, 0)
+        //   ),
   
         hubToD.cmd()
       )
@@ -339,11 +339,11 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToO.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
+        // new InstantCommand(
+        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //     0, 0, 0, 0, 0)
+        //   ),
   
         hubToO.cmd()
       )
@@ -393,11 +393,11 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToD.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
+        // new InstantCommand(
+        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+        //     0, 0, 0, 0, 0)
+        //   ),
   
         hubToD.cmd()
       )
@@ -453,12 +453,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchToCenter.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -517,12 +517,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           path1.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           path1.cmd()
       )
@@ -571,12 +571,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           path1.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           path1.cmd(),
           new PrintCommand("auto start")
@@ -629,12 +629,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchToCenter.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -684,12 +684,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchToCenter.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -741,12 +741,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchToCenter.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           new WaitCommand(2.5),
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -802,12 +802,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchNeutral.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchNeutral.cmd()
       )
@@ -845,61 +845,61 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     return routine;
   }
 
-  private AutoRoutine otnClimb() {
-    AutoRoutine routine = autoFactory.newRoutine("OTNClimb");
+  // private AutoRoutine otnClimb() {
+  //   AutoRoutine routine = autoFactory.newRoutine("OTNClimb");
 
-    AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
-    AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
-    AutoTrajectory shoot1 = routine.trajectory("N_OTShoot1");
-    AutoTrajectory goBack = routine.trajectory("OT_ShootClimb");
+  //   AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
+  //   AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
+  //   AutoTrajectory shoot1 = routine.trajectory("N_OTShoot1");
+  //   AutoTrajectory goBack = routine.trajectory("OT_ShootClimb");
   
 
-    double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
+  //   double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
     
-    routine.active().onTrue(
-      Commands.sequence(
-          new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-          //step one: set gyro to starting heading (flips for alliance)
-          new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-          new PrintCommand("!!!!!***** gyro set to starting heading"),
+  //   routine.active().onTrue(
+  //     Commands.sequence(
+  //         new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+  //         //step one: set gyro to starting heading (flips for alliance)
+  //         new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+  //         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
-          trenchNeutral.resetOdometry(),
+  //         trenchNeutral.resetOdometry(),
 
-          //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+  //         //step three: set LL heading to gyro (aka starting) heading
+  //         new InstantCommand(
+  //           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+  //           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+  //           0, 0, 0, 0, 0)
+  //         ),
+  //         new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
-          trenchNeutral.cmd()
-      )
-    );
+  //         trenchNeutral.cmd()
+  //     )
+  //   );
 
-    trenchNeutral.done().onTrue(
-      new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-      )
-    );
-    trenchNeutral.done().onTrue(intake1.cmd());
-    intake1.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
-    );
-    intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
+    // trenchNeutral.done().onTrue(
+    //   new ParallelCommandGroup(
+    //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
+    //   )
+    // );
+    // trenchNeutral.done().onTrue(intake1.cmd());
+    // intake1.active().onTrue(
+    //   new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+    // );
+    // intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
-    shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequence()
-      .andThen(goBack.cmd())
-    );
+    // shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
+    //   shootSequence()
+    //   .andThen(goBack.cmd())
+    // );
 
-    goBack.done().onTrue(
-      new SequentialCommandGroup(
-          new MoveClimbUp(m_robotContainer.climb, -15),
-          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-          new MoveClimbtoZero(m_robotContainer.climb, 15)
-        )
-    );
+    // goBack.done().onTrue(
+    //   new SequentialCommandGroup(
+    //       new MoveClimbUp(m_robotContainer.climb, -15),
+    //       new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+    //       new MoveClimbtoZero(m_robotContainer.climb, 15)
+    //     )
+    // );
     
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
@@ -908,8 +908,8 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     // //  //write intake for fuel traj if true 
     // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
 
-    return routine;
-  }
+  //   return routine;
+  // }
 
   private AutoRoutine otn2xBump() {
     AutoRoutine routine = autoFactory.newRoutine("OTN2X");
@@ -935,12 +935,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           trenchNeutral.resetOdometry(),
 
           //step three: set LL heading to gyro (aka starting) heading
-          new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-          new PrintCommand("!!!!!***** LL heading set to gyro heading"),
+          // new InstantCommand(
+          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+          //   0, 0, 0, 0, 0)
+          // ),
+          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchNeutral.cmd()
       )
@@ -969,133 +969,134 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     return routine;
   }
-
-  private AutoRoutine htw() {
-    AutoRoutine routine = autoFactory.newRoutine("HTW");
-    AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot_new");
-    AutoTrajectory hubTowerShoot = routine.trajectory("towertest");
-    //AutoTrajectory climbAdjust = routine.trajectory("Climb_Adjust");
-    double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
-
-    routine.active().onTrue(
-      Commands.sequence(
-        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-        //step one: set gyro to starting heading (flips for alliance)
-        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-        new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-        shootFromABitBack.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-        //step three: set LL heading to gyro (aka starting) heading
-        //if we can see a tag then run step 3 & path else just run path
-        shootFromABitBack.cmd()
-      )
-    ); 
-    shootFromABitBack.active().onTrue(
-      intakeSequence()
-    );
-
-    shootFromABitBack.done().onTrue(
-      shootSequence()
-        .andThen(hubTowerShoot.cmd())
-      );
-      hubTowerShoot.active().onTrue(
-        new MoveClimbUp(m_robotContainer.climb, -15)
-      );
-      hubTowerShoot.done().onTrue(
-        new SequentialCommandGroup(
-          new MoveClimbUp(m_robotContainer.climb, -15),
-          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-          //climbAdjust.cmd(),
-          new MoveClimbtoZero(m_robotContainer.climb, 15)
-        )
-      );
-    return routine;
-  }
-private AutoRoutine dtnClimb() {
-    AutoRoutine routine = autoFactory.newRoutine("DTNCLIMB");
-    AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
-    AutoTrajectory intake = routine.trajectory("DT_N_fuelBranch1");
-    AutoTrajectory goBack = routine.trajectory("N_DTShoot1");
-    AutoTrajectory climb = routine.trajectory("DT_Shoot_Climb");
-    double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
-
-    routine.active().onTrue(
-      Commands.sequence(
-        new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-        //step one: set gyro to starting heading (flips for alliance)
-        new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-        new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-        trenchToCenter.resetOdometry(),
-        new InstantCommand(
-            () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-            m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-            0, 0, 0, 0, 0)
-          ),
-        //step three: set LL heading to gyro (aka starting) heading
-        //if we can see a tag then run step 3 & path else just run path
-        trenchToCenter.cmd()
-      )
-    ); 
-    trenchToCenter.active().onTrue(
-      intakeSequence()
-    );
-
-    trenchToCenter.done().onTrue(intake.cmd()
-      );
-    intake.active().onTrue(intakeSequence());
-    intake.done().onTrue(goBack.cmd());
-    goBack.done().onTrue(shootSequence().andThen(climb.cmd()));
-      climb.active().onTrue(
-        new MoveClimbUp(m_robotContainer.climb, -15)
-      );
-      climb.done().onTrue(
-        new SequentialCommandGroup(
-          new MoveClimbUp(m_robotContainer.climb, -15),
-          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-          new MoveClimbtoZero(m_robotContainer.climb, 15)
-        )
-      );
-    return routine;
-  }
-private AutoRoutine towerTest() {
-  AutoRoutine routine = autoFactory.newRoutine("TWtest");
-  AutoTrajectory path1 = routine.trajectory("towertest");
-  double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
-
-  routine.active().onTrue(
-    Commands.sequence(
-      new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-      //step one: set gyro to starting heading (flips for alliance)
-      new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-      new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-      path1.resetOdometry(),
-      new InstantCommand(
-          () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          0, 0, 0, 0, 0)
-        ),
-      //step three: set LL heading to gyro (aka starting) heading
-      //if we can see a tag then run step 3 & path else just run path
-      path1.cmd()
-    )
-  ); 
-  path1.active().onTrue(
-    new MoveClimbUp(m_robotContainer.climb, -15)
-  );
-    path1.done().onTrue(
-      new SequentialCommandGroup(
-        new MoveClimbUp(m_robotContainer.climb, -15),
-        new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-        new MoveClimbtoZero(m_robotContainer.climb, 15)
-      )
-    );
-  return routine;
 }
-}
+
+  // private AutoRoutine htw() {
+  //   AutoRoutine routine = autoFactory.newRoutine("HTW");
+  //   AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot_new");
+  //   AutoTrajectory hubTowerShoot = routine.trajectory("towertest");
+  //   //AutoTrajectory climbAdjust = routine.trajectory("Climb_Adjust");
+  //   double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
+
+  //   routine.active().onTrue(
+  //     Commands.sequence(
+  //       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+  //       //step one: set gyro to starting heading (flips for alliance)
+  //       new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+  //       new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+  //       shootFromABitBack.resetOdometry(),
+  //       new InstantCommand(
+  //           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+  //           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+  //           0, 0, 0, 0, 0)
+  //         ),
+  //       //step three: set LL heading to gyro (aka starting) heading
+  //       //if we can see a tag then run step 3 & path else just run path
+  //       shootFromABitBack.cmd()
+  //     )
+  //   ); 
+  //   shootFromABitBack.active().onTrue(
+  //     intakeSequence()
+  //   );
+
+  //   shootFromABitBack.done().onTrue(
+  //     shootSequence()
+  //       .andThen(hubTowerShoot.cmd())
+  //     );
+  //     hubTowerShoot.active().onTrue(
+  //       new MoveClimbUp(m_robotContainer.climb, -15)
+  //     );
+  //     hubTowerShoot.done().onTrue(
+  //       new SequentialCommandGroup(
+  //         new MoveClimbUp(m_robotContainer.climb, -15),
+  //         new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+  //         //climbAdjust.cmd(),
+  //         new MoveClimbtoZero(m_robotContainer.climb, 15)
+  //       )
+  //     );
+  //   return routine;
+  // }
+// private AutoRoutine dtnClimb() {
+//     AutoRoutine routine = autoFactory.newRoutine("DTNCLIMB");
+//     AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
+//     AutoTrajectory intake = routine.trajectory("DT_N_fuelBranch1");
+//     AutoTrajectory goBack = routine.trajectory("N_DTShoot1");
+//     AutoTrajectory climb = routine.trajectory("DT_Shoot_Climb");
+//     double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
+
+//     routine.active().onTrue(
+//       Commands.sequence(
+//         new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+//         //step one: set gyro to starting heading (flips for alliance)
+//         new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+//         new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+//         trenchToCenter.resetOdometry(),
+//         new InstantCommand(
+//             () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+//             m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+//             0, 0, 0, 0, 0)
+//           ),
+//         //step three: set LL heading to gyro (aka starting) heading
+//         //if we can see a tag then run step 3 & path else just run path
+//         trenchToCenter.cmd()
+//       )
+//     ); 
+//     trenchToCenter.active().onTrue(
+//       intakeSequence()
+//     );
+
+//     trenchToCenter.done().onTrue(intake.cmd()
+//       );
+//     intake.active().onTrue(intakeSequence());
+//     intake.done().onTrue(goBack.cmd());
+//     goBack.done().onTrue(shootSequence().andThen(climb.cmd()));
+//       climb.active().onTrue(
+//         new MoveClimbUp(m_robotContainer.climb, -15)
+//       );
+//       climb.done().onTrue(
+//         new SequentialCommandGroup(
+//           new MoveClimbUp(m_robotContainer.climb, -15),
+//           new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+//           new MoveClimbtoZero(m_robotContainer.climb, 15)
+//         )
+//       );
+//     return routine;
+//   }
+// private AutoRoutine towerTest() {
+//   AutoRoutine routine = autoFactory.newRoutine("TWtest");
+//   AutoTrajectory path1 = routine.trajectory("towertest");
+//   double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
+
+//   routine.active().onTrue(
+//     Commands.sequence(
+//       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
+//       //step one: set gyro to starting heading (flips for alliance)
+//       new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
+//       new PrintCommand("!!!!!***** gyro set to starting heading"),
+
+//       path1.resetOdometry(),
+//       new InstantCommand(
+//           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
+//           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
+//           0, 0, 0, 0, 0)
+//         ),
+//       //step three: set LL heading to gyro (aka starting) heading
+//       //if we can see a tag then run step 3 & path else just run path
+//       path1.cmd()
+//     )
+//   ); 
+//   path1.active().onTrue(
+//     new MoveClimbUp(m_robotContainer.climb, -15)
+//   );
+//     path1.done().onTrue(
+//       new SequentialCommandGroup(
+//         new MoveClimbUp(m_robotContainer.climb, -15),
+//         new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+//         new MoveClimbtoZero(m_robotContainer.climb, 15)
+//       )
+//     );
+//   return routine;
+// }
+// }

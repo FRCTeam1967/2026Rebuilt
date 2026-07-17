@@ -261,10 +261,10 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
         Pose2d pose = getPose();
         double rotationalRate = sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading);
 
-        if (Constants.Drivetrain.verboseLogging) {
-            DogLog.log("Drivetrain/Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
-            DogLog.log("Drivetrain/Trajectory/commanded rot rate", rotationalRate);
-        }
+        // if (Constants.Drivetrain.verboseLogging) {
+        //     DogLog.log("Drivetrain/Trajectory/sample", new Pose2d(sample.x, sample.y, Rotation2d.fromRadians(sample.heading)));
+        //     DogLog.log("Drivetrain/Trajectory/commanded rot rate", rotationalRate);
+        // }
 
         // Generate and apply the next speeds for the robot
         setControl(m_followRequest

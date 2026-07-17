@@ -65,7 +65,7 @@ public class RobotContainer {
 
     //vision
         public Visabelle visabelle = new Visabelle(swerve, MaxAngularRate);
-        public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
+    //    public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
 
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
@@ -74,8 +74,8 @@ public class RobotContainer {
         public final Indexer indexer = new Indexer();
         public final Feeder feeder = new Feeder();
         public final Yeeter yeeter = new Yeeter(this);
-        public final TheHood theHood = new TheHood();
-        public final Climb climb = new Climb();
+        // public final TheHood theHood = new TheHood();
+        // public final Climb climb = new Climb();
         public Autoes autoes = new Autoes(this);
 
         //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
@@ -89,14 +89,14 @@ public class RobotContainer {
     
         public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
         public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
-        public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
+        //public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
         
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
         public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
 
     //leds
         public final CANdle candle = new CANdle(23);
-        private final StrobeAnimation yellowBlink = new StrobeAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
+        //private final StrobeAnimation yellowBlink = new StrobeAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
 
         //private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
         // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
@@ -104,26 +104,26 @@ public class RobotContainer {
 
         private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(false));
         
-        public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
+        //public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
         
-        private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
+        //private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
         
         private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
 
-        private final FireAnimation fire = new FireAnimation(0, 45);
+        //private final FireAnimation fire = new FireAnimation(0, 45);
         
-        private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
-        private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+        //private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
+        //private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
 
-        private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
+        //private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
         private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
         
-        private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0)); // switched r and g
+        //private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         private final Trigger isEaterStalling = new Trigger(() -> eater.isStalling());
         
-        private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
-        private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
+        //private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
+        //private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
 
         //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
 
@@ -237,7 +237,7 @@ public class RobotContainer {
             );
 
             //align to tower
-            m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
+            //m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
             // yaw setter --> 0 faces hub 
             m_driverController.x().onTrue(new SequentialCommandGroup(
@@ -262,40 +262,40 @@ public class RobotContainer {
 
 
         //LEDS
-            isDisabled.whileTrue(
-                new RunCommand(() -> candle.setControl(redSolid)).withTimeout(0.5)
-            );
+            // isDisabled.whileTrue(
+            //     new RunCommand(() -> candle.setControl(redSolid)).withTimeout(0.5)
+            // );
 
-            //seeing any tag
-            // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
-            //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
+            // //seeing any tag
+            // // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
+            // //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
-            //aligned with tag
-            isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
-                .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
+            // //aligned with tag
+            // isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
+            //     .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
-            //shooter speed reached
-            speedReached.and(isEaterStalling.negate())
-                .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
+            // //shooter speed reached
+            // speedReached.and(isEaterStalling.negate())
+            //     .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
 
-            //intake stalling
-            isEaterStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
+            // //intake stalling
+            // isEaterStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
 
-            //default (when nothing is triggered)
-            (   
-                isAligned.negate()
-                .and(speedReached.negate())
-                .and(isEaterStalling.negate())
-                .and(seeTag.negate())
-                .and(isDisabled.negate())
-            ).whileTrue(new RunCommand(()-> candle.setControl(black)));
+            // //default (when nothing is triggered)
+            // (   
+            //     isAligned.negate()
+            //     .and(speedReached.negate())
+            //     .and(isEaterStalling.negate())
+            //     .and(seeTag.negate())
+            //     .and(isDisabled.negate())
+            // ).whileTrue(new RunCommand(()-> candle.setControl(black)));
         
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
             pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
             //yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
             yeeter.setDefaultCommand(new RunYeeter(yeeter, ()-> Constants.Yeeter.RESTING_SPEED, Constants.Yeeter.YEETER_ACCELERATION));
-            theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
+            //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
 
 
         //SHOOTER
@@ -304,9 +304,9 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new SequentialCommandGroup(
-                                new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+                                //new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
 
-                                new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                                //new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
                             ),
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
@@ -351,7 +351,7 @@ public class RobotContainer {
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
@@ -405,7 +405,7 @@ public class RobotContainer {
         //SHUTTLING (FAR)
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger().negate()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                    //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
@@ -443,7 +443,7 @@ public class RobotContainer {
         //SHUTTLING (SHORT)
             m_operatorController.leftBumper().and(m_operatorController.x()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                    //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
@@ -481,8 +481,8 @@ public class RobotContainer {
         //SHUTTLE WHILE INTAKING
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    new ParallelCommandGroup(
-                            new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
+                    // new ParallelCommandGroup(
+                             //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                         new SequentialCommandGroup( 
                             new ParallelCommandGroup(
                                 new ParallelCommandGroup(
@@ -502,21 +502,17 @@ public class RobotContainer {
                                 )
                             )
                         )
-                    ),
-                    new ParallelCommandGroup(
-                        new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-                        new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
                     )
                 )  
-            );
+            ;
 
         //hood back down
-            m_operatorController.povLeft().whileTrue(
-                //new SequentialCommandGroup(
-                    new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
-                    //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
-                //)
-            );
+            // m_operatorController.povLeft().whileTrue(
+            //     //new SequentialCommandGroup(
+            //         new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
+            //         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
+            //     //)
+            // );
 
             //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
@@ -565,23 +561,23 @@ public class RobotContainer {
             // );
 
 
-        //CLIMB
-            //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
-            m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
-            m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
-    }
+    //     //CLIMB
+    //         //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
+    //         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
+    //         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
+    // }
 
     //LIMELIGHT METHODS
-    public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
-        HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
-        CameraServer.addCamera(httpCamera1);
-        tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
-        .withSize(3, 2);
+    // public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
+    //     HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
+    //     CameraServer.addCamera(httpCamera1);
+    //     tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
+    //     .withSize(3, 2);
 
-        HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
-        CameraServer.addCamera(httpCamera2);
-        tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
-        .withSize(3, 2);
+    //     HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
+    //     CameraServer.addCamera(httpCamera2);
+    //     tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
+    //     .withSize(3, 2);
 
         // tab.addBoolean("LL isInRange", () -> getInRange(LimelightHelpers.getTY("limelight-front")))
         // .withWidget(BuiltInWidgets.kBooleanBox).withPosition(6, 1)
