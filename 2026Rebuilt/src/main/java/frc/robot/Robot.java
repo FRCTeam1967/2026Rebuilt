@@ -128,13 +128,13 @@ public class Robot extends TimedRobot {
   @Override
   public void testExit() {}
   
-  public void simulationInit() {
-    m_robotContainer.pivot.simulationInit();
-  }
+  // public void simulationInit() {
+  //   m_robotContainer.pivot.simulationInit();
+  // }
 
-  @Override
-  public void simulationPeriodic() {
-    //m_robotContainer.climb.simulationPeriodic();
-    m_robotContainer.pivot.simulationPeriodic();
-  }
+  // @Override
+  // public void simulationPeriodic() {
+  //   //m_robotContainer.climb.simulationPeriodic();
+  //   m_robotContainer.pivot.simulationPeriodic();
+  // }
 }

@@ -49,7 +49,7 @@ public class Yeeter extends SubsystemBase {
   public Yeeter(RobotContainer robotContainer){//Visabelle visabelle) {
     speedTable = new InterpolatingDoubleTreeMap();
     motor1 = new TalonFX(Constants.Yeeter.YEETER_MOTOR1_ID);
-    motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID);
+    //motor2 = new TalonFX(Constants.Yeeter.YEETER_MOTOR2_ID);
     m_robotContainer = robotContainer; 
 
     var talonFXConfigs = new TalonFXConfiguration();

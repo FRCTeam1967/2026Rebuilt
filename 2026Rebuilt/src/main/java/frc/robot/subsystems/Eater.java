@@ -17,7 +17,7 @@ import frc.robot.RobotContainer;
 public class Eater extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
-  private final DoubleSubscriber intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
+  //private final DoubleSubscriber intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
   
   /** Creates a new Intake. */
   public Eater() {

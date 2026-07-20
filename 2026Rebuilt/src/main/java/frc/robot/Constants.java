@@ -53,7 +53,7 @@ public final class Constants {
 
     public static class Yeeter {
         public static final int YEETER_MOTOR1_ID = 37; 
-        public static final int YEETER_MOTOR2_ID = 18; 
+        //public static final int YEETER_MOTOR2_ID = 18; 
 
         public static final double kP = 5.0; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
@@ -83,50 +83,50 @@ public final class Constants {
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
-    public static class Pivot{
-        public static final int MOTOR_ID = 10;
-        public static final int ENCODER_ID = 27;
+    // public static class Pivot{
+    //     public static final int MOTOR_ID = 10;
+    //     public static final int ENCODER_ID = 27;
 
-        public static final double kS = 0.25;
-        public static final double kV = 0.12;
-        public static final double kA = 0.01;
-        public static final double kP = 7;
-        public static final int kI = 0;
-        public static final int kD = 0;
+    //     public static final double kS = 0.25;
+    //     public static final double kV = 0.12;
+    //     public static final double kA = 0.01;
+    //     public static final double kP = 7;
+    //     public static final int kI = 0;
+    //     public static final int kD = 0;
 
         
-        public static final int CRUISE_VELOCITY_FAST = 40;
-        public static final int ACCELERATION_FAST = 100;
-        public static final int JERK_FAST = 1000;
-        public static final double GEAR_RATIO = 20.25/1.0;
-        public static final double FEED_FORWARD = 1;
+    //     public static final int CRUISE_VELOCITY_FAST = 40;
+    //     public static final int ACCELERATION_FAST = 100;
+    //     public static final int JERK_FAST = 1000;
+    //     public static final double GEAR_RATIO = 20.25/1.0;
+    //     public static final double FEED_FORWARD = 1;
 
-        public static final int CRUISE_VELOCITY_SLOW = 5;
-        public static final int ACCELERATION_SLOW = 1;
-        public static final int JERK_SLOW = 10;
+    //     public static final int CRUISE_VELOCITY_SLOW = 5;
+    //     public static final int ACCELERATION_SLOW = 1;
+    //     public static final int JERK_SLOW = 10;
 
-        public static final double PIVOT_SPEED = 10.0; //change later WHEN TESTING
-        public static final double PIVOT_SLOW_SPEED = 5.0;//change later WHEN TESTING
+    //     public static final double PIVOT_SPEED = 10.0; //change later WHEN TESTING
+    //     public static final double PIVOT_SLOW_SPEED = 5.0;//change later WHEN TESTING
         
 
-        public static final double THRESHOLD = 1;
-        public static final double DEGREES_TO_REVS = 1.0/360.0;
-        public static final double MAGNET_OFFSET = 0.043212890625;
+    //     public static final double THRESHOLD = 1;
+    //     public static final double DEGREES_TO_REVS = 1.0/360.0;
+    //     public static final double MAGNET_OFFSET = 0.043212890625;
 
-       // public static final boolean verboseLogging = false || Logging.verboseLogging;
-        public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
-        public static final double SAFE = 5 * DEGREES_TO_REVS;
-        public static final double SLIGHTLY_UP_FROM_DOWN = 50 * DEGREES_TO_REVS;
+    //    // public static final boolean verboseLogging = false || Logging.verboseLogging;
+    //     public static final double DOWN_POSITION = 130 * DEGREES_TO_REVS;
+    //     public static final double SAFE = 5 * DEGREES_TO_REVS;
+    //     public static final double SLIGHTLY_UP_FROM_DOWN = 50 * DEGREES_TO_REVS;
         
-        public static final double JITTER_POS_ONE = 100 * DEGREES_TO_REVS;
-        public static final double JITTER_POS_TWO = 130 * DEGREES_TO_REVS;
+    //     public static final double JITTER_POS_ONE = 100 * DEGREES_TO_REVS;
+    //     public static final double JITTER_POS_TWO = 130 * DEGREES_TO_REVS;
         
-        public static final double JITTER_POS_THREE = 120 * DEGREES_TO_REVS;
-        public static final double JITTER_POS_FOUR = 90 * DEGREES_TO_REVS;
+    //     public static final double JITTER_POS_THREE = 120 * DEGREES_TO_REVS;
+    //     public static final double JITTER_POS_FOUR = 90 * DEGREES_TO_REVS;
 
-        public static final double JITTER_POS_FIVE = 100 * DEGREES_TO_REVS;
-        public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
-    }
+    //     public static final double JITTER_POS_FIVE = 100 * DEGREES_TO_REVS;
+    //     public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
+    // }
 
     public static class Eater{
         public static final int EATER_MOTOR_ID = 11;
@@ -134,23 +134,23 @@ public final class Constants {
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
-    public static class Indexer{
-        public static final int INDEXER_MOTOR_ID = 12;
-        public static final double INDEXER_SPEED = 100;
+    // public static class Indexer{
+    //     public static final int INDEXER_MOTOR_ID = 12;
+    //     public static final double INDEXER_SPEED = 100;
 
-        public static final double kP = 1.5; // placeholder //0.8 5ft
-        public static final double kI = 0.0; // placeholder
-        public static final double kD = 0.0; // placeholder
-        public static final double kS = 0.12; // placeholder
-        public static final double kV = 0.0; // placeholder
-        public static final double kA = 0.0; // placeholder
+    //     public static final double kP = 1.5; // placeholder //0.8 5ft
+    //     public static final double kI = 0.0; // placeholder
+    //     public static final double kD = 0.0; // placeholder
+    //     public static final double kS = 0.12; // placeholder
+    //     public static final double kV = 0.0; // placeholder
+    //     public static final double kA = 0.0; // placeholder
 
-        public static final double CRUISE_VELOCITY = 50.0; // placeholder
-        public static final double ACCELERATION = 100.0;   // placeholder
-        public static final double JERK = 0.0;           // placeholder
+    //     public static final double CRUISE_VELOCITY = 50.0; // placeholder
+    //     public static final double ACCELERATION = 100.0;   // placeholder
+    //     public static final double JERK = 0.0;           // placeholder
 
-        //public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
+    //     //public static final boolean verboseLogging = false || Logging.verboseLogging;
+    // }
 
     public static class Feeder{
         public static final int FEEDER_MOTOR_ID = 36;

@@ -32,11 +32,11 @@ import frc.robot.commands.AimHub;
 // import frc.robot.commands.MoveClimbHalfwayDown;
 // import frc.robot.commands.MoveClimbUp;
 // import frc.robot.commands.MoveClimbtoZero;
-import frc.robot.commands.MovePivot;
+//import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunYeeter;
 import frc.robot.generated.TunerConstants;
-import frc.robot.commands.RunIndexer;
+//import frc.robot.commands.RunIndexer;
 import frc.robot.commands.RunEater;
 
 /** Add your docs here. */
@@ -117,16 +117,16 @@ public class Autoes {
                       
                       new ParallelCommandGroup(
                           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                      //     new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
-                          new SequentialCommandGroup(
-                              new WaitCommand(2.0), 
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                           new SequentialCommandGroup(
+                      //         new WaitCommand(2.0), 
+                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
                               new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
-                          )
-                      )
+                           )
+                       )
                   )
               )
           )
@@ -153,14 +153,14 @@ public class Autoes {
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
                       new ParallelCommandGroup(
-                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+                          //new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                          //new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
                           new SequentialCommandGroup(
                               new WaitCommand(1.0), 
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
                               new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
                           )
                       )
@@ -175,7 +175,7 @@ public class Autoes {
 
   private SequentialCommandGroup intakeSequence() {
     return new SequentialCommandGroup(new ParallelCommandGroup(
-      new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+      //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
     ));
   }
@@ -208,9 +208,10 @@ public class Autoes {
       )
     );
 
-    goBack.done().onTrue(
-      score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false))
-    );
+    // goBack.done().onTrue(
+    //   score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false))
+    // )
+    ;
     // score.active().onTrue(
     //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
     // );
@@ -813,11 +814,12 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       )
     );
 
-    trenchNeutral.done().onTrue(
-      new ParallelCommandGroup(
-            new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-      )
-    );
+    // trenchNeutral.done().onTrue(
+    //   // new ParallelCommandGroup(
+    //   //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
+    //   // )
+    // )
+    ;
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
