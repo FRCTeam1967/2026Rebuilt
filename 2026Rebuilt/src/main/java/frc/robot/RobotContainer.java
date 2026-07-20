@@ -4,18 +4,11 @@
 package frc.robot;
 import java.util.Optional;
 
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.controls.FireAnimation;
-import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
-import com.ctre.phoenix6.controls.TwinkleAnimation;
+import com.ctre.phoenix6.CANBus; 
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -65,17 +58,11 @@ public class RobotContainer {
 
     //vision
         public Vision vision = new Vision(swerve, MaxAngularRate);
-    //    public VisionUpdate visionUpdate = new VisionUpdate(swerve);
-
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
-        //public final Pivot pivot = new Pivot();
         public final Intake intake = new Intake();
-        //public final Indexer indexer = new Indexer();
         public final Feeder feeder = new Feeder();
         public final Shooter shooter = new Shooter(this);
-        // public final TheHood theHood = new TheHood();
-        // public final Climb climb = new Climb();
         public Autoes autoes = new Autoes(this);
 
         //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Shooter.SHOOTER_SPEED);
@@ -94,49 +81,11 @@ public class RobotContainer {
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
         public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
 
-    //leds
-        public final CANdle candle = new CANdle(23);
-        //private final StrobeAnimation yellowBlink = new StrobeAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
-
-        //private final TwinkleAnimation yellowBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
-        // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
-        // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
-
-        private final Trigger speedReached = new Trigger(() -> shooter.reachedShooterSpeed(false));
-        
-        //public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
-        public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
-        
-        //private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
-        
-        private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
-
-        //private final FireAnimation fire = new FireAnimation(0, 45);
-        
-        //private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
-        //private final Trigger seeTag = new Trigger(() -> visionUpdate.canSeeATag());
-
-        //private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
-        private final Trigger isAligned = new Trigger(() -> vision.isAligned());
-        
-        //private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0)); // switched r and g
-        private final Trigger isIntakeStalling = new Trigger(() -> intake.isStalling());
-        
-        //private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
-        //private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
-
-        //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
-
-
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        //theHood.configDashboard(matchTab);
         //shooter.configDashboard(matchTab);
-        //pivot.configDashboard(matchTab);
-        //configLLTab(limelightTab, fieldTab);
-        //climb.configDashboard(fieldTab);
-        
+  
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
         ally = DriverStation.getAlliance(); 
@@ -258,44 +207,10 @@ public class RobotContainer {
                     () -> ally.get() == Alliance.Red
                 )
             ));
-
-
-        //LEDS
-            // isDisabled.whileTrue(
-            //     new RunCommand(() -> candle.setControl(redSolid)).withTimeout(0.5)
-            // );
-
-            // //seeing any tag
-            // // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isIntakeStalling.negate()).and(isDisabled.negate())
-            // //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
-
-            // //aligned with tag
-            // isAligned.and(speedReached.negate()).and(isIntakeStalling.negate())
-            //     .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
-
-            // //shooter speed reached
-            // speedReached.and(isIntakeStalling.negate())
-            //     .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
-
-            // //intake stalling
-            // isIntakeStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
-
-            // //default (when nothing is triggered)
-            // (   
-            //     isAligned.negate()
-            //     .and(speedReached.negate())
-            //     .and(isIntakeStalling.negate())
-            //     .and(seeTag.negate())
-            //     .and(isDisabled.negate())
-            // ).whileTrue(new RunCommand(()-> candle.setControl(black)));
         
         //MECHANISM DEFAULT COMMANDS
-            //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
-            //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
             //shooter.setDefaultCommand(new RunCommand(() -> shooter.stopMotor(), shooter));
             shooter.setDefaultCommand(new RunShooter(shooter, ()-> Constants.Shooter.RESTING_SPEED, Constants.Shooter.SHOOTER_ACCELERATION));
-            //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
-
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
@@ -504,30 +419,13 @@ public class RobotContainer {
                 )  
             ;
 
-        //hood back down
-            // m_operatorController.povLeft().whileTrue(
-            //     //new SequentialCommandGroup(
-            //         new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
-            //         //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kGreen)).withName("Shuttling")) //TODO: update color
-            //     //)
-            // );
-
-            //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
-
-
-        //PIVOT
-            //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-            //m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
-            //m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
-
 
         //FEEDER
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
                 new ParallelCommandGroup(
-                    new RunFeeder(feeder, -100),
-                    new RunCommand (() -> candle.setControl(whiteSolid)) //75
+                    new RunFeeder(feeder, -100)
                 )
             );
 
@@ -546,8 +444,7 @@ public class RobotContainer {
             //eject
             m_operatorController.rightTrigger().and(m_operatorController.x()).and(m_operatorController.leftBumper().negate()).whileTrue(
                  new ParallelCommandGroup(  
-                    new RunIntake(intake, -Constants.Intake.INTAKE_MOTOR_SPEED),
-                    new RunCommand (() -> candle.setControl(whiteSolid))
+                    new RunIntake(intake, -Constants.Intake.INTAKE_MOTOR_SPEED)
                 )  
             );
             
@@ -557,35 +454,6 @@ public class RobotContainer {
             //         new RunCommand (() -> candle.setControl(whiteSolid))
             //     )  
             // );
-
-
-    //     //CLIMB
-    //         //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
-    //         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
-    //         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
-    // }
-
-    //LIMELIGHT METHODS
-    // public void configLLTab(ShuffleboardTab tab, ShuffleboardTab fieldTab) {
-    //     HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
-    //     CameraServer.addCamera(httpCamera1);
-    //     tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
-    //     .withSize(3, 2);
-
-    //     HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
-    //     CameraServer.addCamera(httpCamera2);
-    //     tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
-    //     .withSize(3, 2);
-
-        // tab.addBoolean("LL isInRange", () -> getInRange(LimelightHelpers.getTY("limelight-front")))
-        // .withWidget(BuiltInWidgets.kBooleanBox).withPosition(6, 1)
-        // .withSize(1, 1);
-
-        // tab.addBoolean("LL isAligned", () -> isAligned(LimelightHelpers.getTX("limelight-front")))
-        // .withWidget(BuiltInWidgets.kBooleanBox).withPosition(7, 1)
-        // .withSize(1, 1);
-
-        //fieldTab.add("Field", CommandSwerveDrivetrain.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
     }
 
     public void wonAuto(ShuffleboardTab tab) {
