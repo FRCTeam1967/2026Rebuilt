@@ -28,19 +28,6 @@ public class Visabelle extends SubsystemBase {
     this.maxAngularRate = maxAngularRate;
   }
 
-  // public double limelight_aim_proportional() {        
-  //     double kP = 0.02; //0.035
-  //     double targetingAngularVelocity = 0.0; 
-  //     // tx ranges from (-hfov/2) to (hfov/2) in degrees.
-
-  //     targetingAngularVelocity = (LimelightHelpers.getTX("limelight-front") * kP);
-
-  //     // convert to radians per second for our drive method
-  //     targetingAngularVelocity *= maxAngularRate;
-  //     //invert since tx is positive when the target is to the right of the crosshair
-  //     targetingAngularVelocity *= -1.0;
-  //     return targetingAngularVelocity;
-  // }
 
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
@@ -102,24 +89,6 @@ public class Visabelle extends SubsystemBase {
     return (() -> getAngleToHub() <= 0.0872665); //5 degrees to radians
   }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    // HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
-    // CameraServer.addCamera(httpCamera1);
-    // tab.add(httpCamera1).withWidget(BuiltInWidgets.kCameraStream).withPosition(0, 0)
-    //     .withSize(3, 2);
-
-    // HttpCamera httpCamera2 = new HttpCamera("limelight-back", "http://10.19.67.15:5801/"); //http://10.19.67.202:5801/
-    // CameraServer.addCamera(httpCamera2);
-    // tab.add(httpCamera2).withWidget(BuiltInWidgets.kCameraStream).withPosition(3, 0)
-    //     .withSize(3, 2);
-    // tab.addBoolean("front-limelight valid target?", () -> LimelightHelpers.getTV("limelight-front"))
-    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(3, 0)
-    //     .withSize(1, 1);
-
-    // tab.addBoolean("back-limelight valid target?", () -> LimelightHelpers.getTV("limelight-back"))
-    //     .withWidget(BuiltInWidgets.kBooleanBox).withPosition(4, 0)
-    //     .withSize(1, 1);
-  }
 
   @Override
   public void periodic() {

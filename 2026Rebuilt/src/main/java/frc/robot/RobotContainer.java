@@ -131,7 +131,6 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
         autoes.configDashboard(matchTab);
-        visabelle.configDashboard(matchTab);
         //theHood.configDashboard(matchTab);
         //yeeter.configDashboard(matchTab);
         //pivot.configDashboard(matchTab);
