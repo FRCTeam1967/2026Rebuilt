@@ -4,23 +4,23 @@
 
 package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Yeeter;
+import frc.robot.subsystems.Shooter;
 import java.util.function.DoubleSupplier;
 
 
 
-public class RunYeeter extends Command {
+public class RunShooter extends Command {
   /** Creates a new RunFlywheelShooter. */
-  private final Yeeter yeeter;
+  private final Shooter shooter;
   private final DoubleSupplier speed;
   private final double acceleration;
 
-  public RunYeeter(Yeeter yeeter, DoubleSupplier speed, double acceleration) {
-    this.yeeter = yeeter;
+  public RunShooter(Shooter shooter, DoubleSupplier speed, double acceleration) {
+    this.shooter = shooter;
     this.speed = speed;
     this.acceleration = acceleration;
 
-    addRequirements(yeeter);
+    addRequirements(shooter);
   }
 
   @Override
@@ -30,12 +30,12 @@ public class RunYeeter extends Command {
 
   @Override
   public void execute() {
-    yeeter.setVelocity(speed, acceleration);
+    shooter.setVelocity(speed, acceleration);
   }
   
    @Override
   public void end(boolean interrupted) {
-    //yeeter.stopMotor();
+    //shooter.stopMotor();
   }
 
  // Returns true when the command should end.

@@ -17,13 +17,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
-public class Visabelle extends SubsystemBase {
+public class Vision extends SubsystemBase {
   private double maxAngularRate;
-  private SwerveOnTheseBows swerve;
+  private Swerve swerve;
   private Translation2d hubPose;
   
   
-  public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
+  public Vision(Swerve drivetrain, double maxAngularRate) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
   }
@@ -32,13 +32,13 @@ public class Visabelle extends SubsystemBase {
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     //FOR SIMULATION:
-    //hubPose = Constants.Visabelle.BLUE_HUB_POSE;
-    //hubPose = Constants.Visabelle.RED_HUB_POSE;
+    //hubPose = Constants.Vision.BLUE_HUB_POSE;
+    //hubPose = Constants.Vision.RED_HUB_POSE;
 
     if (alliance == Alliance.Blue) {
-      hubPose = Constants.Visabelle.BLUE_HUB_POSE;
+      hubPose = Constants.Vision.BLUE_HUB_POSE;
     } else {
-      hubPose = Constants.Visabelle.RED_HUB_POSE;
+      hubPose = Constants.Vision.RED_HUB_POSE;
     }
 
     return hubPose;
@@ -50,10 +50,10 @@ public class Visabelle extends SubsystemBase {
     Translation2d ourPose = swerve.getPose().getTranslation();
 
     double eucDist = Math.hypot(ourPose.getX() - hubPose.getX(), ourPose.getY() - hubPose.getY());
-    // DogLog.log("Visabelle/dist from hub", eucDist);
+    // DogLog.log("Vision/dist from hub", eucDist);
     
-    // if (Constants.Visabelle.verboseLogging) {
-    //   DogLog.log("Visabelle/target hub", hubPose);
+    // if (Constants.Vision.verboseLogging) {
+    //   DogLog.log("Vision/target hub", hubPose);
     // }
     
     return eucDist;
@@ -69,15 +69,15 @@ public class Visabelle extends SubsystemBase {
     //tan(angle) opposite / adjacent = ∆y/∆x so angle = arctan(∆y/∆x)
     double angle = Math.atan2(yDist, xDist);
 
-    // if (Constants.Visabelle.verboseLogging) {
-    //   DogLog.log("Visabelle/raw angle to hub", angle);
+    // if (Constants.Vision.verboseLogging) {
+    //   DogLog.log("Vision/raw angle to hub", angle);
     // }
 
     // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
     //   angle += Math.PI;
     // }
 
-    // DogLog.log("Visabelle/angle to hub", angle);
+    // DogLog.log("Vision/angle to hub", angle);
     return (angle);
   }
 
@@ -92,14 +92,14 @@ public class Visabelle extends SubsystemBase {
 
   @Override
   public void periodic() {
-    hubPose = Constants.Visabelle.BLUE_HUB_POSE; // In case we're not connected yet
+    hubPose = Constants.Vision.BLUE_HUB_POSE; // In case we're not connected yet
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        hubPose = Constants.Visabelle.BLUE_HUB_POSE;
-        hubPose = Constants.Visabelle.BLUE_HUB_POSE;
+        hubPose = Constants.Vision.BLUE_HUB_POSE;
+        hubPose = Constants.Vision.BLUE_HUB_POSE;
       } else {
-        hubPose = Constants.Visabelle.RED_HUB_POSE;
-        hubPose = Constants.Visabelle.RED_HUB_POSE;
+        hubPose = Constants.Vision.RED_HUB_POSE;
+        hubPose = Constants.Vision.RED_HUB_POSE;
       }
     }
 

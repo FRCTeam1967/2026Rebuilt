@@ -34,10 +34,10 @@ import frc.robot.commands.AimHub;
 // import frc.robot.commands.MoveClimbtoZero;
 //import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
-import frc.robot.commands.RunYeeter;
+import frc.robot.commands.RunShooter;
 import frc.robot.generated.TunerConstants;
 //import frc.robot.commands.RunIndexer;
-import frc.robot.commands.RunEater;
+import frc.robot.commands.RunIntake;
 
 /** Add your docs here. */
 public class Autoes {
@@ -98,7 +98,7 @@ public class Autoes {
   private SequentialCommandGroup shootSequence() {
     return new SequentialCommandGroup(
         (m_robotContainer.swerve.applyRequest(() ->
-            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.visabelle.getAngleToHub()))
+            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.vision.getAngleToHub()))
                 .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
                 .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
         ).withTimeout(0.5),        
@@ -106,12 +106,12 @@ public class Autoes {
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
                   new SequentialCommandGroup(
-                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+                      new RunShooter(m_robotContainer.shooter, () -> (m_robotContainer.shooter.getNecessarySpeed(() -> m_robotContainer.vision.getDisFromHub()) + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
 
-                      new RunYeeter(m_robotContainer.yeeter, () -> (m_robotContainer.yeeter.getNecessarySpeed(() -> m_robotContainer.visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                      new RunShooter(m_robotContainer.shooter, () -> (m_robotContainer.shooter.getNecessarySpeed(() -> m_robotContainer.vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -124,7 +124,7 @@ public class Autoes {
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                              new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED).withTimeout(2)
                            )
                        )
                   )
@@ -138,17 +138,17 @@ public class Autoes {
 
       private SequentialCommandGroup shootSequenceConstant() {
     return new SequentialCommandGroup(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+        new AimHub(m_robotContainer, m_robotContainer.vision).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
                   new SequentialCommandGroup(
-                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+                      new RunShooter(m_robotContainer.shooter, () -> (Constants.Shooter.SHOOTER_AUTO_SPEED + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
 
-                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                      new RunShooter(m_robotContainer.shooter, () -> (Constants.Shooter.SHOOTER_AUTO_SPEED), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -161,7 +161,7 @@ public class Autoes {
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                              new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED).withTimeout(2)
                           )
                       )
                   )
@@ -176,7 +176,7 @@ public class Autoes {
   private SequentialCommandGroup intakeSequence() {
     return new SequentialCommandGroup(new ParallelCommandGroup(
       //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     ));
   }
 
@@ -362,10 +362,10 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     
 
     TrenchNeutral.done().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     NeutralIntake.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     TrenchNeutral.done().onTrue(NeutralIntake.cmd());
     NeutralIntake.done().onTrue(goBackShoot.cmd());
@@ -415,10 +415,10 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       .andThen(TrenchNeutral.cmd()));
 
      TrenchNeutral.done().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     NeutralIntake.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     TrenchNeutral.done().onTrue(NeutralIntake.cmd());
     NeutralIntake.done().onTrue(goBackShoot.cmd());
@@ -481,7 +481,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootToCenter.done().onTrue(intakeMore2.cmd());
     intakeMore2.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(shootSequence());
@@ -648,14 +648,14 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     trenchToCenter.done().onTrue(intake.cmd());
     
     intake.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED));
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED));
 
     intake.done().onTrue(shootFirstCondition.cmd());
 
     shootFirstCondition.done().onTrue(shootSequence());
 
     intakeMore.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
 
     intakeMore.done().onTrue(shootSecondCondition.cmd());
@@ -822,7 +822,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     ;
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
@@ -833,7 +833,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().whileTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     );
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(shootSequence());
@@ -886,7 +886,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     // );
     // trenchNeutral.done().onTrue(intake1.cmd());
     // intake1.active().onTrue(
-    //   new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+    //   new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
     // );
     // intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 

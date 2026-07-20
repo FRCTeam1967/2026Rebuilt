@@ -46,7 +46,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
  */
 public class RobotContainer {
     //drivetrain
-        public final SwerveOnTheseBows swerve = TunerConstants.createDrivetrain();
+        public final Swerve swerve = TunerConstants.createDrivetrain();
         public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
         public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
         private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -64,21 +64,21 @@ public class RobotContainer {
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     //vision
-        public Visabelle visabelle = new Visabelle(swerve, MaxAngularRate);
-    //    public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
+        public Vision vision = new Vision(swerve, MaxAngularRate);
+    //    public VisionUpdate visionUpdate = new VisionUpdate(swerve);
 
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
         //public final Pivot pivot = new Pivot();
-        public final Eater eater = new Eater();
+        public final Intake intake = new Intake();
         //public final Indexer indexer = new Indexer();
         public final Feeder feeder = new Feeder();
-        public final Yeeter yeeter = new Yeeter(this);
+        public final Shooter shooter = new Shooter(this);
         // public final TheHood theHood = new TheHood();
         // public final Climb climb = new Climb();
         public Autoes autoes = new Autoes(this);
 
-        //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
+        //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Shooter.SHOOTER_SPEED);
         //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     //control
@@ -102,7 +102,7 @@ public class RobotContainer {
         // private final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 0));
         // private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
 
-        private final Trigger speedReached = new Trigger(() -> yeeter.reachedYeeterSpeed(false));
+        private final Trigger speedReached = new Trigger(() -> shooter.reachedShooterSpeed(false));
         
         //public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -114,13 +114,13 @@ public class RobotContainer {
         //private final FireAnimation fire = new FireAnimation(0, 45);
         
         //private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
-        //private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+        //private final Trigger seeTag = new Trigger(() -> visionUpdate.canSeeATag());
 
         //private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
-        private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
+        private final Trigger isAligned = new Trigger(() -> vision.isAligned());
         
         //private final SolidColor redSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 255, 0)); // switched r and g
-        private final Trigger isEaterStalling = new Trigger(() -> eater.isStalling());
+        private final Trigger isIntakeStalling = new Trigger(() -> intake.isStalling());
         
         //private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
         //private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
@@ -132,7 +132,7 @@ public class RobotContainer {
         configureBindings();
         autoes.configDashboard(matchTab);
         //theHood.configDashboard(matchTab);
-        //yeeter.configDashboard(matchTab);
+        //shooter.configDashboard(matchTab);
         //pivot.configDashboard(matchTab);
         //configLLTab(limelightTab, fieldTab);
         //climb.configDashboard(fieldTab);
@@ -220,7 +220,7 @@ public class RobotContainer {
             // hub alignment but with localization
             m_driverController.rightTrigger().whileTrue(
                 swerve.applyRequest(() ->
-                    driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+                    driveAtAngle.withTargetDirection(new Rotation2d(vision.getAngleToHub()))
                         .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                         .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                 )
@@ -266,25 +266,25 @@ public class RobotContainer {
             // );
 
             // //seeing any tag
-            // // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
+            // // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isIntakeStalling.negate()).and(isDisabled.negate())
             // //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
             // //aligned with tag
-            // isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
+            // isAligned.and(speedReached.negate()).and(isIntakeStalling.negate())
             //     .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
             // //shooter speed reached
-            // speedReached.and(isEaterStalling.negate())
+            // speedReached.and(isIntakeStalling.negate())
             //     .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
 
             // //intake stalling
-            // isEaterStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
+            // isIntakeStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
 
             // //default (when nothing is triggered)
             // (   
             //     isAligned.negate()
             //     .and(speedReached.negate())
-            //     .and(isEaterStalling.negate())
+            //     .and(isIntakeStalling.negate())
             //     .and(seeTag.negate())
             //     .and(isDisabled.negate())
             // ).whileTrue(new RunCommand(()-> candle.setControl(black)));
@@ -292,8 +292,8 @@ public class RobotContainer {
         //MECHANISM DEFAULT COMMANDS
             //pivot.setDefaultCommand(new MovePivot(pivot, Constants.Pivot.SAFE));
             //pivot.setDefaultCommand(new RunCommand(()-> pivot.maintainPosition(), pivot));
-            //yeeter.setDefaultCommand(new RunCommand(() -> yeeter.stopMotor(), yeeter));
-            yeeter.setDefaultCommand(new RunYeeter(yeeter, ()-> Constants.Yeeter.RESTING_SPEED, Constants.Yeeter.YEETER_ACCELERATION));
+            //shooter.setDefaultCommand(new RunCommand(() -> shooter.stopMotor(), shooter));
+            shooter.setDefaultCommand(new RunShooter(shooter, ()-> Constants.Shooter.RESTING_SPEED, Constants.Shooter.SHOOTER_ACCELERATION));
             //theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
 
 
@@ -303,12 +303,12 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new SequentialCommandGroup(
-                                //new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+                                //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub()) + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
 
-                                //new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+                                //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                             ),
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
@@ -326,7 +326,7 @@ public class RobotContainer {
                                             //     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
                                             //     new MovePivot(pivot, Constants.Pivot.SAFE, false)    
                                             // ),
-                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
                                         )
                                     )
                                 )
@@ -339,7 +339,7 @@ public class RobotContainer {
             // eject shooter
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
             //     new ParallelCommandGroup(
-            //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
+            //         new RunShooter(shooter, ()-> -Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION),
             //         new RunCommand (() -> candle.setControl(magentaBlink))
             //     )
             // );
@@ -350,13 +350,13 @@ public class RobotContainer {
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                //new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                //new RunShooter(shooter, () -> shooter.getNecessarySpeed(() -> vision.getDisFromHub()), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), 
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(true)), 
                                 
                                 // new ParallelCommandGroup( //green
                                 //     new SequentialCommandGroup(
@@ -409,14 +409,14 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_FAR_SHUTTLE, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_FAR_SHUTTLE, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                                new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
                                 // new ParallelCommandGroup(
                                 //     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                                 //     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
@@ -446,12 +446,12 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
                                 new ParallelCommandGroup(
@@ -467,7 +467,7 @@ public class RobotContainer {
                                         //         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
                                         //         new MovePivot(pivot, Constants.Pivot.SAFE, false)
                                         //     ),
-                                            new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                                            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
                                         )
                                     )
                                 )
@@ -484,12 +484,12 @@ public class RobotContainer {
                         new SequentialCommandGroup( 
                             new ParallelCommandGroup(
                                 new ParallelCommandGroup(
-                                    new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
+                                    new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                     //new RunCommand (() -> candle.setControl(yellowBlink))
                                 ),
 
                                 new SequentialCommandGroup(
-                                    new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(false)),
+                                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
                                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                     
                                     new ParallelCommandGroup(
@@ -536,7 +536,7 @@ public class RobotContainer {
             m_operatorController.rightTrigger().and(m_operatorController.x().negate()).and(m_operatorController.leftBumper().negate()).whileTrue(
                 new ParallelCommandGroup(
                     //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-                    new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                    new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
                     //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
                     //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
                     //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
@@ -546,14 +546,14 @@ public class RobotContainer {
             //eject
             m_operatorController.rightTrigger().and(m_operatorController.x()).and(m_operatorController.leftBumper().negate()).whileTrue(
                  new ParallelCommandGroup(  
-                    new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
+                    new RunIntake(intake, -Constants.Intake.INTAKE_MOTOR_SPEED),
                     new RunCommand (() -> candle.setControl(whiteSolid))
                 )  
             );
             
             // m_operatorController.povRight().whileTrue(
             //      new ParallelCommandGroup(  
-            //         new RunEater(eater, 100),
+            //         new RunIntake(intake, 100),
             //         new RunCommand (() -> candle.setControl(whiteSolid))
             //     )  
             // );

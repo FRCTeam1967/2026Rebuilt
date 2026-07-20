@@ -5,18 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Eater;
+import frc.robot.subsystems.Intake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunEater extends Command {
-  public Eater eater;
+public class RunIntake extends Command {
+  public Intake intake;
   private double speed;
 
   /** Creates a new RunIntake. */
-  public RunEater(Eater eater, double speed) {
-    this.eater = eater;
+  public RunIntake(Intake intake, double speed) {
+    this.intake = intake;
     this.speed = speed;
-    addRequirements(eater);
+    addRequirements(intake);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -29,13 +29,13 @@ public class RunEater extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    eater.setMotor(speed);
+    intake.setMotor(speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    eater.stopMotor();
+    intake.stopMotor();
   }
 
   // Returns true when the command should end.

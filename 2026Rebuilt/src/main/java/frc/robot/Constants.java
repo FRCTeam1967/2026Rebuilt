@@ -51,9 +51,9 @@ public final class Constants {
     //     public static final boolean verboseLogging = false || Logging.verboseLogging;
     // }
 
-    public static class Yeeter {
-        public static final int YEETER_MOTOR1_ID = 37; 
-        //public static final int YEETER_MOTOR2_ID = 18; 
+    public static class Shooter {
+        public static final int SHOOTER_MOTOR_ID = 37; 
+        //public static final int SHOOTER_MOTOR2_ID = 18; 
 
         public static final double kP = 5.0; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
@@ -66,16 +66,16 @@ public final class Constants {
         public static final double ACCELERATION = 300.0;   // placeholder
         public static final double JERK = 800.0;           // placeholder
 
-        public static final double PRELOAD_YEETER_SPEED = 700.0; 
+        public static final double PRELOAD_SHOOTER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 65.0; //81; //rotations per second
+        public static final double SHOOTER_SPEED = 65.0; //81; //rotations per second
         public static final double RESTING_SPEED = 60.0;
-        public static final double YEETER_ACCELERATION = 500.0; //500
-        public static final double YEETER_AUTO_SPEED = 67.5;
-        public static final double YEETER_SPEED_ADDITION = 4.0;
-        public static final double YEETER_FAR_SHUTTLE = 500;
+        public static final double SHOOTER_ACCELERATION = 500.0; //500
+        public static final double SHOOTER_AUTO_SPEED = 67.5;
+        public static final double SHOOTER_SPEED_ADDITION = 4.0;
+        public static final double SHOOTER_FAR_SHUTTLE = 500;
 
-        public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
+        public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5* Constants.Shooter.SHOOTER_SPEED;
         //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
 
         public static final double GEAR_RATIO = 1.333; 
@@ -128,9 +128,9 @@ public final class Constants {
     //     public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
     // }
 
-    public static class Eater{
-        public static final int EATER_MOTOR_ID = 11;
-        public static final double EATER_MOTOR_SPEED = -100.0;
+    public static class Intake{
+        public static final int INTAKE_MOTOR_ID = 11;
+        public static final double INTAKE_MOTOR_SPEED = -100.0;
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
@@ -211,7 +211,7 @@ public final class Constants {
     //     public static final boolean verboseLogging = false || Logging.verboseLogging;
     // }
 
-public static class Visabelle {
+public static class Vision {
     //     public static final double DEGREE_ERROR = 4.0;
     //     public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify
     //     public static final double LIMELIGHT_HEIGHT_INCHES = 25.125; //need to verify

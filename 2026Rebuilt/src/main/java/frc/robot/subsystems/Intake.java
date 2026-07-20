@@ -14,14 +14,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
-public class Eater extends SubsystemBase {
+public class Intake extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
-  //private final DoubleSubscriber intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
+  //private final DoubleSubscribser intakeSpeed = DogLog.tunable("Eater/intakeSpeed", Constants.Eater.EATER_MOTOR_SPEED);
   
   /** Creates a new Intake. */
-  public Eater() {
-    motor = new TalonFX(Constants.Eater.EATER_MOTOR_ID);
+  public Intake() {
+    motor = new TalonFX(Constants.Intake.INTAKE_MOTOR_ID);
     var talonFXConfigurator = motor.getConfigurator();
 
     var limitConfigs = new CurrentLimitsConfigs();

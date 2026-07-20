@@ -21,16 +21,16 @@ public class AimHub extends Command {
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
   private final RobotContainer m_robotContainer; 
-  private Visabelle visabelle;
+  private Vision vision;
 
   private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
       .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     
-  public AimHub(RobotContainer m_robotContainer, Visabelle visabelle) {
+  public AimHub(RobotContainer m_robotContainer, Vision vision) {
     this.m_robotContainer = m_robotContainer;
-    this.visabelle = m_robotContainer.visabelle;
+    this.vision = m_robotContainer.vision;
 
     addRequirements(m_robotContainer.swerve);
   }
@@ -44,7 +44,7 @@ public class AimHub extends Command {
   public void execute() {
     m_robotContainer.swerve.setControl(
       driveAtAngle
-        .withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
+        .withTargetDirection(new Rotation2d(vision.getAngleToHub()))
         .withVelocityX(0)
         .withVelocityY(0)
     );
