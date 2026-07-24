@@ -11,16 +11,8 @@ public final class Constants {
         public static final int kOperatorControllerPort = 1;
     }
 
-    // public static class LED {
-    //     public static final int CANDLE_ID = 23;
-
-    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
-    // }
-
     public static class IntakeShooter {
         public static final int INTAKE_SHOOTER_MOTOR_ID = 37; 
-        //public static final int SHOOTER_MOTOR2_ID = 18; 
-
         public static final double kP = 5.0; // placeholder //0.8 5ft
         public static final double kI = 0.0; // placeholder
         public static final double kD = 0.0; // placeholder
@@ -41,7 +33,7 @@ public final class Constants {
         public static final double SHOOTER_SPEED_ADDITION = 4.0;
         public static final double SHOOTER_FAR_SHUTTLE = 500;
 
-        public static final double SHOOTER_THRESHOLD_SPEED = 0.5* Constants.IntakeShooter.SHOOTER_SPEED;
+        //public static final double SHOOTER_THRESHOLD_SPEED = 0.5* Constants.IntakeShooter.SHOOTER_SPEED;
 
         public static final double GEAR_RATIO = 1.333; 
         public static final double INTAKE_MOTOR_SPEED = -100.0;
@@ -62,8 +54,6 @@ public final class Constants {
         public static final double SHOOTER_SPEED_O_SHOOT = 67.5;
         public static final double SHOOTER_SPEED_D_SHOOT = 67.5;
         public static final double SHOOTER_THRESHOLD_ERROR = 5;
-
-        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
     public static class Feeder{
@@ -87,7 +77,6 @@ public final class Constants {
         public static final double ACCELERATION = 100.0;   // placeholder
         public static final double JERK = 0.0;           // placeholder
 
-        //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
   
     public static class Drivetrain {

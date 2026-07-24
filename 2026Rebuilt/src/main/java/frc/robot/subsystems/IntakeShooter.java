@@ -141,6 +141,6 @@ public class IntakeShooter extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
+  public void periodic() {
   }
 }

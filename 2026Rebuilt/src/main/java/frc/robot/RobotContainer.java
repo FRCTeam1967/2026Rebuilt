@@ -64,9 +64,6 @@ public class RobotContainer {
         public Autoes autoes = new Autoes(this);
         public double shooterSpeed = 0.0;
 
-        //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Shooter.SHOOTER_SPEED);
-        //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
-
     //control
         public final CommandXboxController m_driverController = new CommandXboxController(0);
         public final CommandXboxController m_operatorController = new CommandXboxController(1);
@@ -75,7 +72,6 @@ public class RobotContainer {
     
         public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
         public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
-        //public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
         
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
         public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
@@ -88,10 +84,6 @@ public class RobotContainer {
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
         ally = DriverStation.getAlliance(); 
-    
-        //for vision servoing
-        driveAtAngle.HeadingController.setPID(5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
-        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
 
@@ -146,13 +138,7 @@ public class RobotContainer {
             swerve.registerTelemetry(logger::telemeterize);
 
             /* defense mode */
-            m_driverController.leftBumper().whileTrue(swerve.applyRequest(() -> brake));
-            
-            // m_driverController.x().whileTrue(
-            //     new ConditionalCommand(new RunCommand(() -> gerryRig.runMotor(0.7), gerryRig),
-            //         new RunCommand(() -> gerryRig.stopMotor(), gerryRig), 
-            //         () -> autoes.getDisSensor() <= 0.15)
-            // );
+            m_driverController.leftBumper().whileTrue(swerve.applyRequest(() -> brake)); 
 
             // Run SysId routines when holding back/start and X/Y.
             // Note that each routine should be run exactly once in a single log.
@@ -163,49 +149,6 @@ public class RobotContainer {
 
             //check for winning auto
             updateWinAuto.whileFalse(new RunCommand(() -> wonAuto(matchTab)));
-
-        //VISION
-            // hub alignment but with localization
-            m_driverController.rightTrigger().whileTrue(
-                swerve.applyRequest(() ->
-                    driveAtAngle.withTargetDirection(new Rotation2d())
-                        .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                )
-            );
-
-            //snap to hub
-            m_driverController.rightBumper().whileTrue(
-                swerve.applyRequest(() ->
-                    driveAtAngle.withTargetDirection(Rotation2d.kPi)
-                        .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                )
-            );
-
-            //align to tower
-            //m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
-
-            // yaw setter --> 0 faces hub 
-            m_driverController.x().onTrue(new SequentialCommandGroup(
-                // ROTATION2D IS IN **RADIANS!!!!**
-                // SET YAW IS IN **DEGREES!!!!**
-                new ConditionalCommand(
-                    new SequentialCommandGroup(
-                        new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kPi)),
-                        new InstantCommand(() -> swerve.getPigeon2().setYaw(180.0)),
-                        new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                        new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kPi)))        
-                    ),
-                    new SequentialCommandGroup(
-                        new InstantCommand(() -> swerve.setOperatorPerspectiveForward(Rotation2d.kZero)),
-                        new InstantCommand(() -> swerve.getPigeon2().setYaw(0.0)),
-                        new InstantCommand(() -> swerve.getPigeon2().getYaw().waitForUpdate(0.1)),
-                        new InstantCommand(() -> swerve.resetPose(new Pose2d(swerve.getPose().getX(), swerve.getPose().getY(), Rotation2d.kZero)))
-                    ),
-                    () -> ally.get() == Alliance.Red
-                )
-            ));
         
         //MECHANISM DEFAULT COMMANDS
             //shooter.setDefaultCommand(new RunCommand(() -> shooter.stopMotor(), shooter));
@@ -217,9 +160,8 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new SequentialCommandGroup(
-                                //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub()) + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
-
-                                //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
+                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
+                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                             ),
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
@@ -228,18 +170,10 @@ public class RobotContainer {
                                 
                                 new ParallelCommandGroup(
                                     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                    //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
 
                                     new SequentialCommandGroup(
                                         new WaitCommand(1.0), 
-                                        //new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                        //new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
                                         new ParallelCommandGroup(
-                                            // new SequentialCommandGroup(
-                                            //     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                            //     new MovePivot(pivot, Constants.Pivot.SAFE, false)    
-                                            // ),
                                             new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                         )
                                     )
@@ -259,94 +193,34 @@ public class RobotContainer {
             // );
 
 
-            //modified if we're stuck
             m_operatorController.leftTrigger().and(m_operatorController.povRight()).whileTrue(
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                //new RunShooter(shooter, () -> shooter.getNecessarySpeed(() -> vision.getDisFromHub()), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                                //new RunCommand (() -> candle.setControl(yellowBlink))
+                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                             ),
-                            //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
-
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), 
-                                
-                                // new ParallelCommandGroup( //green
-                                //     new SequentialCommandGroup(
-                                //         new RunCommand (() -> candle.setControl(redSolid)).withTimeout(1.0),
-                                //         new RunCommand (() -> candle.setControl(whiteSolid)).withTimeout(1.0)
-                                //     )
-                                // ),
-
-                                //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kBlue)).withName("Shooting")), //TODO: update color
-                                //new RunCommand (() -> candle.runColorFlowPattern(0, 0, 255)), //blue
 
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5)
-                                
-                                // new ParallelCommandGroup(
-                                //     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                //     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-
-                                //     new SequentialCommandGroup(
-                                //         new WaitCommand(0.5), 
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_TWO, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_TWO, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
-
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_FOUR, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_FOUR, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_THREE, false).withTimeout(0.25),
-
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_SIX, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_SIX, false),
-                                //         new MovePivot(pivot, Constants.Pivot.JITTER_POS_FIVE, false).withTimeout(0.25)
-                                //     )
-                                // )
-                            
-                        )
-                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
-                )
+                        )                )
                 )
             ); //TODO: add defense mode while the robot is shooting
 
         //SHUTTLING (FAR)
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger().negate()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
                                 new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_FAR_SHUTTLE, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                                //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                                new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
-                                // new ParallelCommandGroup(
-                                //     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                //     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-                                //     new SequentialCommandGroup(
-                                //         new WaitCommand(1.0), 
-                                //         new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                //         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                //         new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
-                                //         new ParallelCommandGroup(
-                                //             // new SequentialCommandGroup(
-                                //             //     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                //             //     new MovePivot(pivot, Constants.Pivot.SAFE, false)
-                                //             // ),
-                                            
-                                //         )
-                                //     )
+                                new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED),
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
                                 )
                             )
                         )
@@ -356,12 +230,10 @@ public class RobotContainer {
         //SHUTTLING (SHORT)
             m_operatorController.leftBumper().and(m_operatorController.x()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
                                 new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                                //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
@@ -370,17 +242,8 @@ public class RobotContainer {
                                 
                                 new ParallelCommandGroup(
                                     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                    //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
                                     new SequentialCommandGroup(
                                         new WaitCommand(1.0), 
-                                        // new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                                        // new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                        // new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
-                                        // new ParallelCommandGroup(
-                                        //     new SequentialCommandGroup(
-                                        //         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                        //         new MovePivot(pivot, Constants.Pivot.SAFE, false)
-                                        //     ),
                                             new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                         )
                                     )
@@ -393,22 +256,17 @@ public class RobotContainer {
         //SHUTTLE WHILE INTAKING
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    // new ParallelCommandGroup(
-                             //new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                         new SequentialCommandGroup( 
                             new ParallelCommandGroup(
                                 new ParallelCommandGroup(
                                     new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                                    //new RunCommand (() -> candle.setControl(yellowBlink))
                                 ),
-
                                 new SequentialCommandGroup(
                                     new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                     
                                     new ParallelCommandGroup(
                                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-                                        //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
 
                                     )
                                 )
@@ -432,9 +290,7 @@ public class RobotContainer {
         //INTAKE
             m_operatorController.rightTrigger().and(m_operatorController.x().negate()).and(m_operatorController.leftBumper().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
                     new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
-                    //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
                     //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
                     //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
                 )
@@ -450,7 +306,6 @@ public class RobotContainer {
             // m_operatorController.povRight().whileTrue(
             //      new ParallelCommandGroup(  
             //         new RunIntake(intake, 100),
-            //         new RunCommand (() -> candle.setControl(whiteSolid))
             //     )  
             // );
     }

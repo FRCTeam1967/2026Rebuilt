@@ -36,23 +36,11 @@ import frc.robot.commands.RunIntake;
 public class Autoes {
   private final AutoChooser autoChooserLOL = new AutoChooser();
   private final AutoFactory autoFactory;
-  private final int disSensorID = 24;
   private final RobotContainer m_robotContainer; 
-  //private final CANrange disSensor = new CANrange(disSensorID);
-  // Write these configs to the CANrange
 
   public Autoes(RobotContainer container) {
     m_robotContainer = container;
     var drive = m_robotContainer.swerve;
-
-    //CANrangeConfiguration config = new CANrangeConfiguration();
-
-    // config.ProximityParams.MinSignalStrengthForValidMeasurement = 2000; // If CANrange has a signal strength of at least 2000, it is a valid measurement.
-    // config.ProximityParams.ProximityThreshold = 0.1; // If CANrange detects an object within 0.1 meters, it will trigger the "isDetected" signal.
-
-    // config.ToFParams.UpdateMode = UpdateModeValue.ShortRange100Hz; // Make the CANrange update as fast as possible at 100 Hz. This requires short-range mode.
-
-    // disSensor.getConfigurator().apply(config);
 
     autoFactory = new AutoFactory(
       drive::getPose, // A function that returns the current robot pose
@@ -76,13 +64,11 @@ public class Autoes {
     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
 
-
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
 
   public void configDashboard(ShuffleboardTab tab) {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-    //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
 
   private SequentialCommandGroup shootSequence(double shooterSpeed) {
@@ -107,13 +93,7 @@ public class Autoes {
                       
                       new ParallelCommandGroup(
                           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                      //     new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-
                            new SequentialCommandGroup(
-                      //         new WaitCommand(2.0), 
-                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                      //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
                               new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED).withTimeout(2)
                            )
                        )
@@ -142,14 +122,8 @@ public class Autoes {
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
                       new ParallelCommandGroup(
-                          //new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                          //new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-
                           new SequentialCommandGroup(
                               new WaitCommand(1.0), 
-                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
                               new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED).withTimeout(2)
                           )
                       )
@@ -164,7 +138,6 @@ public class Autoes {
 
   private SequentialCommandGroup intakeSequence() {
     return new SequentialCommandGroup(new ParallelCommandGroup(
-      //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
       new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     ));
   }
@@ -184,26 +157,10 @@ public class Autoes {
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           goBack.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           goBack.cmd()
       )
     );
-
-    // goBack.done().onTrue(
-    //   score.cmd().alongWith(new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false))
-    // )
-    ;
-    // score.active().onTrue(
-    //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
-    // );
     score.done().onTrue(
        shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_CENTER));
     return routine;
@@ -223,11 +180,6 @@ public class Autoes {
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         otToO.resetOdometry(),
-        // new InstantCommand(
-        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-        //     0, 0, 0, 0, 0)
-        //   ),
   
         otToO.cmd()
       )
@@ -256,11 +208,6 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToO.resetOdometry(),
-        // new InstantCommand(
-        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-        //     0, 0, 0, 0, 0)
-        //   ),
   
         hubToO.cmd()
       )
@@ -290,11 +237,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToD.resetOdometry(),
-        // new InstantCommand(
-        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-        //     0, 0, 0, 0, 0)
-        //   ),
   
         hubToD.cmd()
       )
@@ -329,11 +271,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToO.resetOdometry(),
-        // new InstantCommand(
-        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-        //     0, 0, 0, 0, 0)
-        //   ),
   
         hubToO.cmd()
       )
@@ -383,11 +320,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         new PrintCommand("!!!!!***** gyro set to starting heading"),
 
         hubToD.resetOdometry(),
-        // new InstantCommand(
-        //     () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-        //     m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-        //     0, 0, 0, 0, 0)
-        //   ),
   
         hubToD.cmd()
       )
@@ -441,14 +373,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           trenchToCenter.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -475,13 +399,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
 
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atNeutral = trenchToCenter.done();
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // //  //write intake for fuel traj if true 
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
-
     return routine;
   }
   private AutoRoutine dtndisrupt() {
@@ -505,14 +422,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           path1.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           path1.cmd()
       )
@@ -559,14 +468,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           path1.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           path1.cmd(),
           new PrintCommand("auto start")
@@ -617,14 +518,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           trenchToCenter.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -673,14 +566,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
           trenchToCenter.resetOdometry(),
 
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
-          
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
       )
@@ -729,14 +614,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           trenchToCenter.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
           new WaitCommand(2.5),
           trenchToCenter.cmd(),
           new PrintCommand("auto start")
@@ -790,24 +667,10 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           trenchNeutral.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
-          
           trenchNeutral.cmd()
       )
     );
 
-    // trenchNeutral.done().onTrue(
-    //   // new ParallelCommandGroup(
-    //   //       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-    //   // )
-    // )
     ;
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
@@ -826,13 +689,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     );
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atNeutral = trenchToCenter.done();
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // //  //write intake for fuel traj if true 
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
-
     return routine;
   }
 
@@ -858,15 +714,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           new PrintCommand("!!!!!***** gyro set to starting heading"),
 
           trenchNeutral.resetOdometry(),
-
-          //step three: set LL heading to gyro (aka starting) heading
-          // new InstantCommand(
-          //   () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-          //   m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-          //   0, 0, 0, 0, 0)
-          // ),
-          // new PrintCommand("!!!!!***** LL heading set to gyro heading"),
-          
           trenchNeutral.cmd()
       )
     );
