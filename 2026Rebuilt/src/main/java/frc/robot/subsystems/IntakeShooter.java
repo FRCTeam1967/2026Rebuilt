@@ -109,10 +109,12 @@ public class IntakeShooter extends SubsystemBase {
    * @return true if current speed of yeeter is >= threshold speed
    */
   
-   public boolean reachedShooterSpeed() {
-    double motorSpeed = getCurrentVelocity();
-    return (Math.abs(motorSpeed - Constants.IntakeShooter.SHOOTER_THRESHOLD_SPEED) <= 5);
+    public boolean reachedShooterSpeed(double desiredSpeed) {
+      double currentSpeed = getCurrentVelocity();
+      double difference = Math.abs(desiredSpeed - currentSpeed);
+      return (difference <= Constants.IntakeShooter.SHOOTER_THRESHOLD_ERROR); 
   }
+ 
 
   /**
    * @return average velocity of both motors

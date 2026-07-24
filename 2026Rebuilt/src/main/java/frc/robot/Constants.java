@@ -61,7 +61,7 @@ public final class Constants {
         public static final double SHOOTER_SPEED_LEFT_O = 67.5;
         public static final double SHOOTER_SPEED_O_SHOOT = 67.5;
         public static final double SHOOTER_SPEED_D_SHOOT = 67.5;
-
+        public static final double SHOOTER_THRESHOLD_ERROR = 5;
 
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }

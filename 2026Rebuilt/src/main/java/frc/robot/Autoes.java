@@ -101,7 +101,7 @@ public class Autoes {
                       new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -126,7 +126,7 @@ public class Autoes {
       );
   }
 
-      private SequentialCommandGroup shootSequenceConstant() {
+      private SequentialCommandGroup shootSequenceConstant(double shooterSpeed) {
     return new SequentialCommandGroup(
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
@@ -137,7 +137,7 @@ public class Autoes {
                       new RunShooter(m_robotContainer.shooter, () -> (Constants.IntakeShooter.SHOOTER_AUTO_SPEED), Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       

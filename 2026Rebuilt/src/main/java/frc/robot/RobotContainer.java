@@ -222,7 +222,7 @@ public class RobotContainer {
                                 //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                             ),
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
@@ -270,7 +270,7 @@ public class RobotContainer {
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()), 
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), 
                                 
                                 // new ParallelCommandGroup( //green
                                 //     new SequentialCommandGroup(
@@ -328,7 +328,7 @@ public class RobotContainer {
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                 // new ParallelCommandGroup(
@@ -365,7 +365,7 @@ public class RobotContainer {
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
                                 new ParallelCommandGroup(
@@ -403,7 +403,7 @@ public class RobotContainer {
                                 ),
 
                                 new SequentialCommandGroup(
-                                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
+                                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                     
                                     new ParallelCommandGroup(
