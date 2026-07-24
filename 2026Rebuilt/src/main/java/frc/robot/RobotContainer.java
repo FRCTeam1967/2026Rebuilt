@@ -56,8 +56,6 @@ public class RobotContainer {
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    //vision
-        public Vision vision = new Vision(swerve, MaxAngularRate);
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
         public final IntakeShooter intake = new IntakeShooter(this);
@@ -170,7 +168,7 @@ public class RobotContainer {
             // hub alignment but with localization
             m_driverController.rightTrigger().whileTrue(
                 swerve.applyRequest(() ->
-                    driveAtAngle.withTargetDirection(new Rotation2d(vision.getAngleToHub()))
+                    driveAtAngle.withTargetDirection(new Rotation2d())
                         .withVelocityX(-m_driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                         .withVelocityY(-m_driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                 )

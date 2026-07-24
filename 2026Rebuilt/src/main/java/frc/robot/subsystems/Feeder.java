@@ -57,9 +57,6 @@ public class Feeder extends SubsystemBase {
   /**
    * @param speed - sets motor to speed
    */
-  public void setMotor(double speed){
-    motor.set(speed);
-  }
 
   public void setVelocity(double speed) {
     motor.setControl(motionMagicRequest.withVelocity(speed).withEnableFOC(true));

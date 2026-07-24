@@ -90,21 +90,6 @@ public final class Constants {
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
   
-
-public static class Vision {
-    //     public static final double DEGREE_ERROR = 4.0;
-
-        public static final Translation2d RED_HUB_POSE = new Translation2d(11.914324760437012, 4.033950328826904);
-        public static final Translation2d BLUE_HUB_POSE = new Translation2d(4.622838497161865, 4.033950328826904);
-
-    //     public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
-    //     public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
-        
-    //     public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
-
-    //     public static final boolean verboseLogging = false || Logging.verboseLogging;
-    // }
-
     public static class Drivetrain {
         public static final boolean verboseLogging = true;
     }
@@ -147,5 +132,4 @@ public static class Vision {
     
         }
     }
-}
 }

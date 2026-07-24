@@ -27,16 +27,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.AimHub;
-// import frc.robot.commands.AlignTowerPose;
-// import frc.robot.commands.MoveClimbHalfwayDown;
-// import frc.robot.commands.MoveClimbUp;
-// import frc.robot.commands.MoveClimbtoZero;
-//import frc.robot.commands.MovePivot;
 import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunShooter;
 import frc.robot.generated.TunerConstants;
-//import frc.robot.commands.RunIndexer;
 import frc.robot.commands.RunIntake;
 
 /** Add your docs here. */
@@ -95,7 +88,7 @@ public class Autoes {
   private SequentialCommandGroup shootSequence(double shooterSpeed) {
     return new SequentialCommandGroup(
         (m_robotContainer.swerve.applyRequest(() ->
-            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.vision.getAngleToHub()))
+            m_robotContainer.driveAtAngle.withTargetDirection(null)
                 .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
                 .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
         ).withTimeout(0.5),        
@@ -135,7 +128,6 @@ public class Autoes {
 
       private SequentialCommandGroup shootSequenceConstant() {
     return new SequentialCommandGroup(
-        new AimHub(m_robotContainer, m_robotContainer.vision).withTimeout(0.5),
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
