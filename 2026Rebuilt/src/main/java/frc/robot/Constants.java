@@ -17,8 +17,8 @@ public final class Constants {
     //     public static final boolean verboseLogging = false || Logging.verboseLogging;
     // }
 
-    public static class Shooter {
-        public static final int SHOOTER_MOTOR_ID = 37; 
+    public static class IntakeShooter {
+        public static final int INTAKE_SHOOTER_MOTOR_ID = 37; 
         //public static final int SHOOTER_MOTOR2_ID = 18; 
 
         public static final double kP = 5.0; // placeholder //0.8 5ft
@@ -41,17 +41,28 @@ public final class Constants {
         public static final double SHOOTER_SPEED_ADDITION = 4.0;
         public static final double SHOOTER_FAR_SHUTTLE = 500;
 
-        public static final double SHOOTER_THRESHOLD_SPEED1 = 0.5* Constants.Shooter.SHOOTER_SPEED;
-        //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
+        public static final double SHOOTER_THRESHOLD_SPEED = 0.5* Constants.IntakeShooter.SHOOTER_SPEED;
 
         public static final double GEAR_RATIO = 1.333; 
-
-        //public static final boolean verboseLogging = false || Logging.verboseLogging;
-    }
-
-    public static class Intake{
-        public static final int INTAKE_MOTOR_ID = 11;
         public static final double INTAKE_MOTOR_SPEED = -100.0;
+        public static final double SHOOTER_SPEED_HUB = 67.5;
+        public static final double SHOOTER_SPEED_CENTER = 67.5;
+        public static final double SHOOTER_SPEED_BEHIND_LB = 67.5;
+        public static final double SHOOTER_SPEED_BEHIND_RB = 67.5;
+        public static final double SHOOTER_SPEED_FRONT_TW = 67.5;
+        public static final double SHOOTER_SPEED_FRONT_D = 67.5;
+        public static final double SHOOTER_SPEED_FRONT_O = 67.5;
+        public static final double SHOOTER_SPEED_BEHIND_DT = 67.5;
+        public static final double SHOOTER_SPEED_BEHIND_OT = 67.5;
+        public static final double SHOOTER_SPEED_INSIDE_TW = 67.5;
+        public static final double SHOOTER_SPEED_LEFT_TW = 67.5;
+        public static final double SHOOTER_SPEED_RIGHT_TW = 67.5;
+        public static final double SHOOTER_SPEED_LEFT_D = 67.5;
+        public static final double SHOOTER_SPEED_LEFT_O = 67.5;
+        public static final double SHOOTER_SPEED_O_SHOOT = 67.5;
+        public static final double SHOOTER_SPEED_D_SHOOT = 67.5;
+
+
         //public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 

@@ -4,18 +4,18 @@
 
 package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.IntakeShooter;
 import java.util.function.DoubleSupplier;
 
 
 
 public class RunShooter extends Command {
   /** Creates a new RunFlywheelShooter. */
-  private final Shooter shooter;
+  private final IntakeShooter shooter;
   private final DoubleSupplier speed;
   private final double acceleration;
 
-  public RunShooter(Shooter shooter, DoubleSupplier speed, double acceleration) {
+  public RunShooter(IntakeShooter shooter, DoubleSupplier speed, double acceleration) {
     this.shooter = shooter;
     this.speed = speed;
     this.acceleration = acceleration;

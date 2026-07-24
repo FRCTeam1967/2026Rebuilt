@@ -80,12 +80,9 @@ public class Autoes {
     autoChooserLOL.addRoutine("DT Neutral Bump 2 Cycle", this::dtn2xBump);
     autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
     autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
-    //autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
     autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
     autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
-    //autoChooserLOL.addRoutine("Tower Test", this::towerTest);
-    //autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
-    //autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
+
 
     RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
@@ -95,7 +92,7 @@ public class Autoes {
     //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
 
-  private SequentialCommandGroup shootSequence() {
+  private SequentialCommandGroup shootSequence(double shooterSpeed) {
     return new SequentialCommandGroup(
         (m_robotContainer.swerve.applyRequest(() ->
             m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.vision.getAngleToHub()))
@@ -106,12 +103,12 @@ public class Autoes {
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
                   new SequentialCommandGroup(
-                      new RunShooter(m_robotContainer.shooter, () -> (m_robotContainer.shooter.getNecessarySpeed(() -> m_robotContainer.vision.getDisFromHub()) + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
+                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
 
-                      new RunShooter(m_robotContainer.shooter, () -> (m_robotContainer.shooter.getNecessarySpeed(() -> m_robotContainer.vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
+                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -124,7 +121,7 @@ public class Autoes {
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
                       //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED).withTimeout(2)
+                              new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED).withTimeout(2)
                            )
                        )
                   )
@@ -143,12 +140,12 @@ public class Autoes {
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
                   new SequentialCommandGroup(
-                      new RunShooter(m_robotContainer.shooter, () -> (Constants.Shooter.SHOOTER_AUTO_SPEED + Constants.Shooter.SHOOTER_SPEED_ADDITION), Constants.Shooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
+                      new RunShooter(m_robotContainer.shooter, () -> (Constants.IntakeShooter.SHOOTER_AUTO_SPEED + Constants.IntakeShooter.SHOOTER_SPEED_ADDITION), Constants.IntakeShooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
 
-                      new RunShooter(m_robotContainer.shooter, () -> (Constants.Shooter.SHOOTER_AUTO_SPEED), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
+                      new RunShooter(m_robotContainer.shooter, () -> (Constants.IntakeShooter.SHOOTER_AUTO_SPEED), Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                   ),
                   new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                       new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                       
@@ -161,7 +158,7 @@ public class Autoes {
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
                               //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED).withTimeout(2)
+                              new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED).withTimeout(2)
                           )
                       )
                   )
@@ -176,7 +173,7 @@ public class Autoes {
   private SequentialCommandGroup intakeSequence() {
     return new SequentialCommandGroup(new ParallelCommandGroup(
       //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     ));
   }
 
@@ -216,7 +213,7 @@ public class Autoes {
     //   new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION)
     // );
     score.done().onTrue(
-       shootSequence());
+       shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_CENTER));
     return routine;
   }
   
@@ -249,7 +246,7 @@ public class Autoes {
     otToO.done().onTrue(turnAndShoot.cmd());
    
     turnAndShoot.done().onTrue(
-      shootSequence());
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
     return routine;
   }
 
@@ -283,7 +280,7 @@ private AutoRoutine hTo() { // hub to outpost go a little forward shoot
 
     hubToO.done().onTrue(Shoot.cmd());
    
-    Shoot.done().onTrue(shootSequence());
+    Shoot.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
 
     return routine;
   }
@@ -318,7 +315,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     hubToD.done().onTrue(Shoot.cmd());
    
     Shoot.done().onTrue(
-      shootSequence());
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
 
     return routine;
   }
@@ -357,21 +354,21 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     hubToO.done().onTrue(Shoot.cmd());
    
     Shoot.done().onTrue(
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT)
       .andThen(TrenchNeutral.cmd()));
     
 
     TrenchNeutral.done().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     NeutralIntake.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     TrenchNeutral.done().onTrue(NeutralIntake.cmd());
     NeutralIntake.done().onTrue(goBackShoot.cmd());
 
     goBackShoot.done().onTrue(
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT)
       ); 
 
     return routine;
@@ -411,21 +408,21 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     hubToD.done().onTrue(Shoot.cmd());
    
     Shoot.done().onTrue(
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT)
       .andThen(TrenchNeutral.cmd()));
 
      TrenchNeutral.done().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     NeutralIntake.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     TrenchNeutral.done().onTrue(NeutralIntake.cmd());
     NeutralIntake.done().onTrue(goBackShoot.cmd());
 
 
     goBackShoot.done().onTrue(
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT)
     );
 
     return routine;
@@ -476,15 +473,15 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intakeMore1.done().onTrue(goBack1.cmd());
 
     goBack1.done().onTrue(
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT)
       .andThen(shootToCenter.cmd()));
 
     shootToCenter.done().onTrue(intakeMore2.cmd());
     intakeMore2.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     intakeMore2.done().onTrue(goBack2.cmd());
-    goBack2.done().onTrue(shootSequence());
+    goBack2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
 
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
@@ -538,14 +535,14 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     path2.done().onTrue(path3.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
     path3.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequence().andThen(path4.cmd())
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT).andThen(path4.cmd())
     );
 
     path4.done().onTrue(path5.cmd());
     path5.active().onTrue(
       intakeSequence());
     path5.done().onTrue(path6.cmd());
-    path6.done().onTrue(shootSequence());
+    path6.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
 
     return routine;
   }
@@ -594,7 +591,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     path2.done().onTrue(path3.cmd());
     
-    path3.done().onTrue(shootSequence().andThen(path4.cmd()));
+    path3.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT).andThen(path4.cmd()));
 
     path4.active().onTrue(intakeSequence());
 
@@ -604,7 +601,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     
     path5.done().onTrue(path6.cmd());
 
-    path6.done().onTrue(shootSequence());
+    path6.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
 
     return routine;
   }
@@ -648,19 +645,19 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     trenchToCenter.done().onTrue(intake.cmd());
     
     intake.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED));
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED));
 
     intake.done().onTrue(shootFirstCondition.cmd());
 
-    shootFirstCondition.done().onTrue(shootSequence());
+    shootFirstCondition.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_BEHIND_LB));
 
     intakeMore.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
 
     intakeMore.done().onTrue(shootSecondCondition.cmd());
 
-    shootSecondCondition.done().onTrue(shootSequence());
+    shootSecondCondition.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_BEHIND_LB));
 
     return routine;
   }
@@ -708,7 +705,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake1.done().onTrue(shoot1.cmd());
 
     shoot1.done().onTrue(
-      shootSequence().andThen(goBack.cmd()));
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT).andThen(goBack.cmd()));
     
     goBack.done().onTrue(intake2.cmd());
     
@@ -717,7 +714,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     
     intake2.done().onTrue(shoot2.cmd());
   
-    shoot2.done().onTrue(shootSequence());
+    shoot2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
       
     return routine;
   }
@@ -764,7 +761,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
       intake1.done().onTrue(shoot1.cmd());
 
   
-    shoot1.done().onTrue(shootSequence().andThen(goBack.cmd()));
+    shoot1.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT).andThen(goBack.cmd()));
       goBack.active().onTrue(
       intakeSequence()
     );
@@ -775,7 +772,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
           intake2.done().onTrue(shoot2.cmd());
 
   
-    shoot2.done().onTrue(shootSequence());
+    shoot2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_D_SHOOT));
       
     return routine;
   }
@@ -822,21 +819,21 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     ;
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-      shootSequence()
+      shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT)
       .andThen(goBack.cmd())
     );
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().whileTrue(
-      new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
     );
     intake2.done().onTrue(shoot2.cmd());
-    shoot2.done().onTrue(shootSequence());
+    shoot2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
     //finish the first path and get to the intaking pose. if our distance sensor detects fuel
     //the hopper is full, so we should continue with the rest of the auto and go shoot
     // Trigger atNeutral = trenchToCenter.done();
@@ -846,72 +843,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     return routine;
   }
-
-  // private AutoRoutine otnClimb() {
-  //   AutoRoutine routine = autoFactory.newRoutine("OTNClimb");
-
-  //   AutoTrajectory trenchNeutral = routine.trajectory("OT_N");
-  //   AutoTrajectory intake1  = routine.trajectory("OT_N_fuelBranch1");
-  //   AutoTrajectory shoot1 = routine.trajectory("N_OTShoot1");
-  //   AutoTrajectory goBack = routine.trajectory("OT_ShootClimb");
-  
-
-  //   double initialOrientation = trenchNeutral.getInitialPose().get().getRotation().getDegrees();
-    
-  //   routine.active().onTrue(
-  //     Commands.sequence(
-  //         new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-  //         //step one: set gyro to starting heading (flips for alliance)
-  //         new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-  //         new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-  //         trenchNeutral.resetOdometry(),
-
-  //         //step three: set LL heading to gyro (aka starting) heading
-  //         new InstantCommand(
-  //           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-  //           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-  //           0, 0, 0, 0, 0)
-  //         ),
-  //         new PrintCommand("!!!!!***** LL heading set to gyro heading"),
-          
-  //         trenchNeutral.cmd()
-  //     )
-  //   );
-
-    // trenchNeutral.done().onTrue(
-    //   new ParallelCommandGroup(
-    //         new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false)
-    //   )
-    // );
-    // trenchNeutral.done().onTrue(intake1.cmd());
-    // intake1.active().onTrue(
-    //   new RunIntake(m_robotContainer.intake, Constants.Intake.INTAKE_MOTOR_SPEED)
-    // );
-    // intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
-
-    // shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
-    //   shootSequence()
-    //   .andThen(goBack.cmd())
-    // );
-
-    // goBack.done().onTrue(
-    //   new SequentialCommandGroup(
-    //       new MoveClimbUp(m_robotContainer.climb, -15),
-    //       new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-    //       new MoveClimbtoZero(m_robotContainer.climb, 15)
-    //     )
-    // );
-    
-    //finish the first path and get to the intaking pose. if our distance sensor detects fuel
-    //the hopper is full, so we should continue with the rest of the auto and go shoot
-    // Trigger atNeutral = trenchToCenter.done();
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
-    // //  //write intake for fuel traj if true 
-    // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
-
-  //   return routine;
-  // }
 
   private AutoRoutine otn2xBump() {
     AutoRoutine routine = autoFactory.newRoutine("OTN2X");
@@ -959,7 +890,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     shoot1.done().onTrue(
       new WaitCommand(0.5).andThen(
       wait1.cmd()));
-    wait1.done().onTrue(shootSequence().andThen(goBack.cmd()));
+    wait1.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT).andThen(goBack.cmd()));
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().onTrue(
@@ -967,138 +898,9 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(
       new WaitCommand(0.5).andThen(wait2.cmd()));
-    wait2.done().onTrue(shootSequence());
+    wait2.done().onTrue(shootSequence(Constants.IntakeShooter.SHOOTER_SPEED_O_SHOOT));
 
     return routine;
   }
 }
 
-  // private AutoRoutine htw() {
-  //   AutoRoutine routine = autoFactory.newRoutine("HTW");
-  //   AutoTrajectory shootFromABitBack = routine.trajectory("H_Shoot_new");
-  //   AutoTrajectory hubTowerShoot = routine.trajectory("towertest");
-  //   //AutoTrajectory climbAdjust = routine.trajectory("Climb_Adjust");
-  //   double initialOrientation = shootFromABitBack.getInitialPose().get().getRotation().getDegrees();
-
-  //   routine.active().onTrue(
-  //     Commands.sequence(
-  //       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-  //       //step one: set gyro to starting heading (flips for alliance)
-  //       new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-  //       new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-  //       shootFromABitBack.resetOdometry(),
-  //       new InstantCommand(
-  //           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-  //           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-  //           0, 0, 0, 0, 0)
-  //         ),
-  //       //step three: set LL heading to gyro (aka starting) heading
-  //       //if we can see a tag then run step 3 & path else just run path
-  //       shootFromABitBack.cmd()
-  //     )
-  //   ); 
-  //   shootFromABitBack.active().onTrue(
-  //     intakeSequence()
-  //   );
-
-  //   shootFromABitBack.done().onTrue(
-  //     shootSequence()
-  //       .andThen(hubTowerShoot.cmd())
-  //     );
-  //     hubTowerShoot.active().onTrue(
-  //       new MoveClimbUp(m_robotContainer.climb, -15)
-  //     );
-  //     hubTowerShoot.done().onTrue(
-  //       new SequentialCommandGroup(
-  //         new MoveClimbUp(m_robotContainer.climb, -15),
-  //         new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-  //         //climbAdjust.cmd(),
-  //         new MoveClimbtoZero(m_robotContainer.climb, 15)
-  //       )
-  //     );
-  //   return routine;
-  // }
-// private AutoRoutine dtnClimb() {
-//     AutoRoutine routine = autoFactory.newRoutine("DTNCLIMB");
-//     AutoTrajectory trenchToCenter = routine.trajectory("DT_N");
-//     AutoTrajectory intake = routine.trajectory("DT_N_fuelBranch1");
-//     AutoTrajectory goBack = routine.trajectory("N_DTShoot1");
-//     AutoTrajectory climb = routine.trajectory("DT_Shoot_Climb");
-//     double initialOrientation = trenchToCenter.getInitialPose().get().getRotation().getDegrees();
-
-//     routine.active().onTrue(
-//       Commands.sequence(
-//         new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-//         //step one: set gyro to starting heading (flips for alliance)
-//         new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-//         new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-//         trenchToCenter.resetOdometry(),
-//         new InstantCommand(
-//             () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-//             m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-//             0, 0, 0, 0, 0)
-//           ),
-//         //step three: set LL heading to gyro (aka starting) heading
-//         //if we can see a tag then run step 3 & path else just run path
-//         trenchToCenter.cmd()
-//       )
-//     ); 
-//     trenchToCenter.active().onTrue(
-//       intakeSequence()
-//     );
-
-//     trenchToCenter.done().onTrue(intake.cmd()
-//       );
-//     intake.active().onTrue(intakeSequence());
-//     intake.done().onTrue(goBack.cmd());
-//     goBack.done().onTrue(shootSequence().andThen(climb.cmd()));
-//       climb.active().onTrue(
-//         new MoveClimbUp(m_robotContainer.climb, -15)
-//       );
-//       climb.done().onTrue(
-//         new SequentialCommandGroup(
-//           new MoveClimbUp(m_robotContainer.climb, -15),
-//           new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-//           new MoveClimbtoZero(m_robotContainer.climb, 15)
-//         )
-//       );
-//     return routine;
-//   }
-// private AutoRoutine towerTest() {
-//   AutoRoutine routine = autoFactory.newRoutine("TWtest");
-//   AutoTrajectory path1 = routine.trajectory("towertest");
-//   double initialOrientation = path1.getInitialPose().get().getRotation().getDegrees();
-
-//   routine.active().onTrue(
-//     Commands.sequence(
-//       new PrintCommand("!!!!!***** initial orientation has been gotten from start pose"),
-//       //step one: set gyro to starting heading (flips for alliance)
-//       new InstantCommand(() -> m_robotContainer.swerve.getPigeon2().setYaw(initialOrientation)),
-//       new PrintCommand("!!!!!***** gyro set to starting heading"),
-
-//       path1.resetOdometry(),
-//       new InstantCommand(
-//           () -> LimelightHelpers.SetRobotOrientation("limelight-front", 
-//           m_robotContainer.swerve.getPigeon2().getRotation2d().getDegrees(), 
-//           0, 0, 0, 0, 0)
-//         ),
-//       //step three: set LL heading to gyro (aka starting) heading
-//       //if we can see a tag then run step 3 & path else just run path
-//       path1.cmd()
-//     )
-//   ); 
-//   path1.active().onTrue(
-//     new MoveClimbUp(m_robotContainer.climb, -15)
-//   );
-//     path1.done().onTrue(
-//       new SequentialCommandGroup(
-//         new MoveClimbUp(m_robotContainer.climb, -15),
-//         new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
-//         new MoveClimbtoZero(m_robotContainer.climb, 15)
-//       )
-//     );
-//   return routine;
-// }
-// }

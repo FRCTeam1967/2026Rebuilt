@@ -60,10 +60,11 @@ public class RobotContainer {
         public Vision vision = new Vision(swerve, MaxAngularRate);
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
-        public final Intake intake = new Intake();
+        public final IntakeShooter intake = new IntakeShooter(this);
         public final Feeder feeder = new Feeder();
-        public final Shooter shooter = new Shooter(this);
+        public final IntakeShooter shooter = new IntakeShooter(this);
         public Autoes autoes = new Autoes(this);
+        public double shooterSpeed = 0.0;
 
         //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Shooter.SHOOTER_SPEED);
         //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
@@ -210,7 +211,7 @@ public class RobotContainer {
         
         //MECHANISM DEFAULT COMMANDS
             //shooter.setDefaultCommand(new RunCommand(() -> shooter.stopMotor(), shooter));
-            shooter.setDefaultCommand(new RunShooter(shooter, ()-> Constants.Shooter.RESTING_SPEED, Constants.Shooter.SHOOTER_ACCELERATION));
+            shooter.setDefaultCommand(new RunShooter(shooter, ()-> Constants.IntakeShooter.RESTING_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION));
 
         //SHOOTER
             m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
@@ -223,7 +224,7 @@ public class RobotContainer {
                                 //new RunShooter(shooter, () -> (shooter.getNecessarySpeed(() -> vision.getDisFromHub())), Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
                             ),
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(true)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
@@ -241,7 +242,7 @@ public class RobotContainer {
                                             //     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
                                             //     new MovePivot(pivot, Constants.Pivot.SAFE, false)    
                                             // ),
-                                            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+                                            new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                         )
                                     )
                                 )
@@ -271,7 +272,7 @@ public class RobotContainer {
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(true)), 
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()), 
                                 
                                 // new ParallelCommandGroup( //green
                                 //     new SequentialCommandGroup(
@@ -324,14 +325,14 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_FAR_SHUTTLE, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
+                                new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_FAR_SHUTTLE, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                                new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+                                new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                 // new ParallelCommandGroup(
                                 //     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                                 //     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
@@ -361,12 +362,12 @@ public class RobotContainer {
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
-                                new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
+                                new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
                                 new ParallelCommandGroup(
@@ -382,7 +383,7 @@ public class RobotContainer {
                                         //         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
                                         //         new MovePivot(pivot, Constants.Pivot.SAFE, false)
                                         //     ),
-                                            new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+                                            new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                                         )
                                     )
                                 )
@@ -399,12 +400,12 @@ public class RobotContainer {
                         new SequentialCommandGroup( 
                             new ParallelCommandGroup(
                                 new ParallelCommandGroup(
-                                    new RunShooter(shooter, () -> Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
+                                    new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
                                     //new RunCommand (() -> candle.setControl(yellowBlink))
                                 ),
 
                                 new SequentialCommandGroup(
-                                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed(false)),
+                                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed()),
                                     new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                     
                                     new ParallelCommandGroup(
@@ -434,7 +435,7 @@ public class RobotContainer {
             m_operatorController.rightTrigger().and(m_operatorController.x().negate()).and(m_operatorController.leftBumper().negate()).whileTrue(
                 new ParallelCommandGroup(
                     //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
-                    new RunIntake(intake, Constants.Intake.INTAKE_MOTOR_SPEED)
+                    new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                     //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
                     //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
                     //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
@@ -444,7 +445,7 @@ public class RobotContainer {
             //eject
             m_operatorController.rightTrigger().and(m_operatorController.x()).and(m_operatorController.leftBumper().negate()).whileTrue(
                  new ParallelCommandGroup(  
-                    new RunIntake(intake, -Constants.Intake.INTAKE_MOTOR_SPEED)
+                    new RunIntake(intake, -Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                 )  
             );
             
