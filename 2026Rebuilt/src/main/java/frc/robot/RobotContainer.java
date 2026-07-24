@@ -159,23 +159,16 @@ public class RobotContainer {
                 new ParallelCommandGroup( 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
+                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION),
                             new SequentialCommandGroup(
-                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
-                                new RunShooter(shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
-                            ),
-                            new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
-
-                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                                
+                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), 
+            
                                 new ParallelCommandGroup(
-                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
 
                                     new SequentialCommandGroup(
                                         new WaitCommand(1.0), 
-                                        new ParallelCommandGroup(
                                             new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
-                                        )
                                     )
                                 )
                             )
@@ -202,7 +195,7 @@ public class RobotContainer {
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)), 
 
-                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5)
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5)
                         )                )
                 )
             ); //TODO: add defense mode while the robot is shooting
@@ -218,7 +211,7 @@ public class RobotContainer {
 
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
-                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
                                 new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED),
                                 new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
                                 )
@@ -238,7 +231,7 @@ public class RobotContainer {
 
                             new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
-                                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
                                 
                                 new ParallelCommandGroup(
                                     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
@@ -263,7 +256,7 @@ public class RobotContainer {
                                 ),
                                 new SequentialCommandGroup(
                                     new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
-                                    new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
                                     
                                     new ParallelCommandGroup(
                                         new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
@@ -282,7 +275,7 @@ public class RobotContainer {
 
             m_operatorController.rightBumper().whileTrue(
                 new ParallelCommandGroup(
-                    new RunFeeder(feeder, -100)
+                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
                 )
             );
 

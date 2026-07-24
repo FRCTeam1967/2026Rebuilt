@@ -16,8 +16,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import com.ctre.phoenix6.CANBus;
 
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;

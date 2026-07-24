@@ -37,6 +37,8 @@ public final class Constants {
 
         public static final double GEAR_RATIO = 1.333; 
         public static final double INTAKE_MOTOR_SPEED = -100.0;
+
+        //shooter speeds based on location
         public static final double SHOOTER_SPEED_HUB = 67.5;
         public static final double SHOOTER_SPEED_CENTER = 67.5;
         public static final double SHOOTER_SPEED_BEHIND_LB = 67.5;
@@ -51,18 +53,20 @@ public final class Constants {
         public static final double SHOOTER_SPEED_RIGHT_TW = 67.5;
         public static final double SHOOTER_SPEED_LEFT_D = 67.5;
         public static final double SHOOTER_SPEED_LEFT_O = 67.5;
+
+        //primary auto shooter speeds
         public static final double SHOOTER_SPEED_O_SHOOT = 67.5;
         public static final double SHOOTER_SPEED_D_SHOOT = 67.5;
+
         public static final double SHOOTER_THRESHOLD_ERROR = 5;
     }
 
     public static class Feeder{
         public static final int FEEDER_MOTOR_ID = 36;
         public static final double FEEDER_SPEED = 100.0; //-20 //-10
+        public static final double FEEDER_SPINUP_SPEED = -50.0;
 
         public static final double FEEDER_GEAR_RATIO = 5/1;
-
-        public static final double PREP_FEEDER = -50.0; 
 
         public static final double INTAKE_FEEDER = -20.0; 
 

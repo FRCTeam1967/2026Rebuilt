@@ -12,7 +12,6 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -81,15 +80,10 @@ public class Autoes {
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
+                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION), 
                   new SequentialCommandGroup(
-                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION).withTimeout(3),  // Constants.Shooter.SHOOTER_SPEED + 4.0, Constants.Shooter.SHOOTER_ACCELERATION), // TODO: test timeout
-
-                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION)
-                  ),
-                  new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
-
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), 
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
                       
                       new ParallelCommandGroup(
                           new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
@@ -119,7 +113,7 @@ public class Autoes {
                   new SequentialCommandGroup(
                       new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
 
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
                       
                       new ParallelCommandGroup(
                           new SequentialCommandGroup(
