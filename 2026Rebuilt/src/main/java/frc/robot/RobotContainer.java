@@ -201,67 +201,54 @@ public class RobotContainer {
             ); //TODO: add defense mode while the robot is shooting
 
         //SHUTTLING (FAR)
-            m_operatorController.leftBumper().and(m_operatorController.rightTrigger().negate()).and(m_operatorController.x().negate()).whileTrue(
+            m_operatorController.leftBumper().and(m_operatorController.x()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    new SequentialCommandGroup( 
-                        new ParallelCommandGroup(
-                            new ParallelCommandGroup(
-                                new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_FAR_SHUTTLE, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                            ),
-
-                            new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
-                                new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED),
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-                                )
-                            )
+                    new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_FAR_SHUTTLE, Constants.IntakeShooter.SHOOTER_ACCELERATION), // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
+                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
+                    new ParallelCommandGroup(
+                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.0), 
+                            new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                         )
                     )
-                ); 
+                )
+                )   
+            ); 
 
         //SHUTTLING (SHORT)
             m_operatorController.leftBumper().and(m_operatorController.x()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
-                    new SequentialCommandGroup( 
-                        new ParallelCommandGroup(
-                            new ParallelCommandGroup(
-                                new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                            ),
-
-                            new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
-                                new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
-                                
-                                new ParallelCommandGroup(
-                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                                    new SequentialCommandGroup(
-                                        new WaitCommand(1.0), 
-                                            new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
-                                        )
-                                    )
-                                )
-                            )
+                    new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION), // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
+                new SequentialCommandGroup(
+                    new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
+                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
+                    new ParallelCommandGroup(
+                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.0), 
+                            new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
                         )
                     )
-                ); 
+                )
+                )   
+            ); 
 
         //SHUTTLE WHILE INTAKING
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                         new SequentialCommandGroup( 
                             new ParallelCommandGroup(
-                                new ParallelCommandGroup(
-                                    new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION) // Constants.Shooter.SHOOTER_SPEED, Constants.Shooter.SHOOTER_ACCELERATION) //() -> shooter.getNecessarySpeed(() -> vision.getDisFromHub())
-                                ),
+                                new RunShooter(shooter, () -> Constants.IntakeShooter.SHOOTER_SPEED, Constants.IntakeShooter.SHOOTER_ACCELERATION),
                                 new SequentialCommandGroup(
                                     new WaitUntilCommand(() -> shooter.reachedShooterSpeed(shooterSpeed)),
                                     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
-                                    
-                                    new ParallelCommandGroup(
-                                        new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED)
-
-                                    )
+                                new ParallelCommandGroup(
+                                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                                    new RunIntake(intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
+                                )
                                 )
                             )
                         )

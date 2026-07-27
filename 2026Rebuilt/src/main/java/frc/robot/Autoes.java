@@ -30,6 +30,7 @@ import frc.robot.commands.RunFeeder;
 import frc.robot.commands.RunShooter;
 import frc.robot.generated.TunerConstants;
 import frc.robot.commands.RunIntake;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /** Add your docs here. */
 public class Autoes {
@@ -70,34 +71,21 @@ public class Autoes {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
   }
 
-  private SequentialCommandGroup shootSequence(double shooterSpeed) {
-    return new SequentialCommandGroup(
-        (m_robotContainer.swerve.applyRequest(() ->
-            m_robotContainer.driveAtAngle.withTargetDirection(null)
-                .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
-                .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
-        ).withTimeout(0.5),        
-        new ParallelCommandGroup( 
-          new SequentialCommandGroup( 
-              new ParallelCommandGroup(
-                      new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION), 
-                  new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), 
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
-                      
-                      new ParallelCommandGroup(
-                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                           new SequentialCommandGroup(
-                              new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED).withTimeout(2)
-                           )
-                       )
-                  )
+  private Command shootSequence(double shooterSpeed) {
+      return new SequentialCommandGroup( 
+          new ParallelCommandGroup(
+                  new RunShooter(m_robotContainer.shooter, () -> shooterSpeed, Constants.IntakeShooter.SHOOTER_ACCELERATION), 
+              new SequentialCommandGroup(
+                  new WaitUntilCommand(() -> m_robotContainer.shooter.reachedShooterSpeed(shooterSpeed)), 
+                  new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPINUP_SPEED).withTimeout(0.5),
+                  
+                  new ParallelCommandGroup(
+                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+                      new RunIntake(m_robotContainer.intake, Constants.IntakeShooter.INTAKE_MOTOR_SPEED)
+                    )
               )
           )
-          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
-          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
-        ).withTimeout(6)
-      );
+    ).withTimeout(6);
   }
 
       private SequentialCommandGroup shootSequenceConstant(double shooterSpeed) {
