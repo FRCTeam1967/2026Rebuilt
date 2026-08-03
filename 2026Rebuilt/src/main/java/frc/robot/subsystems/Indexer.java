@@ -74,8 +74,5 @@ public class Indexer extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (Constants.Indexer.verboseLogging) {
-      DogLog.log("Indexer/stator current", motor.getStatorCurrent().getValueAsDouble());
-    }
   }
 }

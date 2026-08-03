@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
@@ -32,13 +31,6 @@ public class Telemetry {
         MaxSpeed = maxSpeed;
         // SignalLogger.setPath("/lv/logs");
         SignalLogger.start();
-
-        if (Constants.Logging.CTRE.enableNTPublishing) {
-            /* Set up the module state Mechanism2d telemetry */
-            for (int i = 0; i < 4; ++i) {
-                SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
-            }
-        }
     }
 
     /* What to publish over networktables for telemetry */
@@ -89,17 +81,6 @@ public class Telemetry {
 
     /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
     public void telemeterize(SwerveDriveState state) {
-        /* Telemeterize the swerve drive state */
-        if (Constants.Logging.CTRE.enableNTPublishing) {
-            drivePose.set(state.Pose);
-            driveSpeeds.set(state.Speeds);
-            driveModuleStates.set(state.ModuleStates);
-            driveModuleTargets.set(state.ModuleTargets);
-            driveModulePositions.set(state.ModulePositions);
-            driveTimestamp.set(state.Timestamp);
-            driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
-        }
-
         /* Also write to log file */
         SignalLogger.writeStruct("DriveState/Pose", Pose2d.struct, state.Pose);
         SignalLogger.writeStruct("DriveState/Speeds", ChassisSpeeds.struct, state.Speeds);
