@@ -41,31 +41,20 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
+   * Use this method to define your trigger->command mappings.
    */
+
   private void configureBindings() {
     //SHOOTER
-    operatorController.leftTrigger().and(operatorController.povRight().negate()).whileTrue(
-        new ParallelCommandGroup( 
-            new SequentialCommandGroup( 
-                new ParallelCommandGroup(
-                    new SequentialCommandGroup(
-                        new RunShooter(shooter, Constants.Shooter.SHOOTER_SPEED)
-                    ),
-                    new SequentialCommandGroup(
-                        new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+    operatorController.______________().whileTrue( // choose a button to bind shooting to!
+        new ParallelCommandGroup(
+            new _____________(shooter, Constants.Shooter.____________), // run the shooter at the shooter speed defined in constants!
+            new SequentialCommandGroup(
+                new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
-                        new ParallelCommandGroup(
-                            new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
-                            new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
-                        )
-                    )
+                new ParallelCommandGroup(
+                    new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
+                    new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED)
                 )
             )
         )
