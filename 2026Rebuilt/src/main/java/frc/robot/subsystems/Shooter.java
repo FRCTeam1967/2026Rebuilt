@@ -4,36 +4,33 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.*;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class Shooter extends SubsystemBase {
-  private SparkMax _________; // Declare the top motor
-  private SparkMax _________; // Declare the bottom motor
+  private TalonFX motor1; // Declare motor 1
+  private TalonFX _________; // Declare motor 2
 
   /** Creates a new Shooter. */
   public Shooter() {
-    topMotor = new SparkMax(Constants.Shooter.TOP_SHOOTER_ID, MotorType.kBrushless); // Set the top shooter ID to 1
+    motor1 = new TalonFX(Constants.Shooter.FIRST_SHOOTER_ID); // Set the first shooter ID
 
     // Initialize the bottom motor in the same way:
-    _________ = new _________(Constants.Shooter._________, MotorType.kBrushless); // Use the BOTTOM_SHOOTER_ID value here
+    _________ = new TalonFX(______); // Use the SECOND_SHOOTER_ID value here
 
     //Configurations
-    SparkMaxConfig config = new SparkMaxConfig();
-    topMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    bottomMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    var talonFXConfigs = new TalonFXConfiguration();
+
+    motor1.getConfigurator().apply(talonFXConfigs);
+    motor2.getConfigurator().apply(talonFXConfigs);
   }
 
   public void runShooter(double _________){ // Write the parameter the command needs to input
-    topMotor.set(_________); // Write the same parameter here
-    bottomMotor.set(_________); // Do it for the bottom motor too
+    motor1.set(_________); // Write the same parameter here
+    motor2.set(_________); // Do it for the bottom motor too
   }
 
   public void stopShooter(){
