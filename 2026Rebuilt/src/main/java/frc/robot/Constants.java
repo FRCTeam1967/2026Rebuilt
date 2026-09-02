@@ -13,6 +13,12 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final class VisionConstants {
+    public static final String kCameraName = "FrontCam";
+
+    private VisionConstants() {}
+  }
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
