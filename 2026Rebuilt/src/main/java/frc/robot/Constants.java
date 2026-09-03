@@ -210,7 +210,7 @@ public final class Constants {
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
-
+   
     public static class Visabelle {
         public static final double DEGREE_ERROR = 4.0;
         public static final double LIMELIGHT_ANGLE_DEGREES = 0; //need to verify

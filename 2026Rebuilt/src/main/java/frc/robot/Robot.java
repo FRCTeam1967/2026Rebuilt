@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -35,6 +36,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    Pathfinding.setPathfinder(new Paths2Fly());
     DogLog.setEnabled(Constants.Logging.enabled);
     DogLogOptions options = new DogLogOptions()
       .withCaptureConsole(Constants.Logging.captureConsole)
