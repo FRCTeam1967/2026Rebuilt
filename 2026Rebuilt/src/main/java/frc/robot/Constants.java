@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Transform3d;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,6 +17,9 @@ package frc.robot;
 public final class Constants {
   public static final class VisionConstants {
     public static final String kCameraName = "FrontCam";
+
+    // test-rig offset; replace after mounting
+    public static final Transform3d kRobotToCamera = new Transform3d();
 
     private VisionConstants() {}
   }
