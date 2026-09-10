@@ -3,9 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-import com.ctre.phoenix6.CANBus;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -13,12 +12,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import dev.doglog.DogLog;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
   private TalonFX motor;
-  private final CANBus canbus = RobotContainer.CANBus;
   private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
 
   /** Creates a new Indexer. */
@@ -53,19 +50,22 @@ public class Indexer extends SubsystemBase {
   }
 
   /**
-   * @param speed - sets motor to speed
+   * @param speed - Sets the motor to a speed
    */
   public void setMotor(double speed){
     motor.set(speed);
       DogLog.log("indexer desired speed", speed);
   }
 
+  /**
+   * @param speed - Sets the motor to a velocity
+   */
   public void setVelocity(double speed) {
     motor.setControl(motionMagicRequest.withVelocity(speed));
   }
   
   /**
-   * stops motor
+   * Stops motor
    */
   public void stopMotor(){
     motor.stopMotor();
@@ -73,7 +73,6 @@ public class Indexer extends SubsystemBase {
   
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     if (Constants.Indexer.verboseLogging) {
       DogLog.log("Indexer/stator current", motor.getStatorCurrent().getValueAsDouble());
     }

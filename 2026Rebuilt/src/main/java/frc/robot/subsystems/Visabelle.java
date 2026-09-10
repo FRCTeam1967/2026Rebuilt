@@ -9,8 +9,6 @@ import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
 import java.util.function.BooleanSupplier;
 import dev.doglog.DogLog;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -28,6 +26,10 @@ public class Visabelle extends SubsystemBase {
     this.maxAngularRate = maxAngularRate;
   }
 
+  /**
+   * Use kP to close the error between the crosshairs when misaligned
+   * @return velocity to drive at for correction
+   */
   public double limelight_aim_proportional() {        
       double kP = 0.02; //0.035
       double targetingAngularVelocity = 0.0; 
@@ -42,8 +44,13 @@ public class Visabelle extends SubsystemBase {
       return targetingAngularVelocity;
   }
 
+  /**
+   * @return coordinates of hub on field
+   * <p> **defaults to blue alliance if driver station not detected
+   */
   private Translation2d getHubPose() {
     Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
+    
     //FOR SIMULATION:
     //hubPose = Constants.Visabelle.BLUE_HUB_POSE;
     //hubPose = Constants.Visabelle.RED_HUB_POSE;
@@ -57,6 +64,9 @@ public class Visabelle extends SubsystemBase {
     return hubPose;
   }
 
+  /**
+   * @return distance from hub based on odometry using euclidean math (pythag theorem)
+   */
   public double getDisFromHub() {
     hubPose = getHubPose();
 
@@ -72,6 +82,9 @@ public class Visabelle extends SubsystemBase {
     return eucDist;
   }
 
+  /**
+   * @return angle to hub dependent on odometry
+   */
   public double getAngleToHub() {
     hubPose = getHubPose();
     Translation2d ourPose = swerve.getPose().getTranslation();
@@ -94,14 +107,24 @@ public class Visabelle extends SubsystemBase {
     return (angle);
   }
 
+  /**
+   * @return if angle to hub is within 5 degrees of 0 (boolean)
+   */
   public boolean isAligned() {
     return (getAngleToHub() <= 0.174533); //5 degrees to radians
   }
 
+  /**
+   * @return if angle to hub is within 5 degrees of 0 (booleansupplier)
+   */
   public BooleanSupplier getIsAligned() {
     return (() -> getAngleToHub() <= 0.0872665); //5 degrees to radians
   }
 
+  /**
+   * add values to shuffleboard
+   * @param tab
+   */
   public void configDashboard(ShuffleboardTab tab) {
     // HttpCamera httpCamera1 = new HttpCamera("limelight-front", "http://10.19.67.14:5801/"); //http://10.19.67.202:5801/
     // CameraServer.addCamera(httpCamera1);

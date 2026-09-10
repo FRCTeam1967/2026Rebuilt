@@ -26,7 +26,6 @@ public class Robot extends TimedRobot {
   boolean enableLimelight = false;
 
   private final StructPublisher<Pose2d> choreoPublisher;
-  //private final NetworkTableListener autoPublisher;
   
   public Robot() {
     choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
@@ -129,12 +128,9 @@ public class Robot extends TimedRobot {
   public void testExit() {}
   
   public void simulationInit() {
-    m_robotContainer.pivot.simulationInit();
   }
 
   @Override
   public void simulationPeriodic() {
-    m_robotContainer.climb.simulationPeriodic();
-    m_robotContainer.pivot.simulationPeriodic();
   }
 }

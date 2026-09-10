@@ -16,8 +16,8 @@ public final class Constants {
         public static final int HOOD_CANCODER_ID = 21;     
 
         public static final double CRUISE_VELOCITY = 500;  // TODO: test if this sped it up, originally 500
-        public static final double ACCELERATION = 1000;     // TODO: test, originally 1000
-        public static final double JERK = 550;//;            // placeholder
+        public static final double ACCELERATION = 1000;    // TODO: test, originally 1000
+        public static final double JERK = 550;          // placeholder
 
         public static final double kP = 2.5;  // placeholder 
         public static final double kI = 0.0;  // placeholder
@@ -26,10 +26,7 @@ public final class Constants {
         public static final double kV = 0.7;  // placeholder
         public static final double kA = 0.0;  // placeholder
 
-        public static final double GEAR_RATIO = 3/1;      // motor_rot / hood_rot
-
-        //public static final double MIN_DEG = 30.0;
-        //public static final double MAX_DEG = 86.0;
+        public static final double GEAR_RATIO = 3/1;  
 
         public static final double HOOD_HOLD_DEG = 30.0;
         public static final double HOOD_MAX = 480 * Constants.Hood.DEGREES_TO_REVS; //57 //30
@@ -68,7 +65,7 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 65.0; //81; //rotations per second
+        public static final double YEETER_SPEED = 65.0; //RPS(rotations per seconds)
         public static final double RESTING_SPEED = 60.0;
         public static final double YEETER_ACCELERATION = 500.0; //500
         public static final double YEETER_AUTO_SPEED = 67.5;
@@ -105,8 +102,8 @@ public final class Constants {
         public static final int ACCELERATION_SLOW = 1;
         public static final int JERK_SLOW = 10;
 
-        public static final double PIVOT_SPEED = 10.0; //change later WHEN TESTING
-        public static final double PIVOT_SLOW_SPEED = 5.0;//change later WHEN TESTING
+        public static final double PIVOT_SPEED = 10.0; 
+        public static final double PIVOT_SLOW_SPEED = 5.0;
         
 
         public static final double THRESHOLD = 1;
@@ -147,7 +144,7 @@ public final class Constants {
 
         public static final double CRUISE_VELOCITY = 50.0; // placeholder
         public static final double ACCELERATION = 100.0;   // placeholder
-        public static final double JERK = 0.0;           // placeholder
+        public static final double JERK = 0.0;             // placeholder
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
@@ -182,8 +179,8 @@ public final class Constants {
         public static final double FEED_FORWARD = 0.0;
 
         public static final int MOTOR_ID = 9;
-        public static final int CRUISE_VELOCITY = 30;//10, 160
-        public static final int ACCELERATION = 210;//240
+        public static final int CRUISE_VELOCITY = 30; //10, 160
+        public static final int ACCELERATION = 210; //240
         public static final int CURRENT_LIMIT = 40;
         public static final int ERROR_THRESHOLD = 2;
         public static final int UP_SPEED = 10;
@@ -202,7 +199,7 @@ public final class Constants {
 
         public static final double METER_CONVERSION_FACTOR = 0.0254;
 
-        public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //inches
+        public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //In inche
         public static final double CARRIAGE_MASS_KG = 3;
         public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
         public static final int BOTTOM_SENSOR_CHANNEL = 8;
@@ -225,9 +222,9 @@ public final class Constants {
         public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * TunerConstants.maxSpeed; //0.43 //0.425
         public static final double ALIGNMENT_THRESHOLD = 1.0;
         public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
-        public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA
-        public static final double ALIGNMENT_RIGHT_OFFSET = -9.2;//-11.86;//-0.8; //-1.0; //-1.1; //-13.1; //in LL degrees //TODO: test at EPA
-        public static final double ALIGNMENT_FORWARD_OFFSET = 0.0; //TODO: test at EPA //-5.16 center for left branch aligned
+        public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; 
+        public static final double ALIGNMENT_RIGHT_OFFSET = -9.2;//-11.86;//-0.8; //-1.0; //-1.1; //-13.1; //in LL degrees 
+        public static final double ALIGNMENT_FORWARD_OFFSET = 0.0; //-5.16 center for left branch aligned
 
         public static final double ALIGNMENT_X_KP = -0.17;  //0.708 // Used for aligning Robot X (forward), which is "ty" in Limelight terms
         public static final double ALIGNMENT_Y_KP = -0.03;  //-0.05 // Used for aligning Robot Y (side-side), which is "tx" in Limelight terms
@@ -238,7 +235,7 @@ public final class Constants {
         public static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, Rotation2d.kPi);
         public static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, Rotation2d.kZero);
         
-        public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
+        public static final double DIST_THRESHOLD = 3; //TODO: check if in meters
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }

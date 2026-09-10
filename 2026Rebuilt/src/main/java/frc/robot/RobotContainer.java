@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -45,7 +44,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    //drivetrain
+        //drivetrain
         public final SwerveOnTheseBows swerve = TunerConstants.createDrivetrain();
         public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
         public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -94,7 +93,7 @@ public class RobotContainer {
         private boolean hasAlreadyUpdatedIfWeWonAuto = false;
         public final Trigger updateWinAuto = new Trigger(() -> hasAlreadyUpdatedIfWeWonAuto);
 
-    //leds
+    //LEDs
         public final CANdle candle = new CANdle(23);
         private final StrobeAnimation yellowBlink = new StrobeAnimation(0, 50).withColor(new RGBWColor(255, 255, 0));
 

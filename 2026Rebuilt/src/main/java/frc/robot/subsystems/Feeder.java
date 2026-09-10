@@ -4,9 +4,7 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -15,11 +13,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import dev.doglog.DogLog;                             
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 
 public class Feeder extends SubsystemBase {
   private TalonFX motor;
-  private final CANBus canbus = RobotContainer.CANBus;
   private MotionMagicVelocityVoltage motionMagicRequest = new MotionMagicVelocityVoltage(0);
 
   /** Creates a new Feeder. */
@@ -50,27 +46,31 @@ public class Feeder extends SubsystemBase {
 
     motor.getConfigurator().apply(talonFXConfigs);
     motor.getConfigurator().apply(limitConfigs);
-
-    //DogLog.log("feeder speed", motor.getVelocity().getValueAsDouble());
   }
 
   /**
-   * @param speed - sets motor to speed
+   * @param speed - Sets motor to speed
    */
   public void setMotor(double speed){
     motor.set(speed);
   }
 
+  /** 
+   * @param speed Sets the motor to a velocity
+  */
   public void setVelocity(double speed) {
     motor.setControl(motionMagicRequest.withVelocity(speed).withEnableFOC(true));
   }
   
+  /**
+   * @return If the feeder is stalling using the supply current
+   */
   public boolean isStalling() {
     return (motor.getSupplyCurrent().getValueAsDouble() > 50.0); //65
   }
 
   /**
-   * stops motor
+   * Stops motor
    */
   public void stopMotor(){
     motor.stopMotor();
@@ -78,7 +78,6 @@ public class Feeder extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     if (Constants.Feeder.verboseLogging) {
       DogLog.log("Feeder/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
