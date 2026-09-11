@@ -107,7 +107,7 @@ public void setLarson() {
     candle.setControl(new ColorFlowAnimation(LED_START, LED_COUNT).withColor(color));
   }
   /**
-    * runs the rainbow scroll pattern
+    * Runs the rainbow scroll pattern
     */
   public void runRainbow() {
     candle.setControl(new RainbowAnimation(LED_START, LED_COUNT));

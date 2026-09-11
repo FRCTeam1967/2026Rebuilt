@@ -15,9 +15,9 @@ public final class Constants {
         public static final int HOOD_MOTOR_ID = 19;        
         public static final int HOOD_CANCODER_ID = 21;     
 
-        public static final double CRUISE_VELOCITY = 500;  // TODO: test if this sped it up, originally 500
-        public static final double ACCELERATION = 1000;    // TODO: test, originally 1000
-        public static final double JERK = 550;          // placeholder
+        public static final double CRUISE_VELOCITY = 500; 
+        public static final double ACCELERATION = 1000;  
+        public static final double JERK = 550;         
 
         public static final double kP = 2.5;  // placeholder 
         public static final double kI = 0.0;  // placeholder
@@ -36,7 +36,7 @@ public final class Constants {
 
         public static final double DEGREES_TO_REVS = 1.0/360.0;
 
-        public static final double OFFSET = 0.0; //-108.45703125
+        public static final double OFFSET = 0.0; 
         public static final double PERCENT_UP = 0.5;
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
@@ -44,7 +44,7 @@ public final class Constants {
 
     public static class LED {
         public static final int CANDLE_ID = 23;
-
+        
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
 
@@ -65,15 +65,14 @@ public final class Constants {
 
         public static final double PRELOAD_YEETER_SPEED = 700.0; 
         
-        public static final double YEETER_SPEED = 65.0; //RPS(rotations per seconds)
+        public static final double YEETER_SPEED = 65.0; //RPS (rotations per seconds)
         public static final double RESTING_SPEED = 60.0;
-        public static final double YEETER_ACCELERATION = 500.0; //500
+        public static final double YEETER_ACCELERATION = 500.0;
         public static final double YEETER_AUTO_SPEED = 67.5;
         public static final double YEETER_SPEED_ADDITION = 4.0;
         public static final double YEETER_FAR_SHUTTLE = 500;
 
         public static final double YEETER_THRESHOLD_SPEED1 = 0.5* Constants.Yeeter.YEETER_SPEED;
-        //public static final double SHOOTER_THRESHOLD_SPEED2 = -86.0;
 
         public static final double GEAR_RATIO = 1.333; 
 
@@ -90,7 +89,6 @@ public final class Constants {
         public static final double kP = 7;
         public static final int kI = 0;
         public static final int kD = 0;
-
         
         public static final int CRUISE_VELOCITY_FAST = 40;
         public static final int ACCELERATION_FAST = 100;
@@ -168,7 +166,7 @@ public final class Constants {
 
         public static final double CRUISE_VELOCITY = 50.0; // placeholder
         public static final double ACCELERATION = 100.0;   // placeholder
-        public static final double JERK = 0.0;           // placeholder
+        public static final double JERK = 0.0;            // placeholder
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
     }
@@ -199,7 +197,7 @@ public final class Constants {
 
         public static final double METER_CONVERSION_FACTOR = 0.0254;
 
-        public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //In inche
+        public static final double SPROCKET_PITCH_CIRCUMFERENCE = 1.432*Math.PI; //Inches
         public static final double CARRIAGE_MASS_KG = 3;
         public static final double SPROCKET_RADIUS = (Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE) / (2.0 * Math.PI);
         public static final int BOTTOM_SENSOR_CHANNEL = 8;

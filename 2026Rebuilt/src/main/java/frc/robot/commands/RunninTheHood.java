@@ -8,30 +8,33 @@ public class RunninTheHood extends Command {
   private final TheHood hood;
   private final double targetPosRevs;
 
+  /** Creates a new RunninTheHood.
+   * @param hood - Hood subsystem
+   * @param targetPosRevs - Requested revolutions for moving the hood
+   */
   public RunninTheHood(TheHood hood, double targetPosRevs) {
     this.hood = hood;
     this.targetPosRevs = targetPosRevs;
     addRequirements(hood);
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
-  public void initialize() {
-  }
+  public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /**Called every time to update the hood's position to its target angle in revolutions*/
   @Override
   public void execute() {
-    hood.moveTo(targetPosRevs); //changed name to reflect parameter type and not cause confusion
+    hood.moveTo(targetPosRevs);
   }
 
-  // Called once the command ends or is interrupted.
+  /**Called once the command ends or is interrupted.*/
   @Override
-  public void end(boolean interrupted) {
-    //hood.stop();
-  }
+  public void end(boolean interrupted) {}
 
-  // Returns true when the command should end.
+  /**
+   * @return true when the command is finished
+  */
   @Override
   public boolean isFinished() {
     return false;

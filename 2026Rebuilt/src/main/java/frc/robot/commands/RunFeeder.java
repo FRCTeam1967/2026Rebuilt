@@ -6,14 +6,16 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Indexer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunFeeder extends Command {
   public Feeder feeder;
   private double speed;
 
-  /** Creates a new RunFeeder. */
+  /** Creates a new RunFeeder. 
+   * @param feeder - Feeder subsystem
+   * @param speed - Requested speed for the feeder
+  */
   public RunFeeder(Feeder feeder, double speed) {
     this.feeder = feeder;
     this.speed = speed;
@@ -24,13 +26,13 @@ public class RunFeeder extends Command {
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /** Called every time the scheduler runs while the command is scheduled and sets the feeder to the requested speed. */
   @Override
   public void execute() {
     feeder.setVelocity(speed);
   }
 
-  // Called once the command ends or is interrupted.
+  /** Called once the command ends or is interrupted and stops the motor. */
   @Override
   public void end(boolean interrupted) {
     feeder.stopMotor();

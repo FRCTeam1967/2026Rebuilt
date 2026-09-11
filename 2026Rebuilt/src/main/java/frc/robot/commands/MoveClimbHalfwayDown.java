@@ -12,30 +12,33 @@ public class MoveClimbHalfwayDown extends Command {
   private Climb climb;
   private double inches;
   
-  /** Creates a new MoveClimbHalfwayDown. */
+  /** Creates a new MoveClimbHalfwayDown. 
+   * @param climb - Climb subsystem
+   * @param inches - number of inches needed to move down
+  */
   public MoveClimbHalfwayDown(Climb climb, double inches) {
     this.climb = climb;
     this.inches = inches;
     addRequirements(climb);
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /**Called every time the scheduler runs to moves the climb to the target height in inches.*/
   @Override
   public void execute() {
     climb.moveTo(inches);
   }
 
-  // Called once the command ends or is interrupted.
+  /**Called once the command ends or is interrupted.*/
   @Override
   public void end(boolean interrupted) {
     climb.stopMotor();
   }
 
-  // Returns true when the command should end.
+  /** Returns true when the climb has reached halfway up */
   @Override
   public boolean isFinished() {
     return climb.atHeight();

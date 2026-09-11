@@ -16,7 +16,6 @@ import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AimHub extends Command {
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -24,7 +23,7 @@ public class AimHub extends Command {
   private Visabelle visabelle;
 
   private final SwerveRequest.FieldCentricFacingAngle driveAtAngle = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.1) // 0.1 = deadband
+      .withDeadband(MaxSpeed * 0.1) //deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     

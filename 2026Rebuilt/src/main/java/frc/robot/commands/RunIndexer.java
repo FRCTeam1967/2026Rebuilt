@@ -12,31 +12,33 @@ public class RunIndexer extends Command {
   public Indexer indexer;
   private double speed;
   
-  /** Creates a new RunIndexer. */
+  /** Creates a new RunIndexer. 
+   * @param indexer - Indexer subsystem
+   * @param speed - Requested speed for the indexer
+  */
   public RunIndexer(Indexer indexer, double speed) {
     this.indexer = indexer;
     this.speed = speed;
     addRequirements(indexer);
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /**Called every time the scheduler runs while the command is scheduled and sets the indexer to the requested speed.*/
   @Override
   public void execute() {
     indexer.setVelocity(speed);
   }
 
-  // Called once the command ends or is interrupted.
+  /** Called once the command ends or is interrupted and stops the motor. */
   @Override
   public void end(boolean interrupted) {
     indexer.stopMotor();
   }
 
-  // Returns true when the command should end.
+  /**Returns true when the command should end.*/
   @Override
   public boolean isFinished() {
     return false;

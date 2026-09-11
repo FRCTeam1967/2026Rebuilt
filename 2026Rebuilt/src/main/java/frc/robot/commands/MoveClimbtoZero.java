@@ -11,33 +11,37 @@ import frc.robot.subsystems.Climb;
 public class MoveClimbtoZero extends Command {
   private Climb climb;
   private double inches;
-  /** Creates a new MoveClimbDown. */
+
+  /** Creates a new MoveClimbDown. 
+   * @param climb - Climb subsystem
+   * @param inches - Requested height in inches for climb
+  */
   public MoveClimbtoZero(Climb climb, double inches) {
     this.climb = climb;
     this.inches = inches;
     addRequirements(climb);
-    
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /** Called every time the scheduler runs to move the climb to the requested height. */
   @Override
   public void execute() {
     climb.moveTo(inches);
   }
 
-  // Called once the command ends or is interrupted.
+  /** Called once the command ends, in which the motor is stopped and sets a new safe position */
   @Override
   public void end(boolean interrupted) {
     climb.stopMotor();
     climb.setSafe();
   }
 
-  // Returns true when the command should end.
+  /** 
+   * @return true when the climb has reached its down (0) position
+   */
   @Override
   public boolean isFinished() {
     return (climb.isReachedBottomSwitch());

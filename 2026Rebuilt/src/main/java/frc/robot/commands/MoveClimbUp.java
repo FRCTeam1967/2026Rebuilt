@@ -12,48 +12,38 @@ public class MoveClimbUp extends Command {
   private Climb climb;
   private double inches;
 
-  /** Creates a new MoveClimb. */
+  /** Creates a new MoveClimb. 
+   * @param climb - Climb subsystem
+   * @param inches - Requested height in inches for the climb
+  */
   public MoveClimbUp(Climb climb, double inches) {
     this.climb = climb;
     this.inches = inches;
     addRequirements(climb);
-    
-    // Use addRequirements() here to declare subsystem dependencies.
-    
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
-  public void initialize(){
-    
-  }
+  public void initialize(){}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /** Called every time the scheduler runs while the command is scheduled and moves the climb to the requested height. */
   @Override
   public void execute() {
-    /* 
-    if (climb.isReachedTopSwitch() || climb.isReachedBottomSwitch()) {
-      climb.stopMotor();
-    } else {
-       climb.moveTo(inches);
-    }
-    */
     climb.moveTo(inches);
-
-    //climb.move(meters);
   }
 
-  // Called once the command ends or is interrupted.
+  /** Called once the command ends or is interrupted and stops the motor. */
   @Override
   public void end(boolean interrupted) {
       climb.stopMotor();
   }
 
-  // Returns true when the command should end.
+  /** 
+   * @return true when the climb has reached its fully up target position
+  */
   @Override
   public boolean isFinished() {
     return (climb.isReachedTopSwitch());
-    //return climb.atHeight();
   }
 }
 

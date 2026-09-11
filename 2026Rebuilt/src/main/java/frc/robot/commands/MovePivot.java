@@ -9,48 +9,44 @@ import frc.robot.subsystems.Pivot;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class MovePivot extends Command {
-  /** Creates a new MovePivot. */
   private Pivot pivot;
   private double targetPosition;
   private boolean isSlow;
 
-  /**
-   * Convenience initalizer. Moves pivot quickly. This alleviates the need
-   * to change all call sites to pass a 3rd parameter when they want the default
-   * behavior that used to exist.
-   * @param pivot Pivot subsystem
-   * @param targetPosition desired position (rotations)
-   */
+  /** Creates a new MovePivot. */
   public MovePivot(Pivot pivot, double targetPosition) {
     this(pivot, targetPosition, false);
   }
   
+  /** Creates a new MovePivot. 
+   * @param pivot - Pivot (intake pivot) subsystem
+   * @param targetPosition - Requested position for the pivot in revolutions
+   * @param isSlow - Returns if movement is or is not slow
+  */
   public MovePivot(Pivot pivot, double targetPosition, boolean isSlow) {
     this.pivot = pivot;
     this.targetPosition = targetPosition;
     this.isSlow = isSlow;
     addRequirements(this.pivot);
   }
-  
 
-  // Called when the command is initially scheduled.
+  /** Called when the command is initially scheduled. */
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /** Called every time the scheduler runs while the command is scheduled and moves the pivot to a requested position, and may be slow depending on boolean value */
   @Override
- 
   public void execute() {
      pivot.moveTo(targetPosition, isSlow);
-    
-   }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
   }
 
-  // Returns true when the command should end.
+  /** Called once the command ends or is interrupted. */
+  @Override
+  public void end(boolean interrupted) {}
+
+  /** 
+   * @return true when the pivot has reached its target position
+  */
   @Override
   public boolean isFinished() {
     return pivot.isReached();

@@ -22,7 +22,6 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.generated.TunerConstants;
-import dev.doglog.DogLog;
 import frc.robot.subsystems.*;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -42,7 +41,6 @@ public class AlignTowerPose extends Command {
 
   public AlignTowerPose(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
-
     addRequirements(swerve);
   }
 

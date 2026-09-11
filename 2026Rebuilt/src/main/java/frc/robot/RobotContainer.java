@@ -106,13 +106,8 @@ public class RobotContainer {
         public final TwinkleAnimation janksterRed = new TwinkleAnimation(0, 53).withColor(new RGBWColor(0, 255, 0)); // switched r and g
         public final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
         
-        private final TwinkleAnimation janksterWhite = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 255, 255));
-        
         private final SolidColor whiteSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 255, 255));
 
-        private final FireAnimation fire = new FireAnimation(0, 45);
-        
-        private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
         private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
 
         private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
@@ -265,22 +260,22 @@ public class RobotContainer {
                 new RunCommand(() -> candle.setControl(redSolid)).withTimeout(0.5)
             );
 
-            //seeing any tag
+            //Seeing any Tag
             // seeTag.and(isAligned.negate()).and(speedReached.negate()).and(isEaterStalling.negate()).and(isDisabled.negate())
             //     .whileTrue(new RunCommand(() -> candle.setControl(blueSolid)));
 
-            //aligned with tag
+            //Aligned with Tag
             isAligned.and(speedReached.negate()).and(isEaterStalling.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(greenSolid)));
 
-            //shooter speed reached
+            // Shooter Speed Reached
             speedReached.and(isEaterStalling.negate())
                 .whileTrue(new RunCommand(() -> candle.setControl(yellowBlink)));
 
-            //intake stalling
+            //Intake is Stalling
             isEaterStalling.whileTrue(new RunCommand(() -> candle.setControl(magentaBlink)));
 
-            //default (when nothing is triggered)
+            //Default LED Pattern
             (   
                 isAligned.negate()
                 .and(speedReached.negate())
@@ -336,7 +331,7 @@ public class RobotContainer {
                 )
             );
             
-            // eject shooter
+            // Eject Shooter if needed
             // m_operatorController.leftTrigger().and(m_operatorController.x()).whileTrue(
             //     new ParallelCommandGroup(
             //         new RunYeeter(yeeter, ()-> -Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION),
@@ -486,7 +481,6 @@ public class RobotContainer {
                             new ParallelCommandGroup(
                                 new ParallelCommandGroup(
                                     new RunYeeter(yeeter, () -> Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
-                                    //new RunCommand (() -> candle.setControl(yellowBlink))
                                 ),
 
                                 new SequentialCommandGroup(
