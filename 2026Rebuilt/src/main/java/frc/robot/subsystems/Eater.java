@@ -9,6 +9,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import dev.doglog.DogLog;
+
 import frc.robot.Constants;
 
 public class Eater extends SubsystemBase {
@@ -53,5 +56,8 @@ public class Eater extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (Constants.Eater.verboseLogging) {
+      DogLog.log("Eater/stator current", motor.getStatorCurrent().getValueAsDouble());
+    }
   }
 }

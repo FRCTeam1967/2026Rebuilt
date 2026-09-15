@@ -26,7 +26,7 @@ public class RunIndexer extends Command {
   @Override
   public void initialize() {}
 
-  /**Called every time the scheduler runs while the command is scheduled and sets the indexer to the requested speed.*/
+  /**Called every time the scheduler runs, setting the indexer to the requested speed.*/
   @Override
   public void execute() {
     indexer.setVelocity(speed);

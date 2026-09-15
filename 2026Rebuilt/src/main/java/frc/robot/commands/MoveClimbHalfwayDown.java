@@ -38,7 +38,9 @@ public class MoveClimbHalfwayDown extends Command {
     climb.stopMotor();
   }
 
-  /** Returns true when the climb has reached halfway up */
+  /** 
+   * @return true when climb has reached halfway down position
+   */
   @Override
   public boolean isFinished() {
     return climb.atHeight();

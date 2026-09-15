@@ -22,23 +22,7 @@ public class VisabelleUpdate extends SubsystemBase {
   // visibility dataType name;
   private SwerveOnTheseBows swerve;
 
-  // number of accepted pose estimates
-  // private int frontLLEstimatecount = 0;
-  // private int backLLEstimatecount = 0;
-
-  //private static final double AREA_THRESHOLD = 0.1;
-  //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
-
   private boolean isTowerPoseSet = false;
-
-  //private int[] validIDs = new int[16];
-
-  //private static final double AREA_THRESHOLD = 0.1;
-  //private static final double DIST_THRESHOLD = 4.572; // 15 ft in meters
-
-  // private static final Pose2d RED_TOWER = new Pose2d(15.421048, 3.432656, new Rotation2d(Math.PI));
-  // private static final Pose2d BLUE_TOWER = new Pose2d(1.092, 4.61, new Rotation2d(0.0));
-  //private static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(.7, .7, 9999999);
 
   public static Pose2d towerPose = Constants.Visabelle.RED_TOWER; // Initialize to something
 
@@ -47,10 +31,6 @@ public class VisabelleUpdate extends SubsystemBase {
   double frontAmbiguity;
   double backAmbiguity;
   double deviation;
-
-  // used for timestamp of previous periodic loop
-  // double frontTimestamp;
-  // double backTimestamp;
 
   public VisabelleUpdate(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
@@ -90,7 +70,7 @@ public class VisabelleUpdate extends SubsystemBase {
 
     double linearVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
-    if (linearVelocity > 5.0) { // TODO: tune
+    if (linearVelocity > 5.0) { 
         DogLog.log("VisabelleUpdate/reject reason", "linear velocity too high"); 
         return true;    
     }
@@ -98,6 +78,10 @@ public class VisabelleUpdate extends SubsystemBase {
     return false;
   }
 
+  /**
+   * This method checks to see if any tag 
+   * @return if Limelight can see a tag from either the back of the front
+   */
   public boolean canSeeATag() { 
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
@@ -135,32 +119,7 @@ public class VisabelleUpdate extends SubsystemBase {
     double distance = estimate.rawFiducials[0].distToCamera;
     double ambiguity = estimate.rawFiducials[0].ambiguity;
 
-    // double distanceScale = Math.pow(distance, 2);
-    // double tagScale = 1.0 / tagCount;
-    // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
-    // double scale = distanceScale * tagScale * ambiguityScale;
-    // double deviation = 0.01 * scale;
-
-    //TODO: test these derivations in order, see if they are useful
-    //double deviation = 6.0 * Math.pow(ambiguity, 3); 
-        //verify examples: 0.1	>> 0.006; 0.3	>> 0.162; 0.5 >> 0.75; 0.7 >> 2.06; 1.0	>> 6.0
-
-    double deviation = 0.75 * distance * Math.pow(ambiguity, 2); //!! best so far
-        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
-        //(dist >> 2) 0.1 >> 0.015; 0.3 >> 0.135; 0.5 >> 0.375; 0.7 >> 0.735
-        //(dist >> 4) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
-
-    //double deviation = 0.75 * Math.pow(distance, 2) * Math.pow(ambiguity, 2);
-        //(dist >> 1) 0.1 >> 0.0075; 0.3 >> 0.0675; 0.5 >> 0.1875; 0.7 >> 0.3675
-        //(dist >> 2) 0.1 >> 0.03; 0.3 >> 0.27; 0.5 >> 0.75; 0.7 >> 1.47
-        //(dist >> 4) 0.1 >> 0.12; 0.3 >> 1.08; 0.5 >> 3.0; 0.7 >> 5.88
-
-
-    //double deviation = 0.5 * Math.pow(distance, 2) * Math.pow(ambiguity, 2) * (1.0 / Math.sqrt(tagCount));
-        //(dist >> 2, tags >> 1) 0.1 >> 0.02; 0.3 >> 0.18; 0.5 >> 0.5; 0.7 >> 0.98
-        //(dist >> 2, tags >> 4) 0.1 >> 0.01; 0.3 >> 0.09; 0.5 >> 0.25; 0.7 >> 0.49
-        //(dist >> 4, tags >> 1) 0.1 >> 0.08; 0.3 >> 0.72; 0.5 >> 2.0; 0.7 >> 3.92
-        //(dist >> 4, tags >> 4) 0.1 >> 0.04; 0.3 >> 0.36; 0.5 >> 1.0; 0.7 >> 1.96
+    double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
 
     DogLog.log("deviation", deviation);
     DogLog.log("LL name", name);
@@ -174,15 +133,7 @@ public class VisabelleUpdate extends SubsystemBase {
       double distance = estimate.rawFiducials[0].distToCamera;
       double ambiguity = estimate.rawFiducials[0].ambiguity;
 
-      // double distanceScale = Math.pow(distance, 2);
-      // double tagScale = 1.0 / tagCount;
-      // double ambiguityScale = 1.0 + 5.0 * ambiguity; // 5.0 is a magic number here
-      // double scale = distanceScale * tagScale * ambiguityScale;
-
       double deviation = 0.75 * distance * Math.pow(ambiguity, 2);
-
-      //DogLog.log("scale", deviation);
-      //DogLog.log("LL name", name);
 
       return deviation;
   }
@@ -200,7 +151,6 @@ public class VisabelleUpdate extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // TODO: see if we can move this to disabled periodic (bc why not?)
     if (!isTowerPoseSet){
       if (DriverStation.getAlliance().isPresent()) {
         if (DriverStation.getAlliance().get() == Alliance.Red) {
@@ -215,29 +165,8 @@ public class VisabelleUpdate extends SubsystemBase {
     LimelightHelpers.SetRobotOrientation("limelight-front", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation("limelight-back", (swerve.getPigeon2().getRotation2d().getDegrees()), 0, 0, 0, 0, 0);
 
-    // // front timestamp accounting for latency
-    // var front_t2d = LimelightHelpers.getT2DArray("limelight-front");
-    // var frontTargetLatency = front_t2d[2];
-    // var frontCaptureLatency = front_t2d[3];
-
-    // var frontLatency = frontTargetLatency + frontCaptureLatency;
-    // var frontLatencySeconds = frontLatency / 1000.0;
-    // var frontTimestamp = Timer.getFPGATimestamp() - frontLatencySeconds;
-
-    // // back timestamp accounting for latency
-    // var back_t2d = LimelightHelpers.getT2DArray("limelight-back");
-    // var backTargetLatency = back_t2d[2];
-    // var backCaptureLatency = back_t2d[3];
-
-    // var backLatency = backTargetLatency + backCaptureLatency;
-    // var backLatencySeconds = backLatency / 1000.0;
-    // var backTimestamp = Timer.getFPGATimestamp() - backLatencySeconds;
-
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
-
-    //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
-    //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-back", validIDs);
     
     if (mt2_front.rawFiducials.length >= 1) {
       frontAmbiguity = mt2_front.rawFiducials[0].ambiguity;
@@ -251,11 +180,8 @@ public class VisabelleUpdate extends SubsystemBase {
       backAmbiguity = 9999999;
     }
 
-    //LimelightHelpers.PoseEstimate chosenPoseEstimate = null;
     DogLog.log("VisabelleUpdate/front limelight pose", mt2_front.pose);
     DogLog.log("VisabelleUpdate/back limelight pose", mt2_back.pose);
-    // DogLog.log("VisabelleUpdate/front avgtagdist", mt2_front.avgTagDist);
-    // DogLog.log("VisabelleUpdate/back avgtagdist", mt2_back.avgTagDist);
     DogLog.log("VisabelleUpdate/front ambiguity", frontAmbiguity);
     DogLog.log("VisabelleUpdate/back ambiguity", backAmbiguity);
 
@@ -277,30 +203,6 @@ public class VisabelleUpdate extends SubsystemBase {
       }
       DogLog.log("Back fiducials", tagArray);
     }
-    
-    // reset pose to next raw vision estimate after 5 seconds of not seeing a tag
-    // if ((mt2_front.timestampSeconds > (prevFrontTimestamp + 5)) && (mt2_back.timestampSeconds > (Timer.getFPGATimestamp() + 5))) {
-    //   swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.0,0.0,9999999));
-
-    //   if (mt2_front.tagCount > 0) {
-    //     swerve.addVisionMeasurement(
-    //         mt2_front.pose,
-    //         mt2_front.timestampSeconds);
-    //   }
-
-    //   if (mt2_back.tagCount > 0) {
-    //     swerve.addVisionMeasurement(
-    //         mt2_back.pose,
-    //         mt2_back.timestampSeconds);
-    //   }
-
-    //   prevFrontTimestamp = mt2_front.timestampSeconds;
-    //   prevBackTimestamp = mt2_front.timestampSeconds;
-    // }
-
-    // else {
-    //   frontTimestamp = mt2_front.timestampSeconds;
-    //   backTimestamp = mt2_front.timestampSeconds;
 
     // accept only front
     if (!rejectUpdate(mt2_front) && rejectUpdate(mt2_back)) {
@@ -309,8 +211,6 @@ public class VisabelleUpdate extends SubsystemBase {
       swerve.addVisionMeasurement(
         mt2_front.pose,
         mt2_front.timestampSeconds);
-      
-      // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
     }
 
     // accept only back
@@ -320,13 +220,10 @@ public class VisabelleUpdate extends SubsystemBase {
       swerve.addVisionMeasurement(
         mt2_back.pose,
         mt2_back.timestampSeconds);
-
-      // DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
 
     // accept both
     else if (!rejectUpdate(mt2_front) && !rejectUpdate(mt2_back)){           
-      //if (mt2_front.tagCount > mt2_back.tagCount) {
 
       if (posesAreClose(mt2_front, mt2_back)) {
         // add front
@@ -357,10 +254,6 @@ public class VisabelleUpdate extends SubsystemBase {
             mt2_back.timestampSeconds);
         }
       }
-        
-        // DogLog.log("VisabelleUpdate/accept both", "Front 0.7, Back 999");
-        // DogLog.log("VisabelleUpdate/front upd count", frontLLEstimatecount++);
-        // DogLog.log("VisabelleUpdate/back upd count", backLLEstimatecount++);
     }
   }
 }

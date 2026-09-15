@@ -22,11 +22,11 @@ public class RunFeeder extends Command {
     addRequirements(feeder);
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
   public void initialize() {}
 
-  /** Called every time the scheduler runs while the command is scheduled and sets the feeder to the requested speed. */
+  /** Called every time the scheduler runs, setting the feeder to the requested speed. */
   @Override
   public void execute() {
     feeder.setVelocity(speed);
@@ -38,7 +38,7 @@ public class RunFeeder extends Command {
     feeder.stopMotor();
   }
 
-  // Returns true when the command should end.
+  /**Returns true when the command should end.*/
   @Override
   public boolean isFinished() {
     return false;
