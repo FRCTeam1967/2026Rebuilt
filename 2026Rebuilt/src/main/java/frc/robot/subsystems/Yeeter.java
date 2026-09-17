@@ -82,7 +82,7 @@ public class Yeeter extends SubsystemBase {
   /**
    * set velocity of the motor with MotionMagicVelocityVoltage requests params </p>
    * creates torque request
-   * @param velocity
+   * @param velocitySupplier uses a doubleSupplier as opposed to a regular doube
    * @param acceleration
    */
   public void setVelocity(DoubleSupplier velocitySupplier, double acceleration) {
@@ -194,9 +194,5 @@ public class Yeeter extends SubsystemBase {
       DogLog.log("Yeeter/stator current 2", motor2.getStatorCurrent().getValueAsDouble());
       DogLog.log("Yeeter/reached speed?", reachedYeeterSpeed(motor1Speed, true));
     }
-  }
-
-  @Override
-  public void simulationPeriodic() {
   }
 }

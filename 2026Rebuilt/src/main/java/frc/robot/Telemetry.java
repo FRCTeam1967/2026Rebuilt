@@ -31,7 +31,7 @@ public class Telemetry {
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
         // SignalLogger.setPath("/lv/logs");
-        SignalLogger.start();
+        //SignalLogger.start();
 
         if (Constants.Logging.CTRE.enableNTPublishing) {
             /* Set up the module state Mechanism2d telemetry */

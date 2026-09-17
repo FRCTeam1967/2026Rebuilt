@@ -25,6 +25,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+/**Creates a new AlignTowerPose */
 public class AlignTowerPose extends Command {
   private final SwerveOnTheseBows swerve;
 
@@ -39,17 +40,20 @@ public class AlignTowerPose extends Command {
   private static final double kP_rotational = 0.85;
   private Transform2d difference = new Transform2d();
 
+  /** 
+   * @param Swerve subsystem
+  */
   public AlignTowerPose(SwerveOnTheseBows swerve) {
     this.swerve = swerve;
     addRequirements(swerve);
   }
 
-  // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled*/
   @Override
   public void initialize() {
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /**Called every time the scheduler runs while the command is scheduled.*/
   @Override
   public void execute() {
     Pose2d drivetrainPose = swerve.getPose();
@@ -77,13 +81,15 @@ public class AlignTowerPose extends Command {
     }    
   }
 
-  // Called once the command ends or is interrupted.
+  /**Called once the command ends or is interrupted.*/
   @Override
   public void end(boolean interrupted) {
       swerve.setControl(request.withSpeeds(new ChassisSpeeds()));
   }
 
-  // Returns true when the command should end.
+  /**
+   * @return true if the absolute X and Y errors are less than 0.05 and absolute rotational error is less than 2 degrees
+  */
   @Override
   public boolean isFinished() {
       return Math.abs(difference.getX()) < 0.05 &&

@@ -15,7 +15,7 @@ import frc.robot.subsystems.*;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 
-
+/**Creates a new AimHub */
 public class AimHub extends Command {
 
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -34,11 +34,13 @@ public class AimHub extends Command {
     addRequirements(m_robotContainer.swerve);
   }
   
-    // Called when the command is initially scheduled.
+  /**Called when the command is initially scheduled.*/
   @Override
   public void initialize() {}
   
-    // Called every time the scheduler runs while the command is scheduled.
+  /**
+   * aligns swerve to rotate toward the target position
+  */
   @Override
   public void execute() {
     m_robotContainer.swerve.setControl(
@@ -49,11 +51,11 @@ public class AimHub extends Command {
     );
   }
 
-  // Called once the command ends or is interrupted.
+  /**Called once the command ends or is interrupted.*/
   @Override
   public void end(boolean interrupted) {}
 
-  // Returns true when the command should end.
+  /**Returns true when the command should end.*/
   @Override
   public boolean isFinished() {
     return false;

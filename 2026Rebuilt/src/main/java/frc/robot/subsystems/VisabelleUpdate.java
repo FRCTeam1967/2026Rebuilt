@@ -36,6 +36,10 @@ public class VisabelleUpdate extends SubsystemBase {
     this.swerve = swerve;
   }
 
+  /**
+   * @param estimate the position estimate based on the limelight's calculations
+   * @return if the new position update should be accepted as the robot's position
+   */
   public boolean rejectUpdate(LimelightHelpers.PoseEstimate estimate) {
     if (estimate == null) {
       DogLog.log("VisabelleUpdate/reject reason", "no PoseEstimate");
@@ -89,6 +93,9 @@ public class VisabelleUpdate extends SubsystemBase {
     return (mt2_front.tagCount > 0 || mt2_back.tagCount > 0);
   }
   
+  /**
+   * sets the first position upon enabling in teleop depending on what tags it sees
+   */
   public void setFirstVisionPose() {
     mt2_front = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
     mt2_back = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
@@ -112,7 +119,11 @@ public class VisabelleUpdate extends SubsystemBase {
     }
   }
 
-  // set standard deviations based on ambiguity (the lower the ambiguity, the more we trust it)
+  /**
+   * set standard deviations based on ambiguity (the lower the ambiguity, the more we trust it) 
+   * @param estimate an estimation of the position based on vision calculation
+   * @param isFront whether the tag is seen from the front limelight or not
+  */
   public void setStandardDevs(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
     String name = isFront ? "limelight-front" : "limelight-back";
     double tagCount = LimelightHelpers.getTargetCount(name);
@@ -127,6 +138,12 @@ public class VisabelleUpdate extends SubsystemBase {
     swerve.setVisionMeasurementStdDevs(VecBuilder.fill(deviation, deviation,9999999));
   }
 
+  /**
+   * gets the deviation of the robot based on the ambiguity and distance from the tag
+   * @return deviation of the robot
+   * @param estimate an estimation of the position based on vision calculation
+   * @param isFront whether the tag is seen from the front limelight or not
+   */
   public double getDeviation(LimelightHelpers.PoseEstimate estimate, boolean isFront) {
       String name = isFront ? "limelight-front" : "limelight-back";
       double tagCount = LimelightHelpers.getTargetCount(name);
@@ -138,6 +155,12 @@ public class VisabelleUpdate extends SubsystemBase {
       return deviation;
   }
 
+  /**
+   * returns whether or not the back or front limelight's positions are close to tag
+   * @param frontEstimate the front estimate for distance between the tag and the front limelight
+   * @param backEstimate the back estimate for distance between the tag and the back limelight
+   * @return whether or not the positions are close to the tags, either front or back
+   */
   public boolean posesAreClose(LimelightHelpers.PoseEstimate frontEstimate, LimelightHelpers.PoseEstimate backEstimate) {
     Pose2d frontPose = frontEstimate.pose;
     Pose2d backPose = backEstimate.pose;
