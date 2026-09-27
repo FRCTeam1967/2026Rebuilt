@@ -347,7 +347,7 @@ public class RobotContainer {
 
 
             //modified if we're stuck
-            m_operatorController.leftTrigger().and(m_operatorController.povRight()).whileTrue(
+            m_operatorController.leftTrigger().and(m_operatorController.y()).whileTrue(
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
                             new ParallelCommandGroup(
@@ -441,7 +441,7 @@ public class RobotContainer {
             ); 
 
         //SHUTTLING (SHORT)
-            m_operatorController.leftBumper().and(m_operatorController.x()).and(m_operatorController.rightTrigger().negate()).whileTrue(
+            m_operatorController.leftBumper().and(m_operatorController.y()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
                     new SequentialCommandGroup( 
