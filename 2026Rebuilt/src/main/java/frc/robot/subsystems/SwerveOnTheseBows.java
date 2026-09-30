@@ -72,6 +72,9 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     
+    
+
+    
 
     
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -132,10 +135,10 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             this
         )
     );
-
+    
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
-
+    
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
@@ -147,6 +150,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
      * @param modules               Constants for each specific module
      */
     public SwerveOnTheseBows(
+        
         SwerveDrivetrainConstants drivetrainConstants,
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
@@ -156,17 +160,21 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
             headingController.enableContinuousInput(headingMin, headingMax);
         }
         headingController.enableContinuousInput(-Math.PI, Math.PI);
-        RobotConfig config;
+
+        RobotConfig config = null; //new line of code
+        
         try{
-      config = RobotConfig.fromGUISettings();
+            config = RobotConfig.fromGUISettings(); //new line of code
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
-    }
+    }   
+
+       
         AutoBuilder.configure(
-            this::getPose, // Robot pose supplier
+            ()->getState().Pose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::followTrajectory, 
+            ()->getState().Speeds,
             (speeds, feedforwards) -> setControl(
                 m_pathApplyRobotSpeeds.withSpeeds(speeds)
                         .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
@@ -175,7 +183,7 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
             ),
-            config, // The robot configuration
+             config,
             () -> {
               // Boolean supplier that controls when the path will be mirrored for the red alliance
               // This will flip the path being followed to the red side of the field.
