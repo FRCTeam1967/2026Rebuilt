@@ -114,12 +114,18 @@ import static org.wpilib.units.Units.Second;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.wpilib.system.RobotController;
+
 import org.wpilib.command2.Command;
 import org.wpilib.command2.sysid.SysIdRoutine;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.system.Notifier;
+
+import org.wpilib.math.linalg.Matrix;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N3;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
@@ -167,8 +173,6 @@ public class Drivetrain extends TunerSwerveDrivetrain {
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
-    private double headingMin = -Math.PI;
-    private double headingMax = Math.PI;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -254,7 +258,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
         super(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
+            headingController.enableContinuousInput(-Math.PI, Math.PI);
         }
         headingController.enableContinuousInput(-Math.PI, Math.PI);
         
@@ -404,15 +408,31 @@ public class Drivetrain extends TunerSwerveDrivetrain {
          * Otherwise, only check and apply the operator perspective if the DS is disabled.
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
-        if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
+        //OLD PERIODIC CODE
+        // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+        //     DriverStation.getAlliance().ifPresent(allianceColor -> {
+        //         setOperatorPerspectiveForward(
+        //             allianceColor == Alliance.Red
+        //                 ? kRedAlliancePerspectiveRotation
+        //                 : kBlueAlliancePerspectiveRotation
+        //         );
+        //         m_hasAppliedOperatorPerspective = true;
+        //     });
+        // }
+
+        // DogLog.log("Drivetrain/pose", getPose());
+
+        if (!m_hasAppliedOperatorPerspective || RobotState.isDisabled()) {
+
+            MatchState.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
                     allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
-                m_hasAppliedOperatorPerspective = true;
-            });
+                    ? kRedAlliancePerspectiveRotation
+                    : kBlueAlliancePerspectiveRotation
+            );
+
+            m_hasAppliedOperatorPerspective = true;
+        });
         }
 
         DogLog.log("Drivetrain/pose", getPose());
@@ -462,7 +482,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
     public void addVisionMeasurement(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
-        //<N3, N1> visionMeasurementStdDevs
+        Matrix<N3, N1> visionMeasurementStdDevs
     ) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
