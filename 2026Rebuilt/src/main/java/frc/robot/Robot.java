@@ -36,7 +36,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    Pathfinding.setPathfinder(new Paths2Fly());
+    Pathfinding.setPathfinder(new LocalADStarAK());
     DogLog.setEnabled(Constants.Logging.enabled);
     DogLogOptions options = new DogLogOptions()
       .withCaptureConsole(Constants.Logging.captureConsole)
