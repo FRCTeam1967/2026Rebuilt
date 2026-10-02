@@ -5,11 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.VisionConstants;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.LocalizationSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,16 +27,23 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   // Constructing the subsystem registers periodic(), even with no mechanisms attached.
   @SuppressWarnings("unused")
-  private final VisionSubsystem m_visionSubsystem =
-      new VisionSubsystem(VisionConstants.kCameraName);
+  private final LocalizationSubsystem m_localization = new LocalizationSubsystem(
+      () -> new Rotation2d(),
+      RobotContainer::dummyModulePositions);
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+  // Encoder distances are meters; module order is FL, FR, RL, RR.
+  private static SwerveModulePosition[] dummyModulePositions() {
+    return new SwerveModulePosition[] {
+      new SwerveModulePosition(), new SwerveModulePosition(),
+      new SwerveModulePosition(), new SwerveModulePosition()
+    };
+  }
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
+    SmartDashboard.putBoolean("Robot/Localization/UsingDummyOdometry", true);
     configureBindings();
   }
 
@@ -52,8 +61,6 @@ public class RobotContainer {
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 

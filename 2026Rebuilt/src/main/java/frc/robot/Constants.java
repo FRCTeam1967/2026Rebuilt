@@ -5,6 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -16,12 +20,37 @@ import edu.wpi.first.math.geometry.Transform3d;
  */
 public final class Constants {
   public static final class VisionConstants {
-    public static final String kCameraName = "FrontCam";
+    //fill mount measurements
+    public record CameraConfig(String name, Transform3d robotToCamera) {}
 
-    // test-rig offset; replace after mounting
-    public static final Transform3d kRobotToCamera = new Transform3d();
+    public static final CameraConfig[] kCameras = {
+      camera("FrontLeft", 0.30, 0.30, 45),
+      camera("FrontRight", 0.30, -0.30, -45),
+      camera("RearLeft", -0.30, 0.30, 135),
+      camera("RearRight", -0.30, -0.30, -135)
+    };
+
+    private static CameraConfig camera(String name, double x, double y, double yawDegrees) {
+      return new CameraConfig(name, new Transform3d(
+          new Translation3d(x, y, 0.45),
+          new Rotation3d(0, 0, Math.toRadians(yawDegrees))));
+    }
 
     private VisionConstants() {}
+  }
+
+  public static final class LocalizationConstants {
+    //fill in actual module locations
+    public static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
+        new Translation2d(0.30, 0.30), new Translation2d(0.30, -0.30),
+        new Translation2d(-0.30, 0.30), new Translation2d(-0.30, -0.30));
+    // initial tuning values
+    public static final double kMaxDistanceMeters = 5.0;
+    public static final double kMaxAmbiguity = 0.20;
+    public static final double kMaxHeightMeters = 0.50;
+    public static final double kMaxAgeSeconds = 0.50;
+    public static final double kValidTimeoutSeconds = 0.50;
+    private LocalizationConstants() {}
   }
 
   public static class OperatorConstants {
