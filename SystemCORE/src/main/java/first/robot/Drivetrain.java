@@ -118,6 +118,9 @@ import org.wpilib.system.RobotController;
 
 import org.wpilib.command2.Command;
 import org.wpilib.command2.sysid.SysIdRoutine;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.MatchState;
+import org.wpilib.driverstation.RobotState;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
@@ -157,6 +160,8 @@ import org.ejml.data.*;
  */
 public class Drivetrain extends TunerSwerveDrivetrain {
     private static final double kSimLoopPeriod = 0.004; // 4 ms
+    public static double kMaxVelocity;
+	public static double kMaxAngularVelocity;
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     
@@ -285,7 +290,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
+            headingController.enableContinuousInput(-Math.PI, Math.PI);
         }
         headingController.enableContinuousInput(-Math.PI, Math.PI); 
     }
@@ -319,7 +324,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         if (Utils.isSimulation()) {
             startSimThread();
-            headingController.enableContinuousInput(headingMin, headingMax);
+            headingController.enableContinuousInput(-Math.PI, Math.PI);
         }
         headingController.enableContinuousInput(-Math.PI, Math.PI);
     }
@@ -399,7 +404,6 @@ public class Drivetrain extends TunerSwerveDrivetrain {
     //     // driveFieldRelative(speeds);
     // }
 
-    @Override
     public void periodic() {
         /*
          * Periodically try to apply the operator perspective.
@@ -426,7 +430,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
 
             MatchState.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
+                    allianceColor == Alliance.RED
                     ? kRedAlliancePerspectiveRotation
                     : kBlueAlliancePerspectiveRotation
             );
@@ -460,10 +464,10 @@ public class Drivetrain extends TunerSwerveDrivetrain {
      * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timestampSeconds The timestamp of the vision measurement in seconds.
      */
-    @Override
-    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-        super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
-    }
+    // @Override
+    // public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
+    //     super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
+    // }
 
     /**
      * Adds a vision measurement to the Kalman Filter. This will correct the odometry pose estimate
@@ -484,7 +488,7 @@ public class Drivetrain extends TunerSwerveDrivetrain {
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) {
-        super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+        //super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
 
     /**
@@ -493,8 +497,8 @@ public class Drivetrain extends TunerSwerveDrivetrain {
      * @param timestampSeconds The timestamp of the pose in seconds.
      * @return The pose at the given timestamp (or Optional.empty() if the buffer is empty).
      */
-    @Override
-    public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
-        return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
-    }
+    //@Override
+    //public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
+        //return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    //}
 }

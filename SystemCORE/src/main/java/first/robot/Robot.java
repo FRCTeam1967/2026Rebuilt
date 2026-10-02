@@ -11,11 +11,19 @@ import org.wpilib.math.filter.SlewRateLimiter;
 import org.wpilib.math.*;
 import org.wpilib.units.*;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import first.robot.Drivetrain;
 
 public class Robot extends TimedRobot {
   private final Gamepad controller = new Gamepad(0);
   private final Drivetrain drive = new Drivetrain();
+
+  private final TalonFX motor = new TalonFX(1, CANBus.systemcore(0)); //TODO: change ID & port
+
+  private final DutyCycleOut motorOutput = new DutyCycleOut(0.20);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter velocityLimiter = new SlewRateLimiter(3);
@@ -24,7 +32,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     teleopPeriodic();
-    drive.updateOdometry();
+    //drive.updateOdometry();
   }
 
   @Override
@@ -41,5 +49,12 @@ public class Robot extends TimedRobot {
     final var rot = -rotLimiter.calculate(controller.getRightX()) * Drivetrain.kMaxAngularVelocity;
 
     drive.drive(xVelocity, rot);
+
+    motor.setThrottle(0.20);
+  }
+
+  @Override
+  public void disabledInit() {
+    motor.setThrottle(0.0);
   }
 }

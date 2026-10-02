@@ -298,6 +298,11 @@ public class TunerConstants {
                 odometryStandardDeviation, visionStandardDeviation, modules
             );
         }
+
+        public void periodic() {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'periodic'");
+        }
     }
 }
 
