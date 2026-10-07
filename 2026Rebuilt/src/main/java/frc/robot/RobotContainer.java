@@ -13,11 +13,13 @@ import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.math.geometry.Pose2d;
-
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+
 
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -37,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -77,6 +81,16 @@ public class RobotContainer {
         public final TheHood theHood = new TheHood();
         public final Climb climb = new Climb();
         public Autoes autoes = new Autoes(this);
+
+        Pose2d targetPose = new Pose2d(10, 5, Rotation2d.fromDegrees(180));
+
+        // Create the constraints to use while pathfinding
+        PathConstraints constraints = new PathConstraints(
+            3.0, 4.0,
+            Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+        
 
         //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
         //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
@@ -523,10 +537,15 @@ public class RobotContainer {
 
         //PIVOT
             //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-            m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
+            //m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
             m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
-
+        //DYNAMIC PATH PLANNING
+            m_operatorController.b().onTrue(AutoBuilder.pathfindToPose(
+            targetPose,
+            constraints,
+            0.0 // Goal end velocity in meters/sec
+        ));
         //FEEDER
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
