@@ -8,6 +8,7 @@ public final class Constants {
     public static class OperatorConstants{
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
+
     }
 
     public static class Hood {
@@ -118,6 +119,8 @@ public final class Constants {
         public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -100.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
+        public static final double MIN_SYSTEM_VOLTAGE = 6.0;
+        public static final double KRAKEN_MAX_RPS = 100.0;
     }
 
     public static class Indexer{

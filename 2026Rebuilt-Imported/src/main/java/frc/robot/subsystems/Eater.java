@@ -9,7 +9,6 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import com.ctre.phoenix6.signals.InvertedValue;
-
 import dev.doglog.DogLog;
 import org.wpilib.networktables.DoubleSubscriber;
 import org.wpilib.smartdashboard.SmartDashboard;
@@ -50,6 +49,10 @@ public class Eater extends SubsystemBase {
    */
   public void stopMotor(){
     motor.stopMotor();
+  }
+
+  public double getVelocityRPS(){
+    return motor.getRotorVelocity().getValueAsDouble();
   }
 
   @Override

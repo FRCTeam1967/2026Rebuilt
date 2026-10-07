@@ -31,6 +31,8 @@ import org.wpilib.command2.*;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import org.wpilib.hardware.power.PowerDistribution;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
