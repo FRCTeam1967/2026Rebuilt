@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.LocalizationSubsystem;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -30,6 +32,11 @@ public class AlignToHub extends Command {
   private final Supplier<Optional<Alliance>> allianceSupplier;
   private final PIDController heading = new PIDController(kP, 0.0, 0.0);
   private final Translation2d redHub;
+
+  public AlignToHub(Swerve swerve, LocalizationSubsystem localization) {
+    this(swerve, swerve::getPose, localization::hasValidPoseSensorResult,
+        swerve::driveRobotRelative);
+  }
 
   public AlignToHub(Subsystem drivetrain, Supplier<Pose2d> poseSupplier,
       BooleanSupplier poseValid, Consumer<ChassisSpeeds> driveOutput) {
@@ -89,6 +96,9 @@ public class AlignToHub extends Command {
       return;
     }
     double target = targetHeadingRadians(pose, hub);
+    // atan2 gives a CCW-positive field angle. Continuous PID wraps target - measured
+    // to the shortest turn; positive omega turns left. Do not apply 180/360 or alliance
+    // flips again in the drivetrain's ROBOT-relative output method.
     double omega = MathUtil.clamp(heading.calculate(
         MathUtil.angleModulus(pose.getRotation().getRadians()), target),
         -kMaxOmegaRadiansPerSecond, kMaxOmegaRadiansPerSecond);

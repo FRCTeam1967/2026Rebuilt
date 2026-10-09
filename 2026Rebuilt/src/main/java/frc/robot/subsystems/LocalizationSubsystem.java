@@ -1,46 +1,35 @@
-package frc.robot.commands;
+package frc.robot.subsystems;
 
 import static frc.robot.Constants.LocalizationConstants.*;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.VisionSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Supplier;
 
-/** Continuously updates pose without reserving the drivetrain or interrupting alignment. */
-public class LocalizationCommand extends Command {
-  private final Supplier<Rotation2d> gyro;
-  private final Supplier<SwerveModulePosition[]> modules;
+/** Updates odometry and vision before commands run; does not reserve the drivetrain. */
+public class LocalizationSubsystem extends SubsystemBase {
+  private final Swerve swerve;
   private final AprilTagFieldLayout layout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   private final VisionSubsystem[] cameras;
-  private final SwerveDrivePoseEstimator estimator;
   private final Field2d field = new Field2d();
   private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
       .getStructTopic("/SmartDashboard/Robot/Localization/Pose", Pose2d.struct).publish();
   private double lastAcceptedTime = Double.NEGATIVE_INFINITY;
-  private double resetTime = Double.NEGATIVE_INFINITY;
 
-  public LocalizationCommand(Supplier<Rotation2d> gyro,
-      Supplier<SwerveModulePosition[]> modules) {
-    this.gyro = gyro;
-    this.modules = modules;
-    estimator = new SwerveDrivePoseEstimator(kKinematics, gyro.get(), modules.get(), new Pose2d());
+  public LocalizationSubsystem(Swerve swerve) {
+    this.swerve = swerve;
     cameras = Arrays.stream(VisionConstants.kCameras)
         .map(c -> new VisionSubsystem(c.name(), c.robotToCamera(), layout))
         .toArray(VisionSubsystem[]::new);
@@ -48,12 +37,14 @@ public class LocalizationCommand extends Command {
   }
 
   @Override
-  public void execute() {
+  public void periodic() {
     double now = Timer.getFPGATimestamp();
-    estimator.updateWithTime(now, gyro.get(), modules.get());
+    swerve.updatePlaceholderOdometry(now);
+    double resetTime = swerve.getLastResetTimestamp();
     var observations = new ArrayList<VisionSubsystem.Observation>();
+    var measuredSpeeds = swerve.getChassisSpeeds();
     for (var camera : cameras) {
-      observations.addAll(camera.drainObservations());
+      observations.addAll(camera.drainObservations(now, resetTime, measuredSpeeds));
     }
     observations.sort(Comparator.comparingDouble(o -> o.estimate().timestampSeconds));
     for (var observation : observations) {
@@ -91,7 +82,7 @@ public class LocalizationCommand extends Command {
       }
       double thetaStdDev = observation.multiTag()
           ? Math.max(0.20, 0.15 * distance * distance) : 1e6;
-      estimator.addVisionMeasurement(pose.toPose2d(), timestamp,
+      swerve.addVisionMeasurement(pose.toPose2d(), timestamp,
           VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev));
       lastAcceptedTime = now;
     }
@@ -101,33 +92,17 @@ public class LocalizationCommand extends Command {
         hasValidPoseSensorResult());
   }
 
-  @Override
-  public boolean runsWhenDisabled() {
-    return true;
-  }
-
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    lastAcceptedTime = Double.NEGATIVE_INFINITY;
-    SmartDashboard.putBoolean("Robot/Localization/HasValidPoseSensorResult", false);
-  }
-
   public Pose2d getRobotPose() {
-    return estimator.getEstimatedPosition();
+    return swerve.getPose();
   }
 
   public void resetRobotPose(Pose2d pose) {
-    estimator.resetPosition(gyro.get(), modules.get(), pose);
-    resetTime = Timer.getFPGATimestamp();
+    swerve.resetPose(pose);
     lastAcceptedTime = Double.NEGATIVE_INFINITY;
   }
 
   public boolean hasValidPoseSensorResult() {
-    return Timer.getFPGATimestamp() - lastAcceptedTime <= kValidTimeoutSeconds;
+    return lastAcceptedTime > swerve.getLastResetTimestamp()
+        && Timer.getFPGATimestamp() - lastAcceptedTime <= kValidTimeoutSeconds;
   }
 }

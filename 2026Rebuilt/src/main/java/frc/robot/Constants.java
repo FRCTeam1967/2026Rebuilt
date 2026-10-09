@@ -47,6 +47,10 @@ public final class Constants {
     // initial tuning values
     public static final double kMaxDistanceMeters = 5.0;
     public static final double kMaxAmbiguity = 0.20;
+    // Starting thresholds; tune against camera exposure and real drivetrain logs.
+    public static final double kMaxMultiTagReprojectionErrorPixels = 2.0;
+    public static final double kMaxVisionSpeedMetersPerSecond = 4.0;
+    public static final double kMaxVisionOmegaRadiansPerSecond = 3.0;
     public static final double kMaxHeightMeters = 0.50;
     public static final double kMaxAgeSeconds = 0.50;
     public static final double kValidTimeoutSeconds = 0.50;
