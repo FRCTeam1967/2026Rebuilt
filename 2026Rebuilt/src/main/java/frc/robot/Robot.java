@@ -10,8 +10,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
+import java.util.logging.Logger;
+
+import org.littletonrobotics.junction.LoggedRobot;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,7 +25,7 @@ import dev.doglog.DogLogOptions;
 import edu.wpi.first.networktables.StructPublisher;
 
 
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private RobotContainer m_robotContainer;
   private Autoes autoes;
 
@@ -34,8 +39,11 @@ public class Robot extends TimedRobot {
    
   }
 
+ 
+
   @Override
   public void robotInit() {
+
     Pathfinding.setPathfinder(new LocalADStarAK());
     DogLog.setEnabled(Constants.Logging.enabled);
     DogLogOptions options = new DogLogOptions()
@@ -45,7 +53,11 @@ public class Robot extends TimedRobot {
       .withNtPublish(false)
       .withLogExtras(Constants.Logging.enableExtras);
     DogLog.setOptions(options);
+
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DogLog.log("PathFollowing/CurrentPose", pose));
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DogLog.log("TargetPose", pose));
     
+
     if (Constants.Logging.capturePDH) {
       DogLog.setPdh(new PowerDistribution());
     }
@@ -109,6 +121,8 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
   }
+
+   
 
   @Override
   public void teleopPeriodic() {

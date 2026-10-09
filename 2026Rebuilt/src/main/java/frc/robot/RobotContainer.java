@@ -81,13 +81,16 @@ public class RobotContainer {
         public final TheHood theHood = new TheHood();
         public final Climb climb = new Climb();
         public Autoes autoes = new Autoes(this);
-
         Pose2d targetPose = new Pose2d(10, 5, Rotation2d.fromDegrees(180));
 
         // Create the constraints to use while pathfinding
         PathConstraints constraints = new PathConstraints(
-            3.0, 4.0,
+            4.0, 8.0,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        
+        public Command pathfindingCommand = AutoBuilder.pathfindToPose(targetPose, constraints, 4.0);
+
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
         
@@ -541,11 +544,9 @@ public class RobotContainer {
             m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
         //DYNAMIC PATH PLANNING
-            m_operatorController.b().onTrue(AutoBuilder.pathfindToPose(
-            targetPose,
-            constraints,
-            0.0 // Goal end velocity in meters/sec
-        ));
+            m_operatorController.b().onTrue(pathfindingCommand);
+
+            
         //FEEDER
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
