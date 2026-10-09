@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.commands;
 
 import static frc.robot.Constants.LocalizationConstants.*;
 
@@ -14,14 +14,16 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.VisionConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Supplier;
 
-public class LocalizationSubsystem extends SubsystemBase {
+/** Continuously updates pose without reserving the drivetrain or interrupting alignment. */
+public class LocalizationCommand extends Command {
   private final Supplier<Rotation2d> gyro;
   private final Supplier<SwerveModulePosition[]> modules;
   private final AprilTagFieldLayout layout =
@@ -34,7 +36,7 @@ public class LocalizationSubsystem extends SubsystemBase {
   private double lastAcceptedTime = Double.NEGATIVE_INFINITY;
   private double resetTime = Double.NEGATIVE_INFINITY;
 
-  public LocalizationSubsystem(Supplier<Rotation2d> gyro,
+  public LocalizationCommand(Supplier<Rotation2d> gyro,
       Supplier<SwerveModulePosition[]> modules) {
     this.gyro = gyro;
     this.modules = modules;
@@ -46,7 +48,7 @@ public class LocalizationSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void execute() {
     double now = Timer.getFPGATimestamp();
     estimator.updateWithTime(now, gyro.get(), modules.get());
     var observations = new ArrayList<VisionSubsystem.Observation>();
@@ -97,6 +99,22 @@ public class LocalizationSubsystem extends SubsystemBase {
     posePublisher.set(getRobotPose());
     SmartDashboard.putBoolean("Robot/Localization/HasValidPoseSensorResult",
         hasValidPoseSensorResult());
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
+  }
+
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    lastAcceptedTime = Double.NEGATIVE_INFINITY;
+    SmartDashboard.putBoolean("Robot/Localization/HasValidPoseSensorResult", false);
   }
 
   public Pose2d getRobotPose() {

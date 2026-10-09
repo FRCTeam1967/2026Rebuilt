@@ -9,9 +9,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.Autos;
+import frc.robot.commands.AlignToHub;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.LocalizationSubsystem;
+import frc.robot.commands.LocalizationCommand;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,9 +29,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  // Constructing the subsystem registers periodic(), even with no mechanisms attached.
-  @SuppressWarnings("unused")
-  private final LocalizationSubsystem m_localization = new LocalizationSubsystem(
+  // One persistent localization command; alignment reads its estimated pose.
+  private final LocalizationCommand m_localization = new LocalizationCommand(
       () -> new Rotation2d(),
       RobotContainer::dummyModulePositions);
 
@@ -38,13 +41,31 @@ public class RobotContainer {
       new SwerveModulePosition(), new SwerveModulePosition()
     };
   }
+  // This project has no motor-driving subsystem yet. Replace this requirement with
+  // the real drivetrain AND replace previewDriveOutput with its robot-relative drive method.
+  private final SubsystemBase m_alignmentPreview = new SubsystemBase("Alignment Preview") {};
+
+  private void previewDriveOutput(ChassisSpeeds speeds) {
+    // Preview only: no motors are driven and no simulated movement is fed into localization.
+    SmartDashboard.putNumber("Robot/HubAlignment/Requested Omega rad per sec",
+        speeds.omegaRadiansPerSecond);
+  }
+
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     SmartDashboard.putBoolean("Robot/Localization/UsingDummyOdometry", true);
+    SmartDashboard.putBoolean("Robot/HubAlignment/Preview Only", true);
     configureBindings();
+    CommandScheduler.getInstance().schedule(m_localization);
+    // Restore the continuous command after cancelAll(), including the existing testInit().
+    CommandScheduler.getInstance().getDefaultButtonLoop().bind(() -> {
+      if (!m_localization.isScheduled()) {
+        CommandScheduler.getInstance().schedule(m_localization);
+      }
+    });
   }
 
   /**
@@ -60,6 +81,13 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
+
+    // Hold A to face the alliance hub; releasing A stops the rotation request.
+    m_driverController.a().whileTrue(new AlignToHub(
+        m_alignmentPreview,
+        m_localization::getRobotPose,
+        m_localization::hasValidPoseSensorResult,
+        this::previewDriveOutput));
 
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }

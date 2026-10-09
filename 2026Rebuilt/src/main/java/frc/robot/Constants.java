@@ -53,6 +53,19 @@ public final class Constants {
     private LocalizationConstants() {}
   }
 
+  public static final class HubAlignmentConstants {
+    // Hub center from the supplied reference's core/constants.py, blue-origin field frame.
+    public static final Translation2d kBlueHub = new Translation2d(4.625, 4.030);
+    // Initial tuning: PID input radians, output radians/second. Tune on the real robot.
+    public static final double kP = 4.0;
+    public static final double kMaxOmegaRadiansPerSecond = 2.0;
+    public static final double kToleranceRadians = Math.toRadians(2.0);
+    // Zero aims the front (+X) at the hub; use PI for a rear-facing shooter.
+    public static final double kShooterHeadingOffsetRadians = 0.0;
+    public static final double kMinTargetDistanceMeters = 0.10;
+    private HubAlignmentConstants() {}
+  }
+
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
