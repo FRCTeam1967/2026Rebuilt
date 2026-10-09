@@ -24,6 +24,7 @@ import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Visabelle;
+import org.littletonrobotics.junction.Logger;
 //heloo
 import java.util.function.DoubleSupplier;
 
@@ -243,8 +244,10 @@ public class Yeeter extends SubsystemBase {
   public double getNecessarySpeed(DoubleSupplier distanceToHub) {
     double distance = distanceToHub.getAsDouble();
     double speed = speedTable.get(distance);
-    DogLog.log("Yeeter/distance", distance);
-    DogLog.log("Yeeter/target", speed);
+    //DogLog.log("Yeeter/distance", distance);
+    //DogLog.log("Yeeter/target", speed);
+    Logger.recordOutput("Yeeter", distance);
+    Logger.recordOutput("Yeeter", speed);
     return speed;
   }
 

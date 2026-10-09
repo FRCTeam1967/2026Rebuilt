@@ -32,6 +32,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
+import org.littletonrobotics.junction.Logger;
+
 
 
 public class Climb extends SubsystemBase {  

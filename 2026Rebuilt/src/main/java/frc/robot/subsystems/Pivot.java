@@ -18,6 +18,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import org.littletonrobotics.junction.Logger;
 
 import dev.doglog.DogLog;
 
@@ -277,14 +278,20 @@ public class Pivot extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     //tab.addNumber("current pivot pos degrees", () -> (motor.getPosition().getValueAsDouble()/Constants.Pivot.GEAR_RATIO)*360);
-    // double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
-    // double rotorPosition = motor.getPosition().getValueAsDouble();
+    double encoderPosition = absEncoder.getAbsolutePosition().getValueAsDouble();
+    double rotorPosition = motor.getPosition().getValueAsDouble();
     // DogLog.log("Pivot/abs encoder pos", encoderPosition*360);
     // DogLog.log("Pivot/current pos degrees", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
     // DogLog.log("Pivot/current pos revs", (rotorPosition/Constants.Pivot.GEAR_RATIO));
     // DogLog.log("Pivot/abs encoder pos revs", encoderPosition);
     // DogLog.log("Pivot/pivot reached?", isReached(rotorPosition));
     // DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
+    
+    Logger.recordOutput("Pivot Absolute Encoder (deg)", (encoderPosition*360));
+    Logger.recordOutput("Pivot Rotor (deg)", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
+    Logger.recordOutput("Pivot Target (deg)", revsToMove/Constants.Pivot.GEAR_RATIO*360);
+
+
 
     if (Constants.Pivot.verboseLogging) {
       //DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());

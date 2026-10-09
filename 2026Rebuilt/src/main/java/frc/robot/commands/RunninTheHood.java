@@ -3,6 +3,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TheHood;
 
+import org.littletonrobotics.junction.Logger;
+
 public class RunninTheHood extends Command {
 
   private final TheHood hood;
@@ -23,6 +25,7 @@ public class RunninTheHood extends Command {
   @Override
   public void execute() {
     hood.moveTo(targetPosRevs); //changed name to reflect parameter type and not cause confusion
+
   }
 
   // Called once the command ends or is interrupted.

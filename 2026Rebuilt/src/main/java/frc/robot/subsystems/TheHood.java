@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -173,8 +174,10 @@ public class TheHood extends SubsystemBase {
   public void periodic() {
     //resetEncoder();
      double position = hoodMotor.getPosition().getValueAsDouble();
-     DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
-     DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
+     //DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
+     //DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
+
+     Logger.recordOutput("Hood/Hood Position (deg)", (position/Constants.Hood.GEAR_RATIO)*360);
     // DogLog.log("Hood/target", revsToMove);
     // DogLog.log("Hood/at Target?", isReached());
     // DogLog.log("Hood/Rotor Rotations", position);

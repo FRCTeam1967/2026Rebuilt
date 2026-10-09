@@ -18,8 +18,14 @@ import dev.doglog.DogLog;
 import dev.doglog.DogLogOptions;
 import edu.wpi.first.networktables.StructPublisher;
 
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-public class Robot extends TimedRobot {
+public final class Robot {
   private RobotContainer m_robotContainer;
   private Autoes autoes;
 
@@ -27,13 +33,13 @@ public class Robot extends TimedRobot {
 
   private final StructPublisher<Pose2d> choreoPublisher;
   //private final NetworkTableListener autoPublisher;
-  
+
   public Robot() {
     choreoPublisher = NetworkTableInstance.getDefault().getTable("limelight-front").getStructTopic("Limelight Pose", Pose2d.struct).publish();
    
   }
 
-  @Override
+  
   public void robotInit() {
     DogLog.setEnabled(Constants.Logging.enabled);
     DogLogOptions options = new DogLogOptions()
@@ -52,7 +58,7 @@ public class Robot extends TimedRobot {
     autoes = m_robotContainer.autoes;
   }
 
-  @Override
+
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
     //DogLog.log("yeeter Speed1", m_robotContainer.yeeter.getMotorVelocity());
@@ -69,7 +75,7 @@ public class Robot extends TimedRobot {
    * 1khz update rate is utilized for frame-by-frame motion while the robot's IMU corrects for any drift over time.
    */
 
-  @Override
+
   public void disabledInit() {
     //TODO: check if this is ok; limelight stuff used to be in periodic but I moved it here
     LimelightHelpers.SetIMUMode("limelight-front", 0);
@@ -78,14 +84,14 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-back", 200);
   }
 
-  @Override
+ 
   public void disabledPeriodic() {
   }
 
-  @Override
+ 
   public void disabledExit() {}
 
-  @Override
+  
   public void autonomousInit() {
     LimelightHelpers.SetIMUMode("limelight-front", 0); // robot gyro
     LimelightHelpers.SetThrottle("limelight-front", 0); //used to be 50
@@ -93,22 +99,59 @@ public class Robot extends TimedRobot {
     LimelightHelpers.SetThrottle("limelight-back", 0); //used to be 50
   }
 
-  @Override
+ 
   public void autonomousPeriodic() {
    //removed LL IMU Mode setting bc its also in init
   }
 
-  @Override
+ 
   public void autonomousExit() {}
 
-  @Override
+  
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
     m_robotContainer.visabelleUpdate.setFirstVisionPose();
+
+    // Record metadata
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
+
+        // Set up data receivers & replay source
+    switch (Constants.currentMode) {
+      case REAL:
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        // Replaying a log, set up replay source
+        //setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        break;
+    }
+     Logger.start();
   }
 
-  @Override
+ 
   public void teleopPeriodic() {
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
 
@@ -116,25 +159,27 @@ public class Robot extends TimedRobot {
     // LimelightHelpers.SetIMUMode("limelight-back", 0);
   }
 
-  @Override
+  
   public void teleopExit() {}
 
-  @Override
+
   public void testInit() {}
 
-  @Override
+
   public void testPeriodic() {}
 
-  @Override
+
   public void testExit() {}
   
   public void simulationInit() {
     m_robotContainer.pivot.simulationInit();
   }
 
-  @Override
   public void simulationPeriodic() {
     m_robotContainer.climb.simulationPeriodic();
     m_robotContainer.pivot.simulationPeriodic();
   }
-}
+
+  }
+
+
