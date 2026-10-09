@@ -38,7 +38,6 @@ import frc.robot.commands.RunYeeter;
 import frc.robot.generated.TunerConstants;
 import frc.robot.commands.RunIndexer;
 import frc.robot.commands.RunEater;
-
 /** Add your docs here. */
 public class Autoes {
   private final AutoChooser autoChooserLOL = new AutoChooser();
@@ -94,14 +93,15 @@ public class Autoes {
     tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
     //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
   }
+  
 
   private SequentialCommandGroup shootSequence() {
     return new SequentialCommandGroup(
-        (m_robotContainer.swerve.applyRequest(() ->
-            m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.visabelle.getAngleToHub()))
-                .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
-                .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
-        ).withTimeout(0.5),        
+      (m_robotContainer.swerve.applyRequest(() ->
+                m_robotContainer.driveAtAngle.withTargetDirection(new Rotation2d(m_robotContainer.visabelle.getAngleToHub()))
+                    .withVelocityX(-m_robotContainer.m_driverController.getLeftY() * m_robotContainer.MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_robotContainer.m_driverController.getLeftX() * m_robotContainer.MaxSpeed)) // Drive left with negative X (left)
+            ).withTimeout(0.5),        
         new ParallelCommandGroup( 
           new SequentialCommandGroup( 
               new ParallelCommandGroup(
@@ -120,64 +120,68 @@ public class Autoes {
                           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
                           new SequentialCommandGroup(
-                              new WaitCommand(2.0), 
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
-                          )
-                      )
-                  )
-              )
-          )
-          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
-          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
-        ).withTimeout(6)
-      );
-  }
-
-      private SequentialCommandGroup shootSequenceConstant() {
-    return new SequentialCommandGroup(
-        new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
-        new ParallelCommandGroup( 
-          new SequentialCommandGroup( 
-              new ParallelCommandGroup(
-                  new SequentialCommandGroup(
-                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
-
-                      new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
-                  ),
-                  new SequentialCommandGroup(
-                      new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
-
-                      new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
-                      
-                      new ParallelCommandGroup(
-                          new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
-                          new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
-
-                          new SequentialCommandGroup(
                               new WaitCommand(1.0), 
                               new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
-                              new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+                              new ParallelCommandGroup(
+                                  new SequentialCommandGroup(
+                                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, false)    
+                                  ),
+                                  new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+                              )
                           )
                       )
                   )
               )
           )
-          // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
-          //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
-        ).withTimeout(6)
+      ).withTimeout(6)
       );
   }
 
-  private SequentialCommandGroup intakeSequence() {
-    return new SequentialCommandGroup(new ParallelCommandGroup(
+  // private SequentialCommandGroup shootSequenceConstant() {
+  //   return new SequentialCommandGroup(
+  //       new AimHub(m_robotContainer, m_robotContainer.visabelle).withTimeout(0.5),
+  //       new ParallelCommandGroup( 
+  //         new SequentialCommandGroup( 
+  //             new ParallelCommandGroup(
+  //                 new SequentialCommandGroup(
+  //                     new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
+  //                     new RunYeeter(m_robotContainer.yeeter, () -> (Constants.Yeeter.YEETER_AUTO_SPEED), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION)
+  //                 ),
+  //                 new SequentialCommandGroup(
+  //                     new WaitUntilCommand(() -> m_robotContainer.yeeter.reachedYeeterSpeed(false)), //now this will check for the higher speed TODO: test if the balls start feeding within the 3 sec and if there is any cases they don't
+
+  //                     new RunFeeder(m_robotContainer.feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
+                      
+  //                     new ParallelCommandGroup(
+  //                         new RunFeeder(m_robotContainer.feeder, Constants.Feeder.FEEDER_SPEED),
+  //                         new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
+
+  //                         new SequentialCommandGroup(
+  //                             new WaitCommand(1.0), 
+  //                             new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
+  //                             new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(1),
+  //                             new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false),
+  //                             new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED).withTimeout(2)
+  //                         )
+  //                     )
+  //                 )
+  //             )
+  //         )
+  //         // new RunCommand(() -> swerve.applyRequest(() -> drive.withVelocityX(0).withVelocityY(0)
+  //         //     .withRotationalRate(Math.sin(Timer.getFPGATimestamp() * 10) * MaxAngularRate * 0.3)), swerve)
+  //       ).withTimeout(6)
+  //     );
+  // }
+
+  private ParallelCommandGroup intakeSequence() {
+    return new ParallelCommandGroup(
       new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
       new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
-    ));
+    );
   }
 
   private AutoRoutine hubScore() {
@@ -820,7 +824,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     );
     trenchNeutral.done().onTrue(intake1.cmd());
     intake1.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      intakeSequence()
     );
     intake1.done().onTrue(shoot1.cmd()); //TODO: test if as we go back from neutral zone, are there fuel we can intake?
 
@@ -831,7 +835,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack.done().onTrue(intake2.cmd());
     intake2.active().whileTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      intakeSequence()
     );
     intake2.done().onTrue(shoot2.cmd());
     shoot2.done().onTrue(shootSequence());
@@ -841,7 +845,6 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
     // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() >= 27).onTrue(intakeMore.cmd());//if true then intake 
     // //  //write intake for fuel traj if true 
     // atNeutral.and(()-> disSensor.getDistance().getValueAsDouble() < 27).onTrue(shootClimb.cmd());
-
     return routine;
   }
 
