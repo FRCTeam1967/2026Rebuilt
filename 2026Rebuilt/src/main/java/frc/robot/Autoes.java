@@ -484,7 +484,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shootToCenter.done().onTrue(intakeMore2.cmd());
     intakeMore2.active().onTrue(
-      new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
+      intakeSequence()
     );
     intakeMore2.done().onTrue(goBack2.cmd());
     goBack2.done().onTrue(shootSequence());
