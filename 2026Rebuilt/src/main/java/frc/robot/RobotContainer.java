@@ -161,10 +161,10 @@ public class RobotContainer {
                 )
             );
 
-            /* reset gyro */
+            //BUTTON BINDING: REZERO
             m_driverController.start().onTrue(swerve.runOnce(() -> swerve.seedFieldCentric()));//.seedFieldCentric()
 
-            //POV buttons
+            //BUTTON BINDING: POV buttons
             m_driverController.povUp().whileTrue(swerve.applyRequest(() ->
             drive.withVelocityX(0.2 * MaxSpeed) // Drive forward with negative Y (forward)
                 .withVelocityY(0 * MaxSpeed) // Drive left with negative X (left)
@@ -198,7 +198,7 @@ public class RobotContainer {
 
             swerve.registerTelemetry(logger::telemeterize);
 
-            /* defense mode */
+            //BUTTON BINDING: DEFENSE MODE
             m_driverController.leftBumper().whileTrue(swerve.applyRequest(() -> brake));
             
             // m_driverController.x().whileTrue(
@@ -218,7 +218,7 @@ public class RobotContainer {
             updateWinAuto.whileFalse(new RunCommand(() -> wonAuto(matchTab)));
 
         //VISION
-            // hub alignment but with localization
+            //BUTTON BINDING: SERVOING / hub alignment but with localization
             m_driverController.rightTrigger().whileTrue(
                 swerve.applyRequest(() ->
                     driveAtAngle.withTargetDirection(new Rotation2d(visabelle.getAngleToHub()))
@@ -227,7 +227,7 @@ public class RobotContainer {
                 )
             );
 
-            //snap to hub
+            //BUTTON BINDING: snap to hub
             m_driverController.rightBumper().whileTrue(
                 swerve.applyRequest(() ->
                     driveAtAngle.withTargetDirection(Rotation2d.kPi)
@@ -236,10 +236,10 @@ public class RobotContainer {
                 )
             );
 
-            //align to tower
+            //BUTTON BINDING: TOWER ALIGN
             m_driverController.leftTrigger().whileTrue(new AlignTowerPose(swerve));
 
-            // yaw setter --> 0 faces hub 
+            //BUTTON BINDING: RESET GYRO / yaw setter --> 0 faces hub 
             m_driverController.x().onTrue(new SequentialCommandGroup(
                 // ROTATION2D IS IN **RADIANS!!!!**
                 // SET YAW IS IN **DEGREES!!!!**
@@ -298,8 +298,8 @@ public class RobotContainer {
             theHood.setDefaultCommand(new RunninTheHood(theHood, Constants.Hood.HOOD_MIN));
 
 
-        //SHOOTER
-            m_operatorController.leftTrigger().and(m_operatorController.povRight().negate()).whileTrue(
+        //BUTTON BINDING: SHOOTER
+            m_operatorController.leftTrigger().and(m_operatorController.y().negate()).whileTrue(
                 new ParallelCommandGroup( 
                     new SequentialCommandGroup( 
                         new ParallelCommandGroup(
@@ -318,7 +318,7 @@ public class RobotContainer {
                                     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
 
                                     new SequentialCommandGroup(
-                                        new WaitCommand(1.0), 
+                                        new WaitCommand(0.5), //1.0
                                         new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
                                         new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
                                         new MovePivot(pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
@@ -346,7 +346,7 @@ public class RobotContainer {
             // );
 
 
-            //modified if we're stuck
+        //BUTTON BINDING: JITTER PIVOT SHOOTING
             m_operatorController.leftTrigger().and(m_operatorController.y()).whileTrue(
                 new SequentialCommandGroup(     
                         new ParallelCommandGroup(
@@ -402,7 +402,7 @@ public class RobotContainer {
                 )
                 ); //TODO: add defense mode while the robot is shooting
 
-        //SHUTTLING (FAR)
+        //BUTTON BINDING: SHUTTLING (FAR)
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger().negate()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
@@ -440,7 +440,7 @@ public class RobotContainer {
                 )
             ); 
 
-        //SHUTTLING (SHORT)
+        //BUTTON BINDING: SHUTTLING (SHORT)
             m_operatorController.leftBumper().and(m_operatorController.y()).and(m_operatorController.rightTrigger().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MAX).withTimeout(0.5), 
@@ -478,7 +478,7 @@ public class RobotContainer {
                 )
             ); 
 
-        //SHUTTLE WHILE INTAKING
+        //BUTTON BINDING: SHUTTLE WHILE INTAKING
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new ParallelCommandGroup(
@@ -510,7 +510,7 @@ public class RobotContainer {
                 )  
             );
 
-        //hood back down
+        //BUTTON BINDING: HOOD DOWN
             m_operatorController.povLeft().whileTrue(
                 //new SequentialCommandGroup(
                     new RunninTheHood(theHood, Constants.Hood.HOOD_MIN)
@@ -521,13 +521,13 @@ public class RobotContainer {
             //m_operatorController.y().whileTrue(new RunHood(hood, Constants.Hood.HOOD_MAX));
 
 
-        //PIVOT
+        //BUTTON BINDING: PIVOT DOWN/PIVOT UP
             //m_operatorController.leftTrigger().whileTrue(new MovePivot(pivot, Constants.Pivot.SAFE));
-            m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
-            m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
+            m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false));
+            m_operatorController.b().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
 
-        //FEEDER
+        //BUTTON BINDING: REVERSE FEEDER
             //isFeederStalling.whileTrue(new RunFeeder(feeder, 0.0));
 
             m_operatorController.rightBumper().whileTrue(
@@ -538,7 +538,7 @@ public class RobotContainer {
             );
 
 
-        //INTAKE
+        //BUTTON BINDING: RUN INTAKE
             m_operatorController.rightTrigger().and(m_operatorController.x().negate()).and(m_operatorController.leftBumper().negate()).whileTrue(
                 new ParallelCommandGroup(
                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
@@ -549,7 +549,7 @@ public class RobotContainer {
                 )
             );
 
-            //eject
+        //BUTTON BINDING: REVERSE INTAKE
             m_operatorController.rightTrigger().and(m_operatorController.x()).and(m_operatorController.leftBumper().negate()).whileTrue(
                  new ParallelCommandGroup(  
                     new RunEater(eater, -Constants.Eater.EATER_MOTOR_SPEED),
@@ -565,7 +565,7 @@ public class RobotContainer {
             // );
 
 
-        //CLIMB
+        //BUTTON BINDING: RUN CLIMB
             //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
             m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
             m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
