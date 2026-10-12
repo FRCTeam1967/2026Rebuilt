@@ -402,6 +402,11 @@ public class RobotContainer {
                 )
                 ); //TODO: add defense mode while the robot is shooting
 
+        //BUTTON BINDING: SHOOTER STOP SPINUP TOGGLE
+            m_driverController.b().toggleOnTrue(
+                new RunCommand(() -> yeeter.stopMotor(), yeeter)
+            );
+        
         //BUTTON BINDING: SHUTTLING (FAR)
             m_operatorController.leftBumper().and(m_operatorController.rightTrigger().negate()).and(m_operatorController.x().negate()).whileTrue(
                 new ParallelCommandGroup(
