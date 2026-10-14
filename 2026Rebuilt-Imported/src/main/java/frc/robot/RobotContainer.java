@@ -65,6 +65,7 @@ public class RobotContainer {
     
 
     private void configureBindings() {
+        //m_operatorController.northFace().onTrue(new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED));
         m_operatorController.northFace().onTrue(new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED));
     }
 

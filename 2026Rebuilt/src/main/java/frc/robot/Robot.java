@@ -21,7 +21,7 @@ import edu.wpi.first.networktables.StructPublisher;
 
 public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
-  private Autoes autoes;
+ 
 
   boolean enableLimelight = false;
 
@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
     }
 
     m_robotContainer = new RobotContainer();
-     autoes = m_robotContainer.autoes;
+   
   }
 
   @Override
@@ -109,11 +109,10 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
-    m_robotContainer.visabelleUpdate.setFirstVisionPose();
 
-    m_robotContainer.autoDone.onTrue(
-      new InstantCommand(() -> m_robotContainer.wonAuto(m_robotContainer.matchTab))
-    );
+
+    
+    
 
   }
 
@@ -138,13 +137,5 @@ public class Robot extends TimedRobot {
   @Override
   public void testExit() {}
   
-  public void simulationInit() {
-    m_robotContainer.pivot.simulationInit();
   }
 
-  @Override
-  public void simulationPeriodic() {
-    m_robotContainer.climb.simulationPeriodic();
-    m_robotContainer.pivot.simulationPeriodic();
-  }
-}

@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.generated.TunerConstants;
 
 public final class Constants {
     public static class OperatorConstants{
@@ -119,6 +118,7 @@ public final class Constants {
         public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -100.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
+        public static final double KRAKEN_MAX_RPS = 100.0; 
     }
 
     public static class Indexer{
@@ -209,7 +209,6 @@ public final class Constants {
         public static final double LIMELIGHT_ALIGN_CENTER_OFFSET = -0.1431036;
         public static final double LIMELIGHT_AUTO_LEFT_OFFSET = -0.11;
         public static final double LIMELIGHT_L4_LEFT_OFFSET = -0.1;
-        public static final double ALIGNMENT_SPEED = (Math.abs(Math.pow(0.5, 3))> 0 ? Math.pow(0.5, 3) : 0) * TunerConstants.maxSpeed; //0.43 //0.425
         public static final double ALIGNMENT_THRESHOLD = 1.0;
         public static final double FORWARD_ALIGNMENT_THRESHOLD = 0.0;
         public static final double ALIGNMENT_LEFT_OFFSET = 9.2; //10.54;//10.74;//1.0; //1.1; //9.76; //TODO: test at EPA
