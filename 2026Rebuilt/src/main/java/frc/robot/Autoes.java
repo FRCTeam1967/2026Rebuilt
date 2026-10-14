@@ -830,9 +830,10 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     shoot1.done().onTrue( //TODO: test if starting shooting from the trench pos results in missed balls
       shootSequence()
+      .andThen(new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, false).withTimeout(0.7))
       .andThen(goBack.cmd())
     );
-
+  
     goBack.done().onTrue(intake2.cmd());
     intake2.active().whileTrue(
       intakeSequence()
@@ -898,8 +899,8 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack.done().onTrue(
       new SequentialCommandGroup(
-          new MoveClimbUp(m_robotContainer.climb, -15),
-          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(4),
+          new AlignTowerPose(m_robotContainer.swerve).withTimeout(5),
           new MoveClimbtoZero(m_robotContainer.climb, 15)
         )
     );
@@ -1007,12 +1008,11 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
         .andThen(hubTowerShoot.cmd())
       );
       hubTowerShoot.active().onTrue(
-        new MoveClimbUp(m_robotContainer.climb, -15)
+        new MoveClimbUp(m_robotContainer.climb, -15).withTimeout(2.0)
       );
       hubTowerShoot.done().onTrue(
         new SequentialCommandGroup(
-          new MoveClimbUp(m_robotContainer.climb, -15),
-          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3),
+          new AlignTowerPose(m_robotContainer.swerve).withTimeout(3.5),
           //climbAdjust.cmd(),
           new MoveClimbtoZero(m_robotContainer.climb, 15)
         )
