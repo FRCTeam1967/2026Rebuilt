@@ -217,19 +217,28 @@ public class Yeeter extends SubsystemBase {
   // }
 
   private void populateTreeMap() {
-    //distance from hub (m), shooter speeds
-    speedTable.put(1.524+1.02235, 63.5); //5ft //TESTED
-    speedTable.put(1.676+1.02235, 64.5); //5.5ft //TESTED
-    speedTable.put(1.8288+1.02235, 65.0); //6ft //TESTED
-    speedTable.put(1.9812+1.02235, 67.0); //6.5ft //TESTED
-    speedTable.put(2.1366+1.02235, 69.5);//7ft //TESTED
-    speedTable.put(2.286+1.02235, 70.0); //7.5ft //TESTED
-    speedTable.put(2.4384+1.02235, 70.5); //8ft //TESTED
-    speedTable.put(2.5908+1.02235,71.0); //8.5ft //TESTED
-    speedTable.put(2.7432+1.02235, 72.5); //9ft //TESTED
-    speedTable.put(2.8956+1.02235, 73.5); //9.5ft TESTED
-    speedTable.put(3.048+1.02235, 72.5); //10ft unTESTED
-    // speedTable.put(3.2004+1.02235, 73.0); //10.5 //78 UNTESTED
+    /*base # is distance from hub to front of bumpers
+      added 1.011675 (formerly 1.02235) accounting for dist from center of hub to front of hub
+      & dist from front of bumper to limelight
+
+      when measuring from the corner of the hub, to maintain the same dist
+      from the center of the hub to limelight...
+      measure your distance - 9.734 in. ex. 5 ft (60 in) -> 50.266 in.
+
+      (total dist from center of hub to limelight in meters, shooter speed)
+    */
+    speedTable.put(1.524+1.011675, 63.5); //5ft from front of hub to front of bumpers
+    speedTable.put(1.676+1.011675, 64.5); //5.5ft //untested
+    speedTable.put(1.8288+1.011675, 65.0); //6ft 
+    speedTable.put(1.9812+1.011675, 67.5); //6.5ft 
+    speedTable.put(2.1366+1.011675, 69.5);//7ft //untested onwards
+    speedTable.put(2.286+1.011675, 70.0); //7.5ft 
+    speedTable.put(2.4384+1.011675, 70.5); //8ft 
+    speedTable.put(2.5908+1.011675,71.0); //8.5ft 
+    speedTable.put(2.7432+1.011675, 72.5); //9ft 
+    speedTable.put(2.8956+1.011675, 73.5); //9.5ft 
+    speedTable.put(3.048+1.011675, 72.5); //10ft unTESTED
+    // speedTable.put(3.2004+1.011675, 73.0); //10.5 //78 UNTESTED
     // speedTable.put(3.3528+1.02235, 73.5); //11ft // UNTESTED
     // speedTable.put(3.3288, 68.0); //6 feet
     // speedTable.put(3.9384, 75.0); //8 feet
