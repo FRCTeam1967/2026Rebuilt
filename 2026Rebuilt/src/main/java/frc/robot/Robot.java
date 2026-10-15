@@ -27,7 +27,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public final class Robot {
   private RobotContainer m_robotContainer;
-  private Autoes autoes;
+ 
 
   boolean enableLimelight = false;
 
@@ -111,7 +111,6 @@ public final class Robot {
   public void teleopInit() {
     LimelightHelpers.SetThrottle("limelight-front", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0);
-    m_robotContainer.visabelleUpdate.setFirstVisionPose();
 
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -171,8 +170,6 @@ public final class Robot {
 
   public void testExit() {}
   
-  public void simulationInit() {
-    m_robotContainer.pivot.simulationInit();
   }
 
   public void simulationPeriodic() {
@@ -180,6 +177,6 @@ public final class Robot {
     m_robotContainer.pivot.simulationPeriodic();
   }
 
-  }
+
 
 
