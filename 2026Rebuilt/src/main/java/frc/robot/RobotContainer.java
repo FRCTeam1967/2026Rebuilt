@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 import java.util.Optional;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.FireAnimation;
@@ -15,6 +14,10 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
+import edu.wpi.first.math.geometry.Pose2d;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -24,13 +27,16 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import frc.robot.commands.*;
-import edu.wpi.first.wpilibj2.command.button.*;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.PowerDistribution;
-
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -62,8 +68,18 @@ public class RobotContainer {
         public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
 
     //mechanism
-    public static final CANBus CANBus = new CANBus("Default Name");
-    public final Eater eater = new Eater();
+        public static final CANBus CANBus = new CANBus("Default Name");
+        public final Pivot pivot = new Pivot();
+        public final Eater eater = new Eater();
+        public final Indexer indexer = new Indexer();
+        public final Feeder feeder = new Feeder();
+        public final Yeeter yeeter = new Yeeter(this);
+        public final TheHood theHood = new TheHood();
+        public final Climb climb = new Climb();
+        public Autoes autoes = new Autoes(this);
+
+        //public DoubleSupplierSubscriber speedTunable = DogLog.tunable("Tunable Speed", () -> () -> Constants.Yeeter.YEETER_SPEED);
+        //public DoubleSubscriber angleTunable = DogLog.tunable("Tunable Angle", Constants.Hood.HOOD_ANGLE);
 
     //control
         public final CommandXboxController m_driverController = new CommandXboxController(0);
@@ -114,6 +130,8 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+        autoes.configDashboard(matchTab);
+        visabelle.configDashboard(matchTab);
         //theHood.configDashboard(matchTab);
         //yeeter.configDashboard(matchTab);
         //pivot.configDashboard(matchTab);
@@ -122,6 +140,11 @@ public class RobotContainer {
         
         // Schedule the selected auto during the autonomous period
         // matchTab.add("auto chooser LOL", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+        ally = DriverStation.getAlliance(); 
+    
+        //for vision servoing
+        driveAtAngle.HeadingController.setPID(5, 0.0, 0.0); //TODO: took PID from tuner constants, need to check
+        driveAtAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
     
 
