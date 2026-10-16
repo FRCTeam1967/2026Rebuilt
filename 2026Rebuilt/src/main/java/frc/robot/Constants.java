@@ -146,6 +146,7 @@ public final class Constants {
         public static final int EATER_MOTOR_ID = 11;
         public static final double EATER_MOTOR_SPEED = -100.0;
         public static final boolean verboseLogging = false || Logging.verboseLogging;
+        public static final double KRAKEN_MAX_RPS = 100.0; 
     }
 
     public static class Indexer{
