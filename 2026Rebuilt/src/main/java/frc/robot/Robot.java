@@ -9,13 +9,15 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-
-import java.util.logging.Logger;
-
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.geometry.Pose2d;
+import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.wpilibj.RobotBase;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,8 +45,9 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
-
-    Pathfinding.setPathfinder(new LocalADStarAK());
+    if (RobotBase.isReal() || RobotBase.isSimulation()) {
+      Pathfinding.setPathfinder(new LocalADStarAK());
+    }
     DogLog.setEnabled(Constants.Logging.enabled);
     DogLogOptions options = new DogLogOptions()
       .withCaptureConsole(Constants.Logging.captureConsole)
@@ -54,16 +57,32 @@ public class Robot extends LoggedRobot {
       .withLogExtras(Constants.Logging.enableExtras);
     DogLog.setOptions(options);
 
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DogLog.log("PathFollowing/CurrentPose", pose));
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DogLog.log("TargetPose", pose));
-    
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> {
+        DogLog.log("PathFollowing/CurrentPose", pose);
+        Logger.recordOutput("PathFollowing/currentPose", pose); 
+    });
 
-    if (Constants.Logging.capturePDH) {
-      DogLog.setPdh(new PowerDistribution());
-    }
+    PathPlannerLogging.setLogTargetPoseCallback(pose -> {
+        DogLog.log("PathFollowing/TargetPose", pose);
+        Logger.recordOutput("PathFollowing/targetPose", pose); 
+    });
 
-    m_robotContainer = new RobotContainer();
-    autoes = m_robotContainer.autoes;
+    PathPlannerLogging.setLogActivePathCallback(poses -> {
+        Pose2d[] poseArray = poses.toArray(new Pose2d[0]);
+        DogLog.log("PathFollowing/ActivePath", poseArray);
+        Logger.recordOutput("PathFollowing/activePath", poseArray); 
+    });
+
+
+if (Constants.Logging.capturePDH) {
+  DogLog.setPdh(new PowerDistribution());
+}
+
+m_robotContainer = new RobotContainer();
+autoes = m_robotContainer.autoes;
+
+PathfindingCommand.warmupCommand().schedule();
+
   }
 
   @Override
@@ -152,5 +171,8 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     m_robotContainer.climb.simulationPeriodic();
     m_robotContainer.pivot.simulationPeriodic();
+    if (m_robotContainer.swerve != null) {
+        m_robotContainer.swerve.simulationPeriodic();
+    }
   }
 }

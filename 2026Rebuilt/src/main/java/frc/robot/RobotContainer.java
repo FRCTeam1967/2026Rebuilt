@@ -544,7 +544,8 @@ public class RobotContainer {
             m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
         //DYNAMIC PATH PLANNING
-            m_operatorController.b().onTrue(pathfindingCommand);
+            m_driverController.b().onTrue(
+                new ProxyCommand(() -> pathfindingCommand));
 
             
         //FEEDER
