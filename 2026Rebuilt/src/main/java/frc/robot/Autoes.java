@@ -480,6 +480,7 @@ private AutoRoutine hTd() { // hub to depot go a little forward shoot
 
     goBack1.done().onTrue(
       shootSequence()
+      .andThen(new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, false).withTimeout(0.7))
       .andThen(shootToCenter.cmd()));
 
     shootToCenter.done().onTrue(intakeMore2.cmd());

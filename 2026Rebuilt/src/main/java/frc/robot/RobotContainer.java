@@ -12,6 +12,9 @@ import com.ctre.phoenix6.controls.TwinkleAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+import dev.doglog.DogLog;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.cameraserver.CameraServer;
@@ -348,8 +351,10 @@ public class RobotContainer {
 
         //BUTTON BINDING: JITTER PIVOT SHOOTING
             m_operatorController.leftTrigger().and(m_operatorController.y()).whileTrue(
-                new SequentialCommandGroup(     
+                new SequentialCommandGroup(   
+                    new PrintCommand("button pressed"),
                         new ParallelCommandGroup(
+                            new PrintCommand("parallel started"),
                             new ParallelCommandGroup(
                                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
@@ -357,7 +362,7 @@ public class RobotContainer {
                             //new RunCommand(() -> ledSubsystem.runPattern(LEDPattern.solid(Color.kRed)).withName("Revving Up")), //TODO: update color                
 
                             new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), 
+                               new WaitUntilCommand(() -> yeeter.reachedYeeterSpeed(true)), 
                                 
                                 // new ParallelCommandGroup( //green
                                 //     new SequentialCommandGroup(
@@ -372,9 +377,10 @@ public class RobotContainer {
                                 new RunFeeder(feeder, Constants.Feeder.PREP_FEEDER).withTimeout(0.5),
                                 
                                 new ParallelCommandGroup(
+                                    new PrintCommand("reached feeder and indexer"),
                                     new RunFeeder(feeder, Constants.Feeder.FEEDER_SPEED),
                                     new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
-
+                                    
                                     new SequentialCommandGroup(
                                         new WaitCommand(0.5), 
                                         new MovePivot(pivot, Constants.Pivot.JITTER_POS_ONE, false).withTimeout(0.25),
@@ -573,6 +579,7 @@ public class RobotContainer {
         //BUTTON BINDING: RUN CLIMB
             //m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
             m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
+            m_operatorController.povRight().onTrue(new MoveClimbHalfwayDown(climb, 14)); 
             m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
     }
 

@@ -223,6 +223,7 @@ public class Climb extends SubsystemBase {
   public void setSafe(){
     if(getBottomSensor()){
       motor.setPosition(0);
+      motor.set(0);
     }
   }
 
@@ -263,10 +264,11 @@ public class Climb extends SubsystemBase {
     // DogLog.log("Climb/target rotations", rotations);
     // DogLog.log("Climb/rotations", rotorPosition);
     // DogLog.log("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
-    // DogLog.log("Climb/bottom sensor", getBottomSensor());
-    // DogLog.log("Climb/top sensor", getTopSensor());
-
-    if (Constants.Climb.verboseLogging) {
+    DogLog.log("Climb/bottom sensor",isReachedBottomSwitch() );
+    DogLog.log("Climb/top sensor", isReachedTopSwitch());
+    
+    
+   // if (Constants.Climb.verboseLogging) {
       // DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
 
@@ -314,6 +316,3 @@ public class Climb extends SubsystemBase {
 
   }
   */
-  
-  
-}
