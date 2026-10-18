@@ -120,23 +120,23 @@ public class Autoes {
                           new RunIndexer(m_robotContainer.indexer, Constants.Indexer.INDEXER_SPEED),
 
                           new SequentialCommandGroup(
-                              new WaitCommand(1.0), 
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, true),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
-                              new ParallelCommandGroup(
-                                  new SequentialCommandGroup(
-                                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
-                                      new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, false)    
-                                  ),
+                              new WaitCommand(0.5), 
+                              new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, true),
+                            // new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                              //new MovePivot(m_robotContainer.pivot, Constants.Pivot.SLIGHTLY_UP_FROM_DOWN, false).withTimeout(0.5),
+                              //new ParallelCommandGroup(
+                                  //new SequentialCommandGroup(
+                                      //new MovePivot(m_robotContainer.pivot, Constants.Pivot.DOWN_POSITION, false).withTimeout(0.5),
+                                     // new MovePivot(m_robotContainer.pivot, Constants.Pivot.SAFE, false)    
+                                 // ),
                                   new RunEater(m_robotContainer.eater, Constants.Eater.EATER_MOTOR_SPEED)
-                              )
+                              //)
                           )
                       )
                   )
               )
           )
-      ).withTimeout(6)
+      ).withTimeout(5)
       );
   }
 

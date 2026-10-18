@@ -352,10 +352,12 @@ public class RobotContainer {
         //BUTTON BINDING: JITTER PIVOT SHOOTING
             m_operatorController.leftTrigger().and(m_operatorController.y()).whileTrue(
                 new SequentialCommandGroup(   
-                    new PrintCommand("button pressed"),
+                   // new PrintCommand("button pressed"),
                         new ParallelCommandGroup(
-                            new PrintCommand("parallel started"),
+                           // new PrintCommand("parallel started"),
                             new ParallelCommandGroup(
+                                //new RunYeeter(yeeter, () -> (yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()) + Constants.Yeeter.YEETER_SPEED_ADDITION), Constants.Yeeter.YEETER_ACCELERATION).withTimeout(3),  // Constants.Yeeter.YEETER_SPEED + 4.0, Constants.Yeeter.YEETER_ACCELERATION), // TODO: test timeout
+
                                 new RunYeeter(yeeter, () -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub()), Constants.Yeeter.YEETER_ACCELERATION) // Constants.Yeeter.YEETER_SPEED, Constants.Yeeter.YEETER_ACCELERATION) //() -> yeeter.getNecessarySpeed(() -> visabelle.getDisFromHub())
                                 //new RunCommand (() -> candle.setControl(yellowBlink))
                             ),
@@ -404,9 +406,10 @@ public class RobotContainer {
                                 )
                             )
                         )
-                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
                 )
-                ); //TODO: add defense mode while the robot is shooting
+                        //new MovePivot(pivot, Constants.Pivot.DOWN_POSITION)
+                );
+                //); //TODO: add defense mode while the robot is shooting
 
         //BUTTON BINDING: SHOOTER STOP SPINUP TOGGLE
             m_driverController.b().toggleOnTrue(
