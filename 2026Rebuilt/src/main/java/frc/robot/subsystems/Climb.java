@@ -267,6 +267,13 @@ public class Climb extends SubsystemBase {
     // DogLog.log("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
     // DogLog.log("Climb/bottom sensor", getBottomSensor());
     // DogLog.log("Climb/top sensor", getTopSensor());
+    Logger.recordOutput("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
+    Logger.recordOutput("Climb/target rotations", rotations);
+    Logger.recordOutput("Climb/rotations", rotorPosition);
+    Logger.recordOutput("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    Logger.recordOutput("Climb/bottom sensor", getBottomSensor());
+    Logger.recordOutput("Climb/top sensor", getTopSensor());
+
 
     if (Constants.Climb.verboseLogging) {
       // DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
