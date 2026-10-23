@@ -1,33 +1,23 @@
 {
-  "name": "Rebuilt",
-  "isFTC": false,
+  "name": "Elsa",
   "rotations": [
-    {
-      "axis": "x",
-      "degrees": 90
-    },
-    {
-      "axis": "z",
-      "degrees": 270
-    }
+    {"axis": "z", "degrees": 90}
+  ],
+  "position": [
+    0,
+    0,
+    0
   ],
   "cameras": [],
   "components": [
     {
       "zeroedRotations": [
-        {
-          "axis": "x",
-          "degrees": 20
-        },
-        {
-          "axis": "z",
-          "degrees": 90
-        }
+        {"axis": "x", "degrees": 90}
       ],
       "zeroedPosition": [
-        0.0,
-        0.0,
-        0.0
+        0,
+        0,
+        0
       ]
     }
   ]
