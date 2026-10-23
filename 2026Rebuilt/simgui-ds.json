@@ -4,13 +4,17 @@
       "visible": true
     }
   },
+  "Keyboard 2 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
         {},
         {},
         {
-          "decKey": 69,
           "decayRate": 0.0,
           "incKey": 82,
           "keyRate": 0.009999999776482582
@@ -20,7 +24,7 @@
       "buttonCount": 4,
       "buttonKeys": [
         90,
-        88,
+        -1,
         -1,
         -1
       ],
@@ -52,8 +56,8 @@
       "axisCount": 2,
       "buttonCount": 4,
       "buttonKeys": [
-        66,
-        67,
+        69,
+        88,
         86,
         47
       ],
@@ -74,7 +78,7 @@
       "buttonCount": 6,
       "buttonKeys": [
         260,
-        268,
+        66,
         266,
         261,
         269,
@@ -91,6 +95,9 @@
   "robotJoysticks": [
     {
       "guid": "Keyboard1"
+    },
+    {
+      "guid": "Keyboard2"
     }
   ]
 }

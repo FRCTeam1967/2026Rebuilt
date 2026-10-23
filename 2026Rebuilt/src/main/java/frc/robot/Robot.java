@@ -19,7 +19,8 @@ import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.util.PathPlannerLogging;
-
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import dev.doglog.DogLog;
@@ -34,6 +35,7 @@ public class Robot extends LoggedRobot {
   boolean enableLimelight = false;
 
   private final StructPublisher<Pose2d> choreoPublisher;
+  private final Field2d field = new Field2d();
   //private final NetworkTableListener autoPublisher;
   
   public Robot() {
@@ -45,6 +47,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
+    PathfindingCommand.warmupCommand().schedule();
+    //Pathfinding.setPathfinder(new RobotContainer());
     if (RobotBase.isReal() || RobotBase.isSimulation()) {
       Pathfinding.setPathfinder(new LocalADStarAK());
     }
@@ -72,6 +76,7 @@ public class Robot extends LoggedRobot {
         DogLog.log("PathFollowing/ActivePath", poseArray);
         Logger.recordOutput("PathFollowing/activePath", poseArray); 
     });
+    SmartDashboard.putData("Field", field);
 
 
 if (Constants.Logging.capturePDH) {
@@ -80,8 +85,6 @@ if (Constants.Logging.capturePDH) {
 
 m_robotContainer = new RobotContainer();
 autoes = m_robotContainer.autoes;
-
-PathfindingCommand.warmupCommand().schedule();
 
   }
 
@@ -145,6 +148,7 @@ PathfindingCommand.warmupCommand().schedule();
 
   @Override
   public void teleopPeriodic() {
+    
     //DogLog.log("TargetVelocity", () -> Constants.Yeeter.YEETER_SPEED);
 
     // LimelightHelpers.SetIMUMode("limelight-front", 0); //robot gyro
@@ -174,5 +178,6 @@ PathfindingCommand.warmupCommand().schedule();
     if (m_robotContainer.swerve != null) {
         m_robotContainer.swerve.simulationPeriodic();
     }
+    field.setRobotPose(m_robotContainer.swerve.getPose());
   }
 }

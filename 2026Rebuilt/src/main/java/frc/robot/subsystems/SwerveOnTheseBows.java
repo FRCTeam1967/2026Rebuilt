@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -15,6 +16,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
@@ -25,6 +27,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -72,7 +75,19 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     
-    
+    // Pose2d targetPose = new Pose2d(10, 5, Rotation2d.fromDegrees(180));
+
+    //     // Create the constraints to use while pathfinding
+    //     PathConstraints constraints = new PathConstraints(
+    //         4.0, 8.0,
+    //         Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        
+        // public Command pathfindingCommand = AutoBuilder.pathfindToPose(
+        //     targetPose, constraints, 0.0, poseSupplier(),()->getState().Speeds, (speeds, feedforwards) -> setControl(
+        //         m_pathApplyRobotSpeeds.withSpeeds(speeds)
+        //                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+        //                 .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())));
 
     
 
@@ -199,6 +214,11 @@ public class SwerveOnTheseBows extends TunerSwerveDrivetrain implements Subsyste
     );
         
     }
+
+    public Supplier<Pose2d> poseSupplier() {
+        return () -> getState().Pose;
+    }
+
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
