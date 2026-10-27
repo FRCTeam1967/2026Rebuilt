@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package first.robot;
+package org.wpilib.templates.opmode;
 
 import org.wpilib.driverstation.Gamepad;
 import org.wpilib.framework.TimedRobot;
@@ -16,11 +16,12 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
-import first.robot.Drivetrain;
+import org.wpilib.framework.OpModeRobot;
 
-public class Robot extends TimedRobot {
+
+public class Robot extends OpModeRobot {
   private final Gamepad controller = new Gamepad(0);
-  private final Drivetrain drive = new Drivetrain();
+  //private final Drivetrain drive = new Drivetrain();
 
   private final TalonFX motor = new TalonFX(1, CANBus.systemcore(0)); //TODO: change ID & port
 
@@ -28,32 +29,17 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter velocityLimiter = new SlewRateLimiter(3);
   private final SlewRateLimiter rotLimiter = new SlewRateLimiter(3);
 
+
+ public Robot() {}
+
+  /** This function is called exactly once when the DS first connects. */
   @Override
-  public void autonomousPeriodic() {
-    teleopPeriodic();
-    //drive.updateOdometry();
-  }
+  public void driverStationConnected() {}
 
+  /**
+   * This function is called periodically anytime when no opmode is selected, including when the
+   * Driver Station is disconnected.
+   */
   @Override
-  public void teleopPeriodic() {
-    // Get the x velocity. We are inverting this because gamepads return
-    // negative values when we push forward.
-    final var xVelocity =
-        -velocityLimiter.calculate(controller.getLeftY()) * Drivetrain.kMaxVelocity;
-
-    // Get the rate of angular rotation. We are inverting this because we want a
-    // positive value when we pull to the left (remember, CCW is positive in
-    // mathematics). Gamepads return positive values when you pull to
-    // the right by default.
-    final var rot = -rotLimiter.calculate(controller.getRightX()) * Drivetrain.kMaxAngularVelocity;
-
-    drive.arcadeDrive(xVelocity, rot);
-
-    //motor.setThrottle(0.20);
-  }
-
-  @Override
-  public void disabledInit() {
-    //motor.setThrottle(0.0);
-  }
+  public void nonePeriodic() {}
 }
