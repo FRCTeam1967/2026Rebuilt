@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import first.robot.Constants;
@@ -39,7 +40,7 @@ public class Climb extends PeriodicOpMode {
   public Climb(Robot robot) {
     this.robot = robot;
 
-    motor = new TalonFX(Constants.Climb.MOTOR_ID);
+    motor = new TalonFX(Constants.Climb.MOTOR_ID, canbus);
     config = new TalonFXConfiguration();
     bottomSensor = new DigitalInput(Constants.Climb.BOTTOM_SENSOR_CHANNEL);
     topSensor = new DigitalInput(Constants.Climb.TOP_SENSOR_CHANNEL);
