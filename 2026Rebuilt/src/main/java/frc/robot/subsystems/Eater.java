@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
+import org.littletonrobotics.junction.Logger;
+
 public class Eater extends SubsystemBase {
   private TalonFX motor;
   private final CANBus canbus = RobotContainer.CANBus;
@@ -64,6 +66,8 @@ public class Eater extends SubsystemBase {
     // This method will be called once per scheduler run
     //SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
     //SmartDashboard.putNumber("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
+
     Logger.recordOutput("eater speed", motor.getRotorVelocity().getValueAsDouble());
     Logger.recordOutput("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
   }

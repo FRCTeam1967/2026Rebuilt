@@ -20,6 +20,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -177,6 +178,7 @@ public class TheHood extends SubsystemBase {
      //DogLog.log("Hood/Position (deg)", ((position/Constants.Hood.GEAR_RATIO)*360));
      //DogLog.log("Hood/AbsEnc (deg)", getAbsDeg()); 
 
+    SmartDashboard.putNumber("Hood/Hood Position (deg)", (position/Constants.Hood.GEAR_RATIO)*360);
      Logger.recordOutput("Hood/Hood Position (deg)", (position/Constants.Hood.GEAR_RATIO)*360);
     // DogLog.log("Hood/target", revsToMove);
     // DogLog.log("Hood/at Target?", isReached());

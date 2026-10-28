@@ -19,6 +19,7 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
@@ -255,6 +256,7 @@ public class Yeeter extends SubsystemBase {
   public void periodic() {
     double motor1Speed = getMotorVelocity(motor1);
     DogLog.log("Yeeter/Speed1", motor1Speed);
+    SmartDashboard.putNumber("Yeeter/Speed1", motor1Speed);
     Logger.recordOutput("Yeeter/Speed1", motor1Speed);
     // DogLog.log("Yeeter/Speed2", getMotorVelocity(motor2));
 

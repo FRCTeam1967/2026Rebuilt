@@ -287,6 +287,9 @@ public class Pivot extends SubsystemBase {
     // DogLog.log("Pivot/pivot reached?", isReached(rotorPosition));
     // DogLog.log("Pivot/target pivot pos degrees", (revsToMove/Constants.Pivot.GEAR_RATIO)*360);
     
+    SmartDashboard.putNumber("Pivot Absolute Encoder (deg)", (encoderPosition*360));
+    SmartDashboard.putNumber("Pivot Rotor (deg)", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
+    SmartDashboard.putNumber("Pivot Target (deg)", revsToMove/Constants.Pivot.GEAR_RATIO*360);
     Logger.recordOutput("Pivot Absolute Encoder (deg)", (encoderPosition*360));
     Logger.recordOutput("Pivot Rotor (deg)", (rotorPosition/Constants.Pivot.GEAR_RATIO)*360);
     Logger.recordOutput("Pivot Target (deg)", revsToMove/Constants.Pivot.GEAR_RATIO*360);

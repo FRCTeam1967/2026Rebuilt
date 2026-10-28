@@ -11,7 +11,7 @@ public final class Constants {
         public static final int kOperatorControllerPort = 1;
     }
 
-  public static final Mode simMode = Mode.SIM;
+  public static final Mode simMode = Mode.REPLAY;
   //public static final Mode currentMode = .isReal() ? Mode.REAL : simMode;
 
   public static enum Mode {

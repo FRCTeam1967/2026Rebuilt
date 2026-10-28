@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -31,6 +32,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+
 
 import org.littletonrobotics.junction.Logger;
 
@@ -260,13 +265,30 @@ public class Climb extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // double rotorPosition = motor.getPosition().getValueAsDouble();
+    double rotorPosition = motor.getPosition().getValueAsDouble();
     // DogLog.log("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
     // DogLog.log("Climb/target rotations", rotations);
     // DogLog.log("Climb/rotations", rotorPosition);
     // DogLog.log("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
     // DogLog.log("Climb/bottom sensor", getBottomSensor());
     // DogLog.log("Climb/top sensor", getTopSensor());
+    SmartDashboard.putBoolean("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
+    SmartDashboard.putNumber("Climb/target rotations", rotations);
+    SmartDashboard.putNumber("Climb/rotations", rotorPosition);
+    SmartDashboard.putNumber("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    SmartDashboard.putBoolean("Climb/bottom sensor", getBottomSensor());
+    SmartDashboard.putBoolean("Climb/top sensor", getTopSensor());
+    SmartDashboard.putNumber("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+
+
+    Logger.recordOutput("Climb/target rotations", rotations);
+    Logger.recordOutput("Climb/rotations", rotorPosition);
+    Logger.recordOutput("Climb/inches", rotorPosition/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE));
+    Logger.recordOutput("Climb/bottom sensor", getBottomSensor());
+    Logger.recordOutput("Climb/top sensor", getTopSensor());
+    
+
+    
     Logger.recordOutput("Climb/at height", Math.abs(rotations) - Math.abs(rotorPosition) < Constants.Climb.ERROR_THRESHOLD);
     Logger.recordOutput("Climb/target rotations", rotations);
     Logger.recordOutput("Climb/rotations", rotorPosition);
