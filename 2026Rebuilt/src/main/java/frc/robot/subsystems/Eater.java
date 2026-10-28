@@ -60,5 +60,7 @@ public class Eater extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
     SmartDashboard.putNumber("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("system current", RobotContainer.pdh.getCurrent(0)); //TODO: figure out
+    SmartDashboard.putNumber("system voltage", RobotContainer.pdh.getVoltage()); //TODO: figure out
   }
 }
