@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -69,6 +70,7 @@ public class RobotContainer {
 
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
+        public static final PowerDistribution pdh = new PowerDistribution();
         public final Pivot pivot = new Pivot();
         public final Eater eater = new Eater();
         public final Indexer indexer = new Indexer();

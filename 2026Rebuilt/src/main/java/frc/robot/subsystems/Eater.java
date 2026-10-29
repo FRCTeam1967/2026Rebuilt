@@ -64,11 +64,13 @@ public class Eater extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
-    //SmartDashboard.putNumber("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
-
+  
     Logger.recordOutput("eater speed", motor.getRotorVelocity().getValueAsDouble());
     Logger.recordOutput("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
+
+    SmartDashboard.putNumber("eater speed", motor.getRotorVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("system current", RobotContainer.pdh.getCurrent(0)); //TODO: figure out
+    SmartDashboard.putNumber("system voltage", RobotContainer.pdh.getVoltage()); //TODO: figure out
   }
 }
