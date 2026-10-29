@@ -15,6 +15,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera;
@@ -40,6 +42,8 @@ import edu.wpi.first.wpilibj2.command.*;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+
 
 
 /**
@@ -85,14 +89,41 @@ public class RobotContainer {
 
         Pose2d targetPose = new Pose2d(10, 5, Rotation2d.fromDegrees(180));
 
-        // // Create the constraints to use while pathfinding
-        PathConstraints constraints = new PathConstraints(
-            4.0, 8.0,
+        // Create the constraints to use while pathfinding
+        public Command pathfindingCommand() {
+            PathConstraints constraints = new PathConstraints(
+            3.0, 4.0,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
+            try{
+                
+                // Load the path you want to follow using its name in the GUI
+                PathPlannerPath path = PathPlannerPath.fromPathFile("intakePath");
+        
+                // Create a path following command using AutoBuilder. This will also trigger event markers.
+                return AutoBuilder.pathfindThenFollowPath(path, constraints);
+            } catch (Exception e) {
+                DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+                return Commands.none();
+            }
+          }
+          Command pathfind = pathfindingCommand(); 
+        
+        
+//         PathConstraints constraints = new PathConstraints(
+//             4.0, 8.0,
+//             Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         
-        public Command pathfindingCommand = AutoBuilder.pathfindToPose(
-            targetPose, constraints, 0.0);
+//         public Command pathfindingCommand = AutoBuilder.pathfindToPose(
+//             targetPose, constraints, 0.0);
+
+//         // Load the path we want to pathfind to and follow
+//          PathPlannerPath path = PathPlannerPath.fromPathFile("intakePath");
+
+// // Since AutoBuilder is configured, we can use it to build pathfinding commands
+//         public Command pathfindToPath = AutoBuilder.pathfindThenFollowPath(
+//         path,
+//         constraints);
 
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
@@ -549,7 +580,7 @@ public class RobotContainer {
 
         //DYNAMIC PATH PLANNING
         
-        m_operatorController.b().onTrue(pathfindingCommand);
+        m_operatorController.b().onTrue(pathfind);
 
             
         //FEEDER
