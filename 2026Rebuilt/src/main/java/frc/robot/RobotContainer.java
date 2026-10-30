@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -184,6 +185,14 @@ public class RobotContainer {
         configureBindings();
         autoes.configDashboard(matchTab);
         visabelle.configDashboard(matchTab);
+        new EventTrigger("run intake").whileTrue(
+        new ParallelCommandGroup(
+                    new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before
+                    new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED)
+                    //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
+                    //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
+                    //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
+                ));
         //theHood.configDashboard(matchTab);
         //yeeter.configDashboard(matchTab);
         //pivot.configDashboard(matchTab);
