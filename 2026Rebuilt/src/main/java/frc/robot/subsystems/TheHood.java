@@ -19,6 +19,7 @@ import dev.doglog.DogLog;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -188,4 +189,8 @@ public class TheHood extends SubsystemBase {
       // DogLog.log("Hood/stator current", hoodMotor.getStatorCurrent().getValueAsDouble());
     }
   }
+  public void configDashboard(ShuffleboardTab tab){
+    tab.addNumber("Hood Position",() -> (hoodMotor.getRotorPosition().getValueAsDouble())/Constants.Hood.GEAR_RATIO*360).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
+  }
+  
 }

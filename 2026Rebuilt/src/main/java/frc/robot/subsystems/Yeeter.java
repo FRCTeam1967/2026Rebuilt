@@ -19,6 +19,8 @@ import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import dev.doglog.DogLog;
@@ -267,7 +269,11 @@ public class Yeeter extends SubsystemBase {
     }
   }
 
+
   @Override
   public void simulationPeriodic() {
+  }
+  public void configDashboard(ShuffleboardTab tab){
+    tab.addNumber("Yeeter Speed",() -> motor1.getRotorVelocity().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
   }
 }

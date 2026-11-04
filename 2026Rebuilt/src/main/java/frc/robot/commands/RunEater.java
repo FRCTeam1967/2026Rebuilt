@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.PowerDistribution;
-
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.subsystems.Eater;
 import frc.robot.BatteryParam.BatteryParamEstimator;
 import frc.robot.MotorCurrentEstimators.CIMCurrentEstimator;
@@ -61,4 +61,5 @@ public class RunEater extends Command {
   public boolean isFinished() {
     return false;
   }
+  
 }

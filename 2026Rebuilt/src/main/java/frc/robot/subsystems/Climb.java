@@ -33,6 +33,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
@@ -296,12 +297,17 @@ public class Climb extends SubsystemBase {
     Logger.recordOutput("Climb/bottom sensor", getBottomSensor());
     Logger.recordOutput("Climb/top sensor", getTopSensor());
 
+  
 
     if (Constants.Climb.verboseLogging) {
       // DogLog.log("Climb/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
 
     //setSafe();
+  }
+  public void configDashboard(ShuffleboardTab tab){
+    tab.addNumber("climb target position",() -> motor.getRotorPosition().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
+    tab.addNumber("climb height",() -> motor.getRotorPosition().getValueAsDouble()/(Constants.Climb.GEAR_RATIO/Constants.Climb.SPROCKET_PITCH_CIRCUMFERENCE)).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
   }
   /*
    * @Override

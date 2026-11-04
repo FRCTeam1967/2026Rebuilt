@@ -11,6 +11,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -72,5 +74,8 @@ public class Eater extends SubsystemBase {
     SmartDashboard.putNumber("eater current draw", motor.getSupplyCurrent().getValueAsDouble());
     SmartDashboard.putNumber("system current", RobotContainer.pdh.getCurrent(0)); //TODO: figure out
     SmartDashboard.putNumber("system voltage", RobotContainer.pdh.getVoltage()); //TODO: figure out
+  }
+  public void configDashboard(ShuffleboardTab tab){
+    tab.addNumber("Eater Speed",() -> motor.getRotorVelocity().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
   }
 }

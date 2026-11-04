@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
@@ -299,5 +300,11 @@ public class Pivot extends SubsystemBase {
     if (Constants.Pivot.verboseLogging) {
       //DogLog.log("Pivot/stator current", motor.getStatorCurrent().getValueAsDouble());
     }
+  }
+  public void configDashboard(ShuffleboardTab tab){
+    tab.addNumber("Pivot Absolute Encoder",() -> absEncoder.getAbsolutePosition().getValueAsDouble()*360).withWidget(BuiltInWidgets.kTextView).withPosition(4,1).withSize(1,1);
+    tab.addNumber("Pivot Rotor",() -> motor.getRotorPosition().getValueAsDouble()/(Constants.Pivot.GEAR_RATIO)*360).withWidget(BuiltInWidgets.kTextView).withPosition(4,2).withSize(1,1);
+    tab.addNumber("Pivot Target",() -> revsToMove/Constants.Pivot.GEAR_RATIO*360).withWidget(BuiltInWidgets.kTextView).withPosition(4,3).withSize(1,1);
+
   }
 }
