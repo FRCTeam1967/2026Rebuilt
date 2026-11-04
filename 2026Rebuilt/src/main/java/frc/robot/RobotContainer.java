@@ -30,8 +30,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-
-
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -91,11 +91,17 @@ public class RobotContainer {
         Pose2d targetPose = new Pose2d(10, 5, Rotation2d.fromDegrees(180));
 
         // Create the constraints to use while pathfinding
+        // public static Command buildAuto("intake"){
+        //     Command pathfind = pathfindingCommand(); 
+
+        // }
+        
         public Command pathfindingCommand() {
             PathConstraints constraints = new PathConstraints(
             3.0, 4.0,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
             try{
+                
                 
                 // Load the path you want to follow using its name in the GUI
                 PathPlannerPath path = PathPlannerPath.fromPathFile("intakePath");
@@ -176,14 +182,27 @@ public class RobotContainer {
         
         private final TwinkleAnimation magentaBlink = new TwinkleAnimation(0, 50).withColor(new RGBWColor(255, 0, 255));
         private final SolidColor black = new SolidColor(0, 50).withColor(new RGBWColor(0,0,0));
-
+        private final SendableChooser<Command> autoChooserLOL;
+        //public static ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
+        //public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
         //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
 
 
     public RobotContainer() {
+        autoChooserLOL = AutoBuilder.buildAutoChooser();
+        // SmartDashboard.putData("Auton Chooser", autoChooserLOL);
+
+        autoChooserLOL.addOption("intake path", pathfindingCommand());
+
+        
+        matchTab.add("Auto Chooser lolol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+        matchTab.addNumber("encoder count", ()-> swerve.getModule(0)
+             .getDriveMotor().getRotorPosition().getValueAsDouble())
+           .withWidget(BuiltInWidgets.kTextView).withSize(1, 1);
+        //fieldTab.add("Field", SwerveOnTheseBows.m_field).withWidget(BuiltInWidgets.kField).withSize(8, 4);
         swerve.resetPose(new Pose2d(2.0, 2.0, Rotation2d.kZero));
         configureBindings();
-        autoes.configDashboard(matchTab);
+        //autoes.configDashboard(matchTab);
         visabelle.configDashboard(matchTab);
         new EventTrigger("run intake").whileTrue(
         new ParallelCommandGroup(
@@ -690,5 +709,8 @@ public class RobotContainer {
 
     private void updateWonAuto() {
         hasAlreadyUpdatedIfWeWonAuto = true;
+    }
+    public Command getAutonomousCommand() {
+        return autoChooserLOL.getSelected();
     }
 }

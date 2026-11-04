@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -31,6 +32,7 @@ import edu.wpi.first.networktables.StructPublisher;
 public class Robot extends LoggedRobot {
   private RobotContainer m_robotContainer;
   private Autoes autoes;
+  private Command autonomousCommand;
 
   boolean enableLimelight = false;
 
@@ -127,10 +129,17 @@ autoes = m_robotContainer.autoes;
     LimelightHelpers.SetThrottle("limelight-front", 0); //used to be 50
     LimelightHelpers.SetIMUMode("limelight-back", 0);
     LimelightHelpers.SetThrottle("limelight-back", 0); //used to be 50
+    autonomousCommand = m_robotContainer.getAutonomousCommand();
+    //CommandScheduler.getInstance().schedule(autonomousCommand);
+     if (autonomousCommand != null) {
+      autonomousCommand.schedule();
+    }
+
   }
 
   @Override
   public void autonomousPeriodic() {
+
    //removed LL IMU Mode setting bc its also in init
   }
 

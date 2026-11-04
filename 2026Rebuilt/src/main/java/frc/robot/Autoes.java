@@ -41,7 +41,7 @@ import frc.robot.commands.RunEater;
 
 /** Add your docs here. */
 public class Autoes {
-  private final AutoChooser autoChooserLOL = new AutoChooser();
+  // private final AutoChooser autoChooserLOL = new AutoChooser();
   private final AutoFactory autoFactory;
   private final int disSensorID = 24;
   private final RobotContainer m_robotContainer; 
@@ -69,31 +69,31 @@ public class Autoes {
       drive
     );
 
-    autoChooserLOL.addRoutine("OT to Outpost", this::oto);
-    autoChooserLOL.addRoutine("OT Neutral 2 Cycle", this::otn2x);
-    autoChooserLOL.addRoutine("DT Neutral 2 Cycle", this::dtn2x);
-    autoChooserLOL.addRoutine("Hub Preload", this::hubScore);
-    autoChooserLOL.addRoutine("HubToOutpost Shoot", this::hTo);
-    autoChooserLOL.addRoutine("HubToDepot Shoot", this::hTd);
-    autoChooserLOL.addRoutine("HubToOutpost to Neutral Intake Shoot", this::hotn);
-    autoChooserLOL.addRoutine("HubToDepot to Neutral Intake Shoot", this::hdtn);
-    autoChooserLOL.addRoutine("DT Neutral Bump 2 Cycle", this::dtn2xBump);
-    autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
-    autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
-    autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
-    autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
-    autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
-    autoChooserLOL.addRoutine("Tower Test", this::towerTest);
-    autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
-    autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
+    // autoChooserLOL.addRoutine("OT to Outpost", this::oto);
+    // autoChooserLOL.addRoutine("OT Neutral 2 Cycle", this::otn2x);
+    // autoChooserLOL.addRoutine("DT Neutral 2 Cycle", this::dtn2x);
+    // autoChooserLOL.addRoutine("Hub Preload", this::hubScore);
+    // autoChooserLOL.addRoutine("HubToOutpost Shoot", this::hTo);
+    // autoChooserLOL.addRoutine("HubToDepot Shoot", this::hTd);
+    // autoChooserLOL.addRoutine("HubToOutpost to Neutral Intake Shoot", this::hotn);
+    // autoChooserLOL.addRoutine("HubToDepot to Neutral Intake Shoot", this::hdtn);
+    // autoChooserLOL.addRoutine("DT Neutral Bump 2 Cycle", this::dtn2xBump);
+    // autoChooserLOL.addRoutine("OT Neutral Bump 2 Cycle", this::otn2xBump);
+    // autoChooserLOL.addRoutine("DT Disrupt", this::dtndisrupt);
+    // autoChooserLOL.addRoutine("Hub Preload Climb", this::htw);
+    // autoChooserLOL.addRoutine("DELAY DT Neutral Bump 2x", this::dtn2xBumpDelay);
+    // autoChooserLOL.addRoutine("OT Disrupt", this::otdisrupt);
+    // autoChooserLOL.addRoutine("Tower Test", this::towerTest);
+    // autoChooserLOL.addRoutine("DT Neutral Score Climb", this::dtnClimb);
+    // autoChooserLOL.addRoutine("OT Neutral Score Climb", this::otnClimb);
 
-    RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
+    // RobotModeTriggers.autonomous().whileTrue(autoChooserLOL.selectedCommandScheduler());
   }
 
-  public void configDashboard(ShuffleboardTab tab) {
-    tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
-    //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
-  }
+  // public void configDashboard(ShuffleboardTab tab) {
+  //   tab.add("auto chooser lol", autoChooserLOL).withWidget(BuiltInWidgets.kComboBoxChooser);
+  //   //tab.addDouble("Dis Sensor Values", () -> disSensor.getDistance().refresh().getValueAsDouble()).withWidget(BuiltInWidgets.kTextView);
+  // }
 
   private SequentialCommandGroup shootSequence() {
     return new SequentialCommandGroup(
