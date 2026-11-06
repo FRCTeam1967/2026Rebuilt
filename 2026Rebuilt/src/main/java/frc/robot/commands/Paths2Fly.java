@@ -5,10 +5,12 @@
 package frc.robot.commands;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.utility.LinearPath;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
@@ -24,6 +26,9 @@ public class Paths2Fly extends Command {
         new TrapezoidProfile.Constraints(4.0, 8.0),
         new TrapezoidProfile.Constraints(Math.PI, 2.0 * Math.PI));
 
+  private Pose2d targetPose; 
+  private double heading;
+  private LinearPath path; 
   private RobotContainer m_robotContainer = new RobotContainer();
   private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
   private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
@@ -39,6 +44,8 @@ private double startTime;
 /** Takes the starting snapshot and starts the trip clock. */
 
   public Paths2Fly(Pose2d targetPose, double heading) {
+     this.targetPose = targetPose; 
+     this.heading = heading;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -55,15 +62,39 @@ private double startTime;
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    // Ask the plan where we should be, this many seconds into the trip.
+      double t = Utils.getCurrentTimeSeconds() - startTime;
+      LinearPath.State setpoint = path.calculate(t, startState, targetPose);
+    
+      Pose2d measuredPose = m_robotContainer.swerve.getPose();
+    
+      // The plan's velocity does the driving. Each PID call below adds a small correction that
+      // pulls the measured pose back onto the planned pose.
+      ChassisSpeeds feedforward = setpoint.speeds;
+      double vx = feedforward.vxMetersPerSecond + xController.calculate(measuredPose.getX(), setpoint.pose.getX());
+      double vy = feedforward.vyMetersPerSecond + yController.calculate(measuredPose.getY(), setpoint.pose.getY());
+      double omega =
+          feedforward.omegaRadiansPerSecond
+              + headingController.calculate(
+                  measuredPose.getRotation().getRadians(), setpoint.pose.getRotation().getRadians());
+    
+      m_robotContainer.swerve.setControl(m_robotContainer.drive.withVelocityX(vx));
+      m_robotContainer.swerve.setControl(m_robotContainer.drive.withVelocityY(vy));
+      m_robotContainer.swerve.setControl(m_robotContainer.drive.withRotationalRate(omega));
+    }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+      SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+      m_robotContainer.swerve.applyRequest(() -> brake);
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    //return false; 
+    return m_robotContainer.swerve.getState().Pose == targetPose;
   }
 }
