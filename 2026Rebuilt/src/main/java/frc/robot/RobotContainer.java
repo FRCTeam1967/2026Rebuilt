@@ -60,6 +60,7 @@ public class RobotContainer {
         public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
         private final Telemetry logger = new Telemetry(MaxSpeed);
         private final Pose2d pose = new Pose2d(8, 4, Rotation2d.fromDegrees(180));
+        // public Paths2Fly dynamic = new Paths2Fly(pose, 180);
     
         /* Setting up bindings for necessary control of the swerve drive platform */
         public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -608,9 +609,8 @@ public class RobotContainer {
             m_operatorController.a().onTrue(new MovePivot(pivot, Constants.Pivot.SAFE, false));
 
         //DYNAMIC PATH PLANNING
-        
         m_operatorController.b().onTrue(pathfind);
-        m_operatorController.y().onTrue(new Paths2Fly(pose,180.0));
+        // m_operatorController.y().onTrue(new Paths2Fly(pose, 180));
 
             
         //FEEDER
