@@ -41,15 +41,15 @@ public class LocalizationSubsystem extends SubsystemBase {
     double now = Timer.getFPGATimestamp();
     swerve.updatePlaceholderOdometry(now);
     double resetTime = swerve.getLastResetTimestamp();
-    var observations = new ArrayList<VisionSubsystem.Observation>();
-    var measuredSpeeds = swerve.getChassisSpeeds();
+    ArrayList<VisionSubsystem.Observation> observations = new ArrayList<VisionSubsystem.Observation>();
+    ChassisSpeeds measuredSpeeds = swerve.getChassisSpeeds();
     for (var camera : cameras) {
       observations.addAll(camera.drainObservations(now, resetTime, measuredSpeeds));
     }
     observations.sort(Comparator.comparingDouble(o -> o.estimate().timestampSeconds));
     for (var observation : observations) {
-      var estimate = observation.estimate();
-      var pose = estimate.estimatedPose;
+      double estimate = observation.estimate();
+      EstimatedRobotPose pose = estimate.estimatedPose;
       double timestamp = estimate.timestampSeconds;
       if (!Double.isFinite(timestamp) || timestamp <= resetTime
           || timestamp > now || now - timestamp > kMaxAgeSeconds
