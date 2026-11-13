@@ -60,7 +60,7 @@ public class Climb extends SubsystemBase {
   
   private TalonFX motor; 
   private TalonFXConfiguration config;
-  // private MotionMagicVoltage request;
+  //private MotionMagicVoltage request;
   private DigitalInput bottomSensor;
   private DigitalInput topSensor;
   private double rotations;
@@ -114,8 +114,8 @@ public class Climb extends SubsystemBase {
     config.withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(Constants.Climb.CURRENT_LIMIT));config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     motor.getConfigurator().apply(config);
-  }
-    /* 
+  
+    
     if (RobotBase.isSimulation()) {
       motorSim = motor.getSimState();
       climbSim =
@@ -129,8 +129,8 @@ public class Climb extends SubsystemBase {
               true,
               Constants.Climb.SAFE_METERS
           );
-      /*
-      sensorSim = new DIOSim(sensor);
+      
+      sensorSim = new DIOSim(topSensor);
       mechanism = new Mechanism2d(50,50);
       root = mechanism.getRoot("elevatorRoot", 25, 0);
       tower = root.append(new MechanismLigament2d("tower", 40, 90));
@@ -138,8 +138,8 @@ public class Climb extends SubsystemBase {
           tower.append(
               new MechanismLigament2d(
                   "carriage", 5, 0, 6, new Color8Bit(Color.kBlue)));
-    */
-    /*     
+    
+         
       sensorSim = new DIOSim(bottomSensor);
 
       mechanism = new Mechanism2d(2, 2);
@@ -183,14 +183,16 @@ public class Climb extends SubsystemBase {
       .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
   }
 }
-*/
 
-/* 
+
+
+
   public void simulationInit(){
     motorSim = motor.getSimState();
     motorSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
   }
-*/
+  
+
 
   public void resetEncoders() {
     if (RobotBase.isSimulation()) {
@@ -211,14 +213,14 @@ public class Climb extends SubsystemBase {
   public boolean atHeight(){
     double currentPosition = motor.getRotorPosition().getValueAsDouble();
     return Math.abs(rotations - currentPosition) < Constants.Climb.ERROR_THRESHOLD;
-  
+  }
 
     /*
     if (getBottomSensor() || getTopSensor()){
       return true;
     }
     return false; */
-  }
+  
 
   public void setSafe(){
     if(!bottomSensor.get()){
@@ -256,6 +258,7 @@ public class Climb extends SubsystemBase {
     tab.addBoolean("bottom sensor", () -> getBottomSensor());
     tab.addBoolean("top sensor", () -> getTopSensor());
   }
+  
 
   // public void reachGoal(double goal) {
   //   m_controller.setGoal(goal);
@@ -269,8 +272,7 @@ public class Climb extends SubsystemBase {
   public void periodic() {
     setSafe();
   }
-  /*
-   * @Override
+  
   public void simulationPeriodic() {
     double error = rotations - simRotorPosition;
     double kSimP = 1.0; 
@@ -294,7 +296,7 @@ public class Climb extends SubsystemBase {
 
     SmartDashboard.putData("climb mechanism", mechanism);
     // SmartDashboard.putData("climb mechanism", mechanism.generate3dMechanism());
-    SmartDashboard.putBoolean("sensor val", getSensor());
+    //SmartDashboard.putBoolean("sensor val", getSensor());
     SmartDashboard.putNumber("position", currentHeight);
     SmartDashboard.putNumber("voltage", voltage);
    
@@ -310,7 +312,7 @@ public class Climb extends SubsystemBase {
     
 
   }
-  */
+  
   
   
 }

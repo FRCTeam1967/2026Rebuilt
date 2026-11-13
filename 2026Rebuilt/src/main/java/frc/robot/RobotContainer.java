@@ -76,6 +76,7 @@ public class RobotContainer {
     public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field"); 
     public final ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
     public static ShuffleboardTab limelightTab = Shuffleboard.getTab("Limelight");
+    public final Joystick joystick = new Joystick (0);
 
     public RobotContainer() {
         configureBindings();
@@ -129,6 +130,12 @@ public class RobotContainer {
         m_operatorController.y().onTrue(new MoveClimbHalfwayDown(climb, -4)); 
         m_operatorController.povUp().onTrue(new MoveClimbUp(climb, -15)); 
         m_operatorController.povDown().onTrue(new MoveClimbtoZero(climb, 15)); 
+
+        //CLIMB SIM
+        new JoystickButton(joystick,1).onTrue(new MoveClimbUp(climb,8));
+        new JoystickButton(joystick,2).onTrue(new MoveClimbtoZero(climb,-8));
+        new JoystickButton(joystick,3).onTrue(new MoveClimbHalfwayDown(climb, -2));
+
 
     }
 }
