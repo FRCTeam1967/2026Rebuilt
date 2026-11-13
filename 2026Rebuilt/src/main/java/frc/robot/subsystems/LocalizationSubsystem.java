@@ -6,6 +6,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
@@ -13,9 +15,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.subsystems.VisionSubsystem.Observation;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+
+import org.photonvision.EstimatedRobotPose;
 
 /** Updates odometry and vision before commands run; does not reserve the drivetrain. */
 public class LocalizationSubsystem extends SubsystemBase {
@@ -47,9 +53,9 @@ public class LocalizationSubsystem extends SubsystemBase {
       observations.addAll(camera.drainObservations(now, resetTime, measuredSpeeds));
     }
     observations.sort(Comparator.comparingDouble(o -> o.estimate().timestampSeconds));
-    for (var observation : observations) {
-      double estimate = observation.estimate();
-      EstimatedRobotPose pose = estimate.estimatedPose;
+    for (Observation observation : observations) {
+      EstimatedRobotPose estimate = observation.estimate();
+      Pose3d pose = estimate.estimatedPose;
       double timestamp = estimate.timestampSeconds;
       if (!Double.isFinite(timestamp) || timestamp <= resetTime
           || timestamp > now || now - timestamp > kMaxAgeSeconds
