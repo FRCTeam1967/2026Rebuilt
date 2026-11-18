@@ -21,10 +21,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Holds the robot's shooting direction toward its alliance hub, without translating.
- * Adapted from the reference drive.py alignToTargetHeading behavior.
- * Output is robot-relative ChassisSpeeds in m/s and rad/s.
- */
 public class AlignToHub extends Command {
   private final Supplier<Pose2d> poseSupplier;
   private final BooleanSupplier poseValid;
@@ -91,7 +87,7 @@ public class AlignToHub extends Command {
     }
     var hub = alliance.get() == Alliance.Red ? redHub : kBlueHub;
     if (pose.getTranslation().getDistance(hub) < kMinTargetDistanceMeters) {
-      stopFor("Too close to hub center to calculate heading");
+      stopFor("Too close to hub center to calculate heading"); //3.93701 in
       return;
     }
     double target = targetHeadingRadians(pose, hub);
@@ -114,7 +110,6 @@ public class AlignToHub extends Command {
     SmartDashboard.putString("Robot/HubAlignment/Status", reason);
   }
 
-  // intentionally runs while held, correcting heading again if the robot drifts.
   @Override
   public boolean isFinished() {
     return false;
