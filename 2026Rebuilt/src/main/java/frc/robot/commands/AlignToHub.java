@@ -67,7 +67,6 @@ public class AlignToHub extends Command {
     SmartDashboard.putBoolean("Robot/HubAlignment/Aligned", false);
   }
 
-  /** Field heading for a front/offset-facing shooter, with wraparound at +/- pi. */
   public static double targetHeadingRadians(Pose2d pose, Translation2d hub) {
     return MathUtil.angleModulus(Math.atan2(hub.getY() - pose.getY(),
         hub.getX() - pose.getX()) - kShooterHeadingOffsetRadians);
@@ -96,9 +95,6 @@ public class AlignToHub extends Command {
       return;
     }
     double target = targetHeadingRadians(pose, hub);
-    // atan2 gives a CCW-positive field angle. Continuous PID wraps target - measured
-    // to the shortest turn; positive omega turns left. Do not apply 180/360 or alliance
-    // flips again in the drivetrain's ROBOT-relative output method.
     double omega = MathUtil.clamp(heading.calculate(
         MathUtil.angleModulus(pose.getRotation().getRadians()), target),
         -kMaxOmegaRadiansPerSecond, kMaxOmegaRadiansPerSecond);
@@ -118,7 +114,7 @@ public class AlignToHub extends Command {
     SmartDashboard.putString("Robot/HubAlignment/Status", reason);
   }
 
-  // Intentionally runs while held, correcting heading again if the robot drifts.
+  // intentionally runs while held, correcting heading again if the robot drifts.
   @Override
   public boolean isFinished() {
     return false;
