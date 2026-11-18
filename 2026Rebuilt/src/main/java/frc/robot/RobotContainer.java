@@ -549,8 +549,10 @@ public class RobotContainer {
                     //new RunIndexer(indexer, Constants.Indexer.INDEXER_SPEED),
                     //new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER)
                     //new ConditionalCommand(new RunFeeder(feeder, 0), new RunFeeder(feeder, Constants.Feeder.INTAKE_FEEDER), ()-> feeder.isStalling()) //can change this back to just running it backwards if it doesnt work
-                )
-            );
+                ));
+
+            m_operatorController.y().onTrue(new RunEater(eater, Constants.Eater.EATER_MOTOR_SPEED));
+
 
             //eject
             m_operatorController.rightTrigger().and(m_operatorController.x()).and(m_operatorController.leftBumper().negate()).whileTrue(
