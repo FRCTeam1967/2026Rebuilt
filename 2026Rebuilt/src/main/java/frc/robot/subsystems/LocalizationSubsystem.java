@@ -23,7 +23,6 @@ import java.util.Comparator;
 
 import org.photonvision.EstimatedRobotPose;
 
-/** Updates odometry and vision before commands run; does not reserve the drivetrain. */
 public class LocalizationSubsystem extends SubsystemBase {
   private final Swerve swerve;
   private final AprilTagFieldLayout layout =
