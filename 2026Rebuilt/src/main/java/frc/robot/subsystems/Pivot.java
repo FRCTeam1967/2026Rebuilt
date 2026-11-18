@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -25,6 +27,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 
 public class Pivot extends SubsystemBase {
+  private final DCMotor m_pivotGearbox = DCMotor.getKrakenX44(1);
   private final CANBus canbus = RobotContainer.CANBus;
   private TalonFX motor;
   private MotionMagicVoltage request;
@@ -33,6 +36,12 @@ public class Pivot extends SubsystemBase {
 
   private DynamicMotionMagicVoltage slowRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
   private DynamicMotionMagicVoltage fastRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
+
+  // private final SingleJointedArmSim dontSplashPivotSim = 
+  //     new SingleJointedArmSim (
+  //       m_pivotGearbox,
+  //       Constants.
+  //     )
 
   /** Creates a new Pivot. */
   public Pivot() {
