@@ -40,7 +40,6 @@ public final class Constants {
   }
 
   public static final class LocalizationConstants {
-    //fill in actual module locations
     public static final SwerveDriveKinematics kKinematics = new SwerveDriveKinematics(
         new Translation2d(0.30, 0.30), new Translation2d(0.30, -0.30),
         new Translation2d(-0.30, 0.30), new Translation2d(-0.30, -0.30));
