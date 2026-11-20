@@ -39,11 +39,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.Visabelle.Visabelle;
+import frc.robot.subsystems.Visabelle.VisabelleIO;
+import frc.robot.subsystems.Visabelle.VisabelleIOSimPhoton;
+import frc.robot.subsystems.Visabelle.VisabelleUpdate;
 import edu.wpi.first.wpilibj2.command.*;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 
 
 
@@ -75,8 +78,11 @@ public class RobotContainer {
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     //vision
-        public Visabelle visabelle = new Visabelle(swerve, MaxAngularRate);
-        public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
+        VisabelleIO io;
+        public Visabelle visabelle;
+        public VisabelleUpdate visabelleUpdate;
+        // public Visabelle visabelle = new Visabelle(swerve, MaxAngularRate);
+        // public VisabelleUpdate visabelleUpdate = new VisabelleUpdate(swerve);
 
     //mechanism
         public static final CANBus CANBus = new CANBus("Default Name");
@@ -174,7 +180,8 @@ public class RobotContainer {
         private final FireAnimation fire = new FireAnimation(0, 45);
         
         private final SolidColor blueSolid = new SolidColor(0, 50).withColor(new RGBWColor(0, 0, 255));
-        private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+        //private final Trigger seeTag = new Trigger(() -> visabelleUpdate.canSeeATag());
+        private final Trigger seeTag;
 
         private final SolidColor greenSolid = new SolidColor(0, 50).withColor(new RGBWColor(255, 0, 0)); // switched r and g
         private final Trigger isAligned = new Trigger(() -> visabelle.isAligned());
@@ -188,9 +195,26 @@ public class RobotContainer {
         //public static ShuffleboardTab matchTab = Shuffleboard.getTab("Match");
         //public ShuffleboardTab fieldTab = Shuffleboard.getTab("Field");
         //private final Trigger isFeederStalling = new Trigger(() -> feeder.isStalling());
-
+            
 
     public RobotContainer() {
+        if (Robot.isSimulation()) {
+            io = new VisabelleIOSimPhoton(swerve, () -> swerve.getPose());
+            visabelleUpdate = (VisabelleUpdate) io;
+        } else {
+            io = new VisabelleUpdate(swerve);
+            visabelleUpdate = (VisabelleUpdate) io;
+        }
+
+        visabelle = new Visabelle(swerve, MaxAngularRate, io);
+
+        seeTag = new Trigger(() -> {
+            if (visabelleUpdate == null) {
+                return false;
+            }
+            return visabelleUpdate.canSeeATag();
+        });
+
         autoChooserLOL = AutoBuilder.buildAutoChooser();
         // SmartDashboard.putData("Auton Chooser", autoChooserLOL);
 
@@ -206,6 +230,7 @@ public class RobotContainer {
         configureBindings();
         //autoes.configDashboard(matchTab);
         visabelle.configDashboard(matchTab);
+        
         new EventTrigger("run intake").whileTrue(
         new ParallelCommandGroup(
                     new MovePivot(pivot, Constants.Pivot.DOWN_POSITION, false), //wasnt there before

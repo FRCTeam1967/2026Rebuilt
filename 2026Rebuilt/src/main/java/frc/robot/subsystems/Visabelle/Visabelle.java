@@ -2,10 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Visabelle;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;  
+import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.SwerveOnTheseBows;
+import frc.robot.subsystems.Visabelle.VisabelleIO.VisionIOInputs;
 import frc.robot.Constants;
 import java.util.function.BooleanSupplier;
 import dev.doglog.DogLog;
@@ -21,11 +23,16 @@ public class Visabelle extends SubsystemBase {
   private double maxAngularRate;
   private SwerveOnTheseBows swerve;
   private Translation2d hubPose;
+
+  private final VisabelleIO io;
+  private VisionIOInputs inputs = new VisionIOInputs();
   
   
-  public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate) {
+  
+  public Visabelle(SwerveOnTheseBows drivetrain, double maxAngularRate, VisabelleIO io) {
     this.swerve = drivetrain;
     this.maxAngularRate = maxAngularRate;
+    this.io = io;
   }
 
   public double limelight_aim_proportional() {        
@@ -134,6 +141,10 @@ public class Visabelle extends SubsystemBase {
       }
     }
 
+    this.getDisFromHub();
+    
+    inputs = new VisionIOInputs();
+    //io.readInputs(inputs);
     this.getDisFromHub();
   }
 }

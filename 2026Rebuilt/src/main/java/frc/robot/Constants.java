@@ -1,5 +1,14 @@
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import frc.robot.generated.TunerConstants;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -241,6 +250,24 @@ public final class Constants {
         public static final double DIST_THRESHOLD = 3; // in meters? TODO: check and change
 
         public static final boolean verboseLogging = false || Logging.verboseLogging;
+
+        public static final AprilTagFieldLayout kAprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+        // front ll
+        public static final String kLimelightATableName = "limelight-front";
+        public static final double kRobotToCameraAForward = 0.335;
+        public static final double kRobotToCameraASide = -0.327;
+        public static final double kCameraAHeightOffGroundMeters = 0.538;
+        public static final double kCameraAPitchRads = Units.degreesToRadians(34);
+        public static final Rotation2d kCameraAYawOffset = Rotation2d.fromDegrees(0.0);
+
+        // back ll
+        public static final String kLimelightBTableName = "limelight-back";
+        public static final double kRobotToCameraBForward = -0.327025;
+        public static final double kRobotToCameraBSide = -0.0047625;
+        public static final double kCameraBHeightOffGroundMeters = 0.275717;
+        public static final double kCameraBPitchRads = Units.degreesToRadians(9);
+        public static final Rotation2d kCameraBYawOffset = Rotation2d.fromDegrees(180.0);
     }
 
     public static class Drivetrain {
