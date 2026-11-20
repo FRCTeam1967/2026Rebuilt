@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -18,6 +19,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+
+import java.beans.Encoder;
 
 import com.ctre.phoenix6.CANBus;
 
@@ -37,11 +40,21 @@ public class Pivot extends SubsystemBase {
   private DynamicMotionMagicVoltage slowRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_SLOW, Constants.Pivot.ACCELERATION_SLOW);
   private DynamicMotionMagicVoltage fastRequest = new DynamicMotionMagicVoltage(0, Constants.Pivot.CRUISE_VELOCITY_FAST, Constants.Pivot.ACCELERATION_FAST);
 
-  // private final SingleJointedArmSim dontSplashPivotSim = 
-  //     new SingleJointedArmSim (
-  //       m_pivotGearbox,
-  //       Constants.
-  //     )
+  private final SingleJointedArmSim dontSplashPivotSim = 
+      new SingleJointedArmSim (
+        m_pivotGearbox,
+        Constants.Pivot.GEAR_RATIO,
+        Constants.Pivot.MASS_MOMENT_OF_INERTIA,
+        Constants.Pivot.ARM_LENGTH_METERS,
+        Constants.Pivot.ARM_MIN_DEGREE,
+        Constants.Pivot.ARM_MAX_DEGREE,
+        true,
+        5.0
+      );
+
+ // private final EncoderSim gscekEncoderSim = new EncoderSim(absEncoder);
+
+  
 
   /** Creates a new Pivot. */
   public Pivot() {
@@ -81,6 +94,13 @@ public class Pivot extends SubsystemBase {
     absEncoder.getAbsolutePosition().waitForUpdate(0.02);
 
     setRelToAbs();
+  }
+
+  public void simulationPeriodic(){
+    dontSplashPivotSim.setInputVoltage(12);
+    dontSplashPivotSim.update(0.020); 
+    dontSplashPivotSim.setState(dontSplashPivotSim.getAngleRads(), dontSplashPivotSim.getVelocityRadPerSec());
+    
   }
 
   /**

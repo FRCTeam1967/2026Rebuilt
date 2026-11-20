@@ -126,6 +126,13 @@ public final class Constants {
 
         public static final double JITTER_POS_FIVE = 100 * DEGREES_TO_REVS;
         public static final double JITTER_POS_SIX = 75 * DEGREES_TO_REVS;
+
+        public static final double ARM_LENGTH_METERS = 0.2921; //11.5 in
+        public static final double ARM_MAX_DEGREE = 135.0;
+        public static final double ARM_MIN_DEGREE = 0.0;
+        public static final double MASS_MOMENT_OF_INERTIA = 0.387;
+        
+
     }
 
     public static class Eater{
