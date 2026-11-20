@@ -2,98 +2,118 @@
 // // Open Source Software; you can modify and/or share it under the terms of
 // // the WPILib BSD license file in the root directory of this project.
 
-// package frc.robot.commands;
+ package frc.robot.commands;
 
-// import com.ctre.phoenix6.Utils;
-// import com.ctre.phoenix6.swerve.SwerveRequest;
-// import com.ctre.phoenix6.swerve.utility.LinearPath;
 
-// import edu.wpi.first.math.controller.PIDController;
-// import edu.wpi.first.math.geometry.Pose2d;
-// import edu.wpi.first.math.kinematics.ChassisSpeeds;
-// import edu.wpi.first.math.trajectory.TrapezoidProfile;
-// import edu.wpi.first.wpilibj2.command.Command;
-// import frc.robot.RobotContainer;
 
-// /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-// public class Paths2Fly extends Command {
-//   /** Creates a new Paths2Fly. */
-//   // The trip planner. First pair of limits: top speed (m/s) and acceleration (m/s²) for
-// // driving. Second pair: the same for turning (rad/s, rad/s²).
-// // TODO: tune to what your drivetrain can do.
-//   private final LinearPath path2fly =
-//     new LinearPath(
-//         new TrapezoidProfile.Constraints(4.0, 8.0),
-//         new TrapezoidProfile.Constraints(Math.PI, 2.0 * Math.PI));
+import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-//   private Pose2d targetPose; 
-//   private double heading;
-//   private LinearPath path; 
-//   private RobotContainer m_robotContainer = new RobotContainer();
-//   private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
-//   private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
-//   private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+public class Paths2Fly implements PathFollower {
+  private final PIDController translationController;
+  private final PIDController rotationController;
+  private final ConstraintsCalculator velocityConstrainer;
 
-//   // Where the robot was, and how fast it was moving, when the command started. The whole
-// // trip is planned from this one snapshot.
-// private LinearPath.State startState = new LinearPath.State();
-// // When the command started. (now - startTime) says how far into the trip we are.
-// private double startTime;
+  public Paths2Fly(PIDController translationController, PIDController rotationController) {
+    this.translationController = translationController;
+    this.rotationController = rotationController;
+    this.velocityConstrainer = new ConstraintsCalculator(rotationController);
 
-// /** Takes the starting snapshot and starts the trip clock. */
+    this.rotationController.enableContinuousInput(-Math.PI, Math.PI);
+  }
 
-//   public Paths2Fly(Pose2d targetPose, double heading) {
-//      this.targetPose = targetPose; 
-//      this.heading = heading;
-//     // Use addRequirements() here to declare subsystem dependencies.
-//   }
+  @Override
+  public ChassisSpeeds calculateSpeeds(
+      ChassisSpeeds currentSpeeds,
+      Pose2d currentPose,
+      Pose2d targetPose,
+      int currentPointIndex) {
+    // Get constraints for the current point
+    var linearConstraints =
+        segment.getLinearConstraints(currentPoint).orElseGet(LinearConstraintOptions::new);
+    var angularConstraints =
+        segment.getAngularConstraints(currentPoint).orElseGet(AngularConstraintOptions::new);
 
-//   // Called when the command is initially scheduled.
-//   @Override
-//   public void initialize() { 
-//     startState = new LinearPath.State(m_robotContainer.swerve.getPose(), m_robotContainer.swerve.getState().Speeds);
-//     startTime = Utils.getCurrentTimeSeconds();
-//     xController.reset();
-//     yController.reset();
-//     headingController.reset();
-//   }
-  
+    var distanceToEnd = currentPose.getTranslation().getDistance(targetPose.getTranslation());
 
-//   // Called every time the scheduler runs while the command is scheduled.
-//   @Override
-//   public void execute() {
-//     // Ask the plan where we should be, this many seconds into the trip.
-//       double t = Utils.getCurrentTimeSeconds() - startTime;
-//       LinearPath.State setpoint = path.calculate(t, startState, targetPose);
-    
-//       Pose2d measuredPose = m_robotContainer.swerve.getPose();
-    
-//       // The plan's velocity does the driving. Each PID call below adds a small correction that
-//       // pulls the measured pose back onto the planned pose.
-//       ChassisSpeeds feedforward = setpoint.speeds;
-//       double vx = feedforward.vxMetersPerSecond + xController.calculate(measuredPose.getX(), setpoint.pose.getX());
-//       double vy = feedforward.vyMetersPerSecond + yController.calculate(measuredPose.getY(), setpoint.pose.getY());
-//       double omega =
-//           feedforward.omegaRadiansPerSecond
-//               + headingController.calculate(
-//                   measuredPose.getRotation().getRadians(), setpoint.pose.getRotation().getRadians());
-    
-//       m_robotContainer.swerve.setControl(m_robotContainer.drive.withVelocityX(vx));
-//       m_robotContainer.swerve.setControl(m_robotContainer.drive.withVelocityY(vy));
-//       m_robotContainer.swerve.setControl(m_robotContainer.drive.withRotationalRate(omega));
-//     }
+    // Sum the total linear distance and total angular work remaining through all waypoints in the
+    // segment. These are used together to estimate how long the robot has to complete its rotation,
+    // which drives the dynamic angular velocity cap.
+    //
+    // For arc segments with a midpoint rotation, we compute angular work through the midpoint
+    // (current -> midpoint + midpoint -> final) instead of using shortest-path angleModulus
+    // directly to the final rotation. This ensures the velocity cap accounts for the full
+    // intended rotation path and prevents the robot from trying to take a shortcut.
+    var totalAngularWorkRadians = 0.0;
+    var currentPointFinalRotation = currentPoint.getPose().getRotation();
 
-//   // Called once the command ends or is interrupted.
-//   @Override
-//   public void end(boolean interrupted) {
-//       SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-//       m_robotContainer.swerve.applyRequest(() -> brake);
-//   }
+    if (currentPoint.arcMidpoint().isPresent()) {
+      var midRotation = currentPoint.arcMidpoint().orElseThrow().getRotation();
+      // Leg 1: current rotation -> midpoint rotation
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  midRotation.getRadians() - currentPose.getRotation().getRadians()));
+      // Leg 2: midpoint rotation -> current waypoint's final rotation
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  currentPointFinalRotation.getRadians() - midRotation.getRadians()));
+    } else {
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians()));
+    }
 
-//   // Returns true when the command should end.
-//   @Override
-//   public boolean isFinished() {
-//     //return false; 
-//     return m_robotContainer.swerve.getState().Pose == targetPose;
-//   }
-// }
+    // Find total distance and angular work to end of segment
+    for (int i = currentPointIndex; i < segment.points.size() - 1; i++) {
+      var thisPoint = segment.points.get(i).poseSupplier().get().getPose();
+      var nextPoint = segment.points.get(i + 1).getPose();
+
+      distanceToEnd += thisPoint.getTranslation().getDistance(nextPoint.getTranslation());
+      totalAngularWorkRadians +=
+          Math.abs(
+              MathUtil.angleModulus(
+                  nextPoint.getRotation().getRadians() - thisPoint.getRotation().getRadians()));
+    }
+
+    // Calculate velocities with PID controller
+    var linearVelocity = Math.abs(translationController.calculate(distanceToEnd, 0));
+    var angularVelocity =
+        rotationController.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+
+    DogLog.log("Trailblazer/Follower/AngularVelocity", angularVelocity);
+
+    // Constrain velocities
+    linearVelocity =
+        velocityConstrainer.constrainLinearVelocity(
+            linearVelocity, currentSpeeds, distanceToEnd, linearConstraints);
+
+    angularVelocity =
+        velocityConstrainer.constrainAngularVelocity(
+            angularVelocity,
+            currentPose.getRotation().getRadians(),
+            targetPose.getRotation().getRadians(),
+            currentSpeeds,
+            angularConstraints);
+
+    DogLog.log("Trailblazer/Follower/AngularLimit", angularConstraints.maxVelocity());
+    DogLog.log("Trailblazer/Follower/AngularACCLimit", angularConstraints.maxAcceleration());
+
+    DogLog.log("Trailblazer/Follower/AngularVelocityAfterConstraint", angularVelocity);
+
+    var driveDirection = MathHelpers.getDriveDirection(currentPose, targetPose);
+
+    return new PolarChassisSpeeds(linearVelocity, driveDirection, angularVelocity);
+  }
+
+  @Override
+  public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
+    velocityConstrainer.reset(currentSpeeds, currentPose.getRotation().getRadians());
+  }
+}
